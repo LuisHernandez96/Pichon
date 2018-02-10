@@ -7,9 +7,11 @@ def keyInput(evt):
     elif evt.key == "down":
     	scene.camera.pos = vector(scene.camera.pos.x, scene.camera.pos.y - 0.5, scene.camera.pos.z)
     elif evt.key == "left":
-    	scene.camera.pos = vector(scene.camera.pos.x - 0.5, scene.camera.pos.y, scene.camera.pos.z)
+    	dir = cross(scene.camera.pos, scene.up).norm() * 0.5
+    	scene.camera.pos = scene.camera.pos + dir
     elif evt.key == "right":
-    	scene.camera.pos = vector(scene.camera.pos.x + 0.5, scene.camera.pos.y, scene.camera.pos.z)
+    	dir = cross(scene.camera.pos, -1 * scene.up).norm() * 0.5
+    	scene.camera.pos = scene.camera.pos + dir
 
 def spawnCubeAt(x, y, z, l, w, h, c):
 	box1 = box(pos = vector(x, y, z), length = l, width = w, height = h, color = c)
