@@ -13,8 +13,6 @@ def keyInput(evt):
     s = evt.key
     if evt.key == "up":
         KEK.pos = KEK.pos + KEK.axis
-    elif evt.key == "down":
-        KEK.pos = KEK.pos - KEK.axis
     elif evt.key == "left":
         KEK.rotate(radians(90), vec(0, 1, 0))
     elif evt.key == "right":
