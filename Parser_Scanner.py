@@ -42,46 +42,71 @@ reserved = {
 }
 
 tokens = [
+    'CTE_I',
+    'CTE_F',
+    'ID',
+    'COMMA',
+    'L_PAREN',
+    'R_PAREN',
+    'L_BRACE',
+    'R_BRACE',
+    'L_BRACKET',
+    'R_BRACKET',
+    'ASSIGN',
+    'SEMICOLON',
+    'PLUS',
+    'MINUS',
+    'MULT',
+    'DIVISION',
+    'NOT',
+    'LESS',
+    'LESS_EQUAL',
+    'GREATER',
+    'GREATER_EQUAL',
+    'DIFFERENT',
+    'EQUAL',
+    'AND',
+    'OR'
 ] + list(reserved.values())
 
 # Tokens
-t_PLUS      = r'\+'
-t_MINUS     = r'-'
-t_TIMES     = r'\*'
-t_DIVIDE    = r'/'
-t_EQUALS    = r'='
-t_LPAREN    = r'\('
-t_RPAREN    = r'\)'
-t_COLON     = r'\:'
-t_SEMICOLON = r'\;'
-t_COMA      = r'\,'
-t_LBRAC     = r'\{'
-t_RBRAC     = r'\}'
-t_DIF      = r'\<\>'
-t_BIGGER    = r'\>'
-t_LESS      = r'\<'
-t_CTE_STRING =  r'[\"].*[\"]'
-
-def t_ID(t):
-    r'[_a-zA-Z][_a-zA-Z0-9]*'
-    print(t.value)
-    t.type = reserved.get(t.value,'ID')
-    print("--" + t.type + "--")
+def t_CTE_I(t):
+    r'[1-9][0-9]*'
+    t.value = int(t.value)
     return t
 
 def t_CTE_F(t):
     r'[0-9]*[\.][0-9]+'
     t.value = float(t.value)
-    print(t.value)
-    print("--cte_f--")
     return t
 
-def t_CTE_I(t):
-     r'[1-9][0-9]*'
-     t.value = int(t.value)
-     print(t.value)
-     print("--cte_s--")
-     return t
+def t_ID(t):
+    r'[_a-zA-Z][_a-zA-Z0-9]*'
+    t.type = reserved.get(t.value,'ID')
+    return t
+
+t_COMMA         = r'\,'
+t_L_PAREN       = r'\('
+t_R_PAREN       = r'\)'
+t_L_BRACE       = r'\{'
+t_R_BRACE       = r'\}'
+t_L_BRACKET     = r'\['
+t_R_BRACKET     = r'\]'
+t_ASSIGN        = r'\='
+t_SEMICOLON     = r'\;'
+t_PLUS          = r'\+'
+t_MINUS         = r'\-'
+t_MULT          = r'\*'
+t_DIVISION      = r'\/'
+t_NOT           = r'\!'
+t_LESS          = r'\<'
+t_LESS_EQUAL    = r'\<\='
+t_GREATER       = r'\>'
+t_GREATER_EQUAL = r'\>\='
+t_DIFFERENT     = r'\!\='
+t_EQUAL         = r'\=\='
+t_AND           = r'\&\&'
+t_OR            = r'\|\|'
 
 # Ignored characters
 t_ignore = " \t"
