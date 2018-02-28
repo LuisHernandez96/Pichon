@@ -1,3 +1,6 @@
+import ply.lex as lex
+import ply.yacc as yacc
+
 reserved = {
     'functions' : 'FUNCTIONS',
     'environment' : 'ENVIRONMENT',
@@ -120,7 +123,6 @@ def t_error(t):
     t.lexer.skip(1)
 
 # Build the lexer
-import ply.lex as lex
 lex.lex()
 
 # Precedence rules for the arithmetic operators
@@ -138,8 +140,6 @@ def p_error(p):
 def p_empty(p):
     'empty :'
     pass
-
-import ply.yacc as yacc
 
 parser = yacc.yacc(start='programa')
 
