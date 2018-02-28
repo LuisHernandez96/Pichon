@@ -131,6 +131,70 @@ precedence = (
     ('left','TIMES','DIVIDE'),
     )
 
+def p_start(p):
+    'start: func_sec env_sec mov_sec'
+
+def p_func_sec(p):
+    'func_sec: FUNCTIONS { func_sec1 }'
+def p_func_sec1(p):
+    '''func_sec1: functions func_sec1
+        | empty'''
+
+def p_functions(p):
+    'functions: FUNCTION tipo ID ( functions1 ) { vars bloque functions2 }'
+def p_functions1(p):
+    '''functions1: params
+                   | empty '''
+def p_fucntions2(p):
+    '''functions2: return
+                   | empty'''
+
+def p_env_sec(p):
+    'env_sec: ENVIRONMENT { vars bloque }'
+
+def p_mov_sec(p):
+    'mov_sec: MOVEMENT { vars bloque }'
+
+def p_tipo(p):
+    '''tipo: INT tipo1
+            | BOOLEAN tipo1
+            | COORD tipo1
+            | FLOAT tipo1
+            | VOID tipo1'''
+def p_tipo1(p):
+    '''tipo1: [ tipo2 ]
+              | empty'''
+def p_tipo2(p):
+    '''tipo2: CTE_I
+              | empty'''
+
+def p_params(p):
+    'params: tipo ID params1'
+def p_params1(p):
+    '''params1: , params
+                | empty'''
+
+def p_bloque(p):
+    '''bloque: bloque1
+               | empty'''
+def p_bloque1(p):
+    '''bloque1: estatutos bloque1
+                | empty'''
+
+def p_vars(p):
+    '''vars: declaracion ; vars
+        | inicializacion ; vars
+        | empty'''
+
+def p_list(p):
+    'list: { expresion list1 }'
+def p_list1(p):
+    '''list1: , expresion list1
+              | empty'''
+
+def p_return(p):
+    'return: RETURN expresion ;'
+
 def p_error(p):
     if p is not None:
         print("Syntax error at '%s'" % p)
