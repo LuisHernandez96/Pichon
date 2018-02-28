@@ -1,20 +1,48 @@
 reserved = {
+    'functions' : 'FUNCTIONS',
+    'environment' : 'ENVIRONMENT',
+    'movement' : 'MOVEMENT',
+    'function' : 'FUNCTION',
+    'int' : 'INT',
+    'float' : 'FLOAT',
+    'boolean' : 'BOOLEAN',
+    'coord' : 'COORD',
+    'void' : 'VOID',
+    'return' : 'RETURN',
     'if' : 'IF',
-    'else': 'ELSE',
-    'var': 'VAR',
-    'int': 'INT',
-    'float': 'FLOAT',
-    'print': 'PRINT',
-    'program' : 'PROGRAM'
+    'elif' : 'ELIF',
+    'else' : 'ELSE',
+    'while' : 'WHILE',
+    'for' : 'FOR',
+    'true' : 'TRUE',
+    'false' : 'FALSE',
+    'cube' : 'CUBE',
+    'sphere' : 'SPHERE',
+    'down' : 'DOWN',
+    'up' : 'UP',
+    'forward' : 'FORWARD',
+    'turnLeft' : 'TURN_LEFT',
+    'turnRight' : 'TURN_RIGHT',
+    'isFacingNorth' : 'IS_FACING_NORTH',
+    'isFacingSouth' : 'IS_FACING_SOUTH',
+    'isFacingEast' : 'IS_FACING_EAST',
+    'isFacingWest' : 'IS_FACING_WEST',
+    'goal' : 'GOAL',
+    'start' : 'START',
+    'outOfBounds' : 'OUT_OF_BOUNDS',
+    'canMoveForward' : 'CAN_MOVE_FORWARD',
+    'isBlocked' : 'IS_BLOCKED',
+    'isCollectible' : 'IS_COLLECTIBLE',
+    'pickUp' : 'PICK_UP',
+    'position' : 'POSITION',
+    'spawnObject' : 'SPAWN_OBJECT',
+    'envSize' : 'ENV_SIZE',
+    'setMovementSpeed' : 'SET_MOV_SPEED',
+    'length' : 'LENGTH'
 }
 
 tokens = [
-    'ID','CTE_I','CTE_F','CTE_STRING',
-    'PLUS','MINUS','TIMES','DIVIDE','EQUALS',
-    'LPAREN','RPAREN', 'COLON',
-    'SEMICOLON', 'COMA', 'LBRAC', 'RBRAC',
-    'BIGGER', 'LESS', 'DIF'
-    ] + list(reserved.values())
+] + list(reserved.values())
 
 # Tokens
 t_PLUS      = r'\+'
