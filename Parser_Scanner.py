@@ -195,6 +195,59 @@ def p_list1(p):
 def p_return(p):
     'return: RETURN expresion ;'
 
+def p_func_call(p):
+    'func_call: func_id ( func_call1 )'
+def p_func_call1(p):
+    '''func_call1: expresion func_call2
+                    | empty'''
+def p_func_call2(p):
+    '''func_call2: , expresion func_call2
+                    | empty'''
+
+def p_func_id(p):
+    '''func_id: ID
+                | DOWN
+                | UP
+                | FORWARD
+                | TURN_LEFT
+                | TURN_RIGTH
+                | IS_FACING_NORTH
+                | IS_FACING_SOUTH
+                | IS_FACING_EAST
+                | IS_FACING_WEST
+                | GOAL
+                | START
+                | OUT_OF_BOUNDS
+                | CAN_MOVE_FORWARD
+                | IS_BLOCKED
+                | IS_COLLECTIBLE
+                | PICK_UP
+                | POSITION
+                | SPAWN_OBJECT
+                | ENV_SIZE
+                | SET_MOVEMENT_SPEED
+                | LENGTH
+                '''
+
+def p_declaracion(p):
+    'declaracion: tipo ID'
+
+def p_inicializacion(p):
+    'inicializacion: tipo ID = expresion'
+
+def p_asignacion(p):
+    'asignacion: ID asignacion1 = expresion'
+def p_asignacion1(p):
+    '''asignacion1: [ expresion ]
+                    | empty'''
+
+def p_estatutos(p):
+    '''estatutos: asignacion ;
+                  | condicion ;
+                  | for_loop ;
+                  | while_loop ;
+                  | func_call ;'''
+
 def p_error(p):
     if p is not None:
         print("Syntax error at '%s'" % p)
