@@ -136,12 +136,14 @@ def p_start(p):
 
 def p_func_sec(p):
     'func_sec: FUNCTIONS { func_sec1 }'
+
 def p_func_sec1(p):
     '''func_sec1: functions func_sec1
         | empty'''
 
 def p_functions(p):
-    'functions: FUNCTION tipo ID ( functions1 ) { vars bloque functions2 }'
+    'functions: FUNCTION tipo ID L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
+
 def p_functions1(p):
     '''functions1: params
                    | empty '''
@@ -150,10 +152,10 @@ def p_fucntions2(p):
                    | empty'''
 
 def p_env_sec(p):
-    'env_sec: ENVIRONMENT { vars bloque }'
+    'env_sec: ENVIRONMENT L_BRACE vars bloque R_BRACE'
 
 def p_mov_sec(p):
-    'mov_sec: MOVEMENT { vars bloque }'
+    'mov_sec: MOVEMENT L_BRACE vars bloque R_BRACE'
 
 def p_tipo(p):
     '''tipo: INT tipo1
@@ -161,9 +163,11 @@ def p_tipo(p):
             | COORD tipo1
             | FLOAT tipo1
             | VOID tipo1'''
+
 def p_tipo1(p):
-    '''tipo1: [ tipo2 ]
+    '''tipo1: L_BRACKET tipo2 R_BRACKET
               | empty'''
+
 def p_tipo2(p):
     '''tipo2: CTE_I
               | empty'''
@@ -171,7 +175,7 @@ def p_tipo2(p):
 def p_params(p):
     'params: tipo ID params1'
 def p_params1(p):
-    '''params1: , params
+    '''params1: COMMA params
                 | empty'''
 
 def p_bloque(p):
@@ -182,18 +186,112 @@ def p_bloque1(p):
                 | empty'''
 
 def p_vars(p):
-    '''vars: declaracion ; vars
-        | inicializacion ; vars
+    '''vars: declaracion SEMICOLON vars
+        | inicializacion SEMICOLON vars
         | empty'''
 
 def p_list(p):
-    'list: { expresion list1 }'
+    'list: L_BRACE expresion list1 R_BRACE'
+
 def p_list1(p):
-    '''list1: , expresion list1
+    '''list1: COMMA expresion list1
               | empty'''
 
 def p_return(p):
-    'return: RETURN expresion ;'
+    'return: RETURN expresion SEMICOLON'
+
+def p_condicion(p):
+    'condicion: IF L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE condicion1'
+
+def p_condicion1(p):
+    '''condicion1: ELSE L_BRACE bloque R_BRACE
+        | ELIF L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE condicion1
+        | empty'''
+
+def p_while(p):
+    'while: WHILE L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE'
+
+def p_for(p):
+    'for: FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON expresion R_PAREN L_BRACE bloque R_BRACE'
+
+def p_exp(p):
+    'exp: termino exp1'
+
+def p_exp1(p):
+    '''exp1: + exp
+        | - exp
+        | empty'''
+
+def p_termino(p):
+    'termino: factor termino1'
+
+def p_termino1(p):
+    '''termino1: MULT termino
+        | DIVISION termino
+        | empty'''
+
+def p_var_cte(p):
+    '''var_cte: ID var_cte1
+        | CTE_I
+        | CTE_F
+        | TRUE
+        | FALSE
+        | coord
+        | list
+        | CUBE
+        | SPHERE
+    '''
+
+def p_var_cte1(p):
+    '''var_cte1: L_BRACKET expresion R_BRACKET
+        | empty
+    '''
+
+def p_expresion(p):
+    'expresion: expresion1 expresion2'
+
+def p_expresion1(p):
+    '''expresion1: NOT
+        |empty
+    '''
+
+def p_expresion2(p):
+    '''expresion2: func_call
+        | exp expresion3
+    '''
+
+def p_expresion3(p):
+    '''expresion3: operators exp
+        | empty
+    '''
+
+def p_operators:
+    '''operators: GREATER
+        | GREATER_EQUAL
+        | LESS
+        | LESS_EQUAL
+        | DIFFERENT
+        | EQUAL
+        | AND
+        | OR
+    '''
+
+def p_factor(p):
+    '''factor: L_PAREN expresion R_PAREN
+        | factor1 var_cte
+    '''
+
+def p_factor1(p):
+    '''factor1: PLUS
+        | MINUS
+        | empty
+    '''
+
+def p_coord(p):
+    'coord: L_PAREN xyz R_PAREN'
+
+def p_xyz(p):
+    'xyz: expresion COMA expresion COMA expresion'
 
 def p_func_call(p):
     'func_call: func_id ( func_call1 )'
