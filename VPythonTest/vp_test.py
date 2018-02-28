@@ -14,9 +14,13 @@ def keyInput(evt):
     if evt.key == "up":
         KEK.pos = KEK.pos + KEK.axis
     elif evt.key == "left":
+    	dir = cross(scene.camera.pos, scene.up).norm() * 0.5
+    	scene.camera.pos = scene.camera.pos + dir
         KEK.rotate(radians(90), vec(0, 1, 0))
     elif evt.key == "right":
         KEK.rotate(radians(-90), vec(0, 1, 0))
+    	dir = cross(scene.camera.pos, -1 * scene.up).norm() * 0.5
+    	scene.camera.pos = scene.camera.pos + dir
 
 
 def init_floor(x, y):
