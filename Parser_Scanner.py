@@ -122,15 +122,6 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
-# Build the lexer
-lex.lex()
-
-# Precedence rules for the arithmetic operators
-precedence = (
-    ('left','PLUS','MINUS'),
-    ('left','TIMES','DIVIDE'),
-    )
-
 def p_start(p):
     'start: func_sec env_sec mov_sec'
 
@@ -335,6 +326,7 @@ def p_inicializacion(p):
 
 def p_asignacion(p):
     'asignacion: ID asignacion1 ASSIGN expresion'
+
 def p_asignacion1(p):
     '''asignacion1: L_BRACKET expresion R_BRACKET
                     | empty'''
@@ -349,14 +341,14 @@ def p_estatutos(p):
 def p_error(p):
     if p is not None:
         print("Syntax error at '%s'" % p)
-    else:
-        print("BENIS :DDDD")
 
 def p_empty(p):
     'empty :'
     pass
 
-parser = yacc.yacc(start='programa')
+# Build the lexer
+lex.lex()
+parser = yacc.yacc(start='start')
 
 with open('test.txt') as f:
     read_data = f.read()
