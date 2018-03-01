@@ -135,7 +135,7 @@ def p_start(p):
     'start: func_sec env_sec mov_sec'
 
 def p_func_sec(p):
-    'func_sec: FUNCTIONS { func_sec1 }'
+    'func_sec: FUNCTIONS L_BRACE func_sec1 R_BRACE'
 
 def p_func_sec1(p):
     '''func_sec1: functions func_sec1
@@ -218,8 +218,8 @@ def p_exp(p):
     'exp: termino exp1'
 
 def p_exp1(p):
-    '''exp1: + exp
-        | - exp
+    '''exp1: PLUS exp
+        | MINUS exp
         | empty'''
 
 def p_termino(p):
@@ -265,7 +265,7 @@ def p_expresion3(p):
         | empty
     '''
 
-def p_operators:
+def p_operators(p):
     '''operators: GREATER
         | GREATER_EQUAL
         | LESS
@@ -294,12 +294,12 @@ def p_xyz(p):
     'xyz: expresion COMA expresion COMA expresion'
 
 def p_func_call(p):
-    'func_call: func_id ( func_call1 )'
+    'func_call: func_id L_PAREN func_call1 R_PAREN'
 def p_func_call1(p):
     '''func_call1: expresion func_call2
                     | empty'''
 def p_func_call2(p):
-    '''func_call2: , expresion func_call2
+    '''func_call2: COMMA expresion func_call2
                     | empty'''
 
 def p_func_id(p):
@@ -331,20 +331,20 @@ def p_declaracion(p):
     'declaracion: tipo ID'
 
 def p_inicializacion(p):
-    'inicializacion: tipo ID = expresion'
+    'inicializacion: tipo ID ASSIGN expresion'
 
 def p_asignacion(p):
-    'asignacion: ID asignacion1 = expresion'
+    'asignacion: ID asignacion1 ASSIGN expresion'
 def p_asignacion1(p):
-    '''asignacion1: [ expresion ]
+    '''asignacion1: L_BRACKET expresion R_BRACKET
                     | empty'''
 
 def p_estatutos(p):
-    '''estatutos: asignacion ;
-                  | condicion ;
-                  | for_loop ;
-                  | while_loop ;
-                  | func_call ;'''
+    '''estatutos: asignacion SEMICOLON
+                  | condicion SEMICOLON
+                  | for_loop SEMICOLON
+                  | while_loop SEMICOLON
+                  | func_call SEMICOLON'''
 
 def p_error(p):
     if p is not None:
