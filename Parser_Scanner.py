@@ -122,107 +122,117 @@ def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
 
+
+# Build the lexer
+lex.lex()
+
+# Precedence rules for the arithmetic operators
+precedence = (
+    ('left','PLUS','MINUS'),
+    ('left','MULT','DIVISION'),
+    )
+
 def p_start(p):
-    'start: func_sec env_sec mov_sec'
+    'start : func_sec env_sec mov_sec'
 
 def p_func_sec(p):
-    'func_sec: FUNCTIONS L_BRACE func_sec1 R_BRACE'
+    'func_sec : FUNCTIONS L_BRACE func_sec1 R_BRACE'
 
 def p_func_sec1(p):
-    '''func_sec1: functions func_sec1
+    '''func_sec1 : functions func_sec1
         | empty'''
 
 def p_functions(p):
-    'functions: FUNCTION tipo ID L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
+    'functions : FUNCTION tipo ID L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
 
 def p_functions1(p):
-    '''functions1: params
+    '''functions1 : params
                    | empty '''
 def p_fucntions2(p):
-    '''functions2: return
+    '''functions2 : return
                    | empty'''
 
 def p_env_sec(p):
-    'env_sec: ENVIRONMENT L_BRACE vars bloque R_BRACE'
+    'env_sec : ENVIRONMENT L_BRACE vars bloque R_BRACE'
 
 def p_mov_sec(p):
-    'mov_sec: MOVEMENT L_BRACE vars bloque R_BRACE'
+    'mov_sec : MOVEMENT L_BRACE vars bloque R_BRACE'
 
 def p_tipo(p):
-    '''tipo: INT tipo1
+    '''tipo : INT tipo1
             | BOOLEAN tipo1
             | COORD tipo1
             | FLOAT tipo1
             | VOID tipo1'''
 
 def p_tipo1(p):
-    '''tipo1: L_BRACKET tipo2 R_BRACKET
+    '''tipo1 : L_BRACKET tipo2 R_BRACKET
               | empty'''
 
 def p_tipo2(p):
-    '''tipo2: CTE_I
+    '''tipo2 : CTE_I
               | empty'''
 
 def p_params(p):
-    'params: tipo ID params1'
+    'params : tipo ID params1'
 def p_params1(p):
-    '''params1: COMMA params
+    '''params1 : COMMA params
                 | empty'''
 
 def p_bloque(p):
-    '''bloque: bloque1
+    '''bloque : bloque1
                | empty'''
 def p_bloque1(p):
-    '''bloque1: estatutos bloque1
+    '''bloque1 : estatutos bloque1
                 | empty'''
 
 def p_vars(p):
-    '''vars: declaracion SEMICOLON vars
+    '''vars : declaracion SEMICOLON vars
         | inicializacion SEMICOLON vars
         | empty'''
 
 def p_list(p):
-    'list: L_BRACE expresion list1 R_BRACE'
+    'list : L_BRACE expresion list1 R_BRACE'
 
 def p_list1(p):
-    '''list1: COMMA expresion list1
+    '''list1 : COMMA expresion list1
               | empty'''
 
 def p_return(p):
-    'return: RETURN expresion SEMICOLON'
+    'return : RETURN expresion SEMICOLON'
 
 def p_condicion(p):
-    'condicion: IF L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE condicion1'
+    'condicion : IF L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE condicion1'
 
 def p_condicion1(p):
-    '''condicion1: ELSE L_BRACE bloque R_BRACE
+    '''condicion1 : ELSE L_BRACE bloque R_BRACE
         | ELIF L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE condicion1
         | empty'''
 
-def p_while(p):
-    'while: WHILE L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE'
+def p_while_loop(p):
+    'while_loop : WHILE L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE'
 
-def p_for(p):
-    'for: FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON expresion R_PAREN L_BRACE bloque R_BRACE'
+def p_for_loop(p):
+    'for_loop : FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON expresion R_PAREN L_BRACE bloque R_BRACE'
 
 def p_exp(p):
-    'exp: termino exp1'
+    'exp : termino exp1'
 
 def p_exp1(p):
-    '''exp1: PLUS exp
+    '''exp1 : PLUS exp
         | MINUS exp
         | empty'''
 
 def p_termino(p):
-    'termino: factor termino1'
+    'termino : factor termino1'
 
 def p_termino1(p):
-    '''termino1: MULT termino
+    '''termino1 : MULT termino
         | DIVISION termino
         | empty'''
 
 def p_var_cte(p):
-    '''var_cte: ID var_cte1
+    '''var_cte : ID var_cte1
         | CTE_I
         | CTE_F
         | TRUE
@@ -234,30 +244,30 @@ def p_var_cte(p):
     '''
 
 def p_var_cte1(p):
-    '''var_cte1: L_BRACKET expresion R_BRACKET
+    '''var_cte1 : L_BRACKET expresion R_BRACKET
         | empty
     '''
 
 def p_expresion(p):
-    'expresion: expresion1 expresion2'
+    'expresion : expresion1 expresion2'
 
 def p_expresion1(p):
-    '''expresion1: NOT
-        |empty
+    '''expresion1 : NOT
+        | empty
     '''
 
 def p_expresion2(p):
-    '''expresion2: func_call
+    '''expresion2 : func_call
         | exp expresion3
     '''
 
 def p_expresion3(p):
-    '''expresion3: operators exp
+    '''expresion3 : operators exp
         | empty
     '''
 
 def p_operators(p):
-    '''operators: GREATER
+    '''operators : GREATER
         | GREATER_EQUAL
         | LESS
         | LESS_EQUAL
@@ -268,38 +278,38 @@ def p_operators(p):
     '''
 
 def p_factor(p):
-    '''factor: L_PAREN expresion R_PAREN
+    '''factor : L_PAREN expresion R_PAREN
         | factor1 var_cte
     '''
 
 def p_factor1(p):
-    '''factor1: PLUS
+    '''factor1 : PLUS
         | MINUS
         | empty
     '''
 
 def p_coord(p):
-    'coord: L_PAREN xyz R_PAREN'
+    'coord : L_PAREN xyz R_PAREN'
 
 def p_xyz(p):
-    'xyz: expresion COMA expresion COMA expresion'
+    'xyz : expresion COMMA expresion COMMA expresion'
 
 def p_func_call(p):
-    'func_call: func_id L_PAREN func_call1 R_PAREN'
+    'func_call : func_id L_PAREN func_call1 R_PAREN'
 def p_func_call1(p):
-    '''func_call1: expresion func_call2
+    '''func_call1 : expresion func_call2
                     | empty'''
 def p_func_call2(p):
-    '''func_call2: COMMA expresion func_call2
+    '''func_call2 : COMMA expresion func_call2
                     | empty'''
 
 def p_func_id(p):
-    '''func_id: ID
+    '''func_id : ID
                 | DOWN
                 | UP
                 | FORWARD
                 | TURN_LEFT
-                | TURN_RIGTH
+                | TURN_RIGHT
                 | IS_FACING_NORTH
                 | IS_FACING_SOUTH
                 | IS_FACING_EAST
@@ -314,25 +324,25 @@ def p_func_id(p):
                 | POSITION
                 | SPAWN_OBJECT
                 | ENV_SIZE
-                | SET_MOVEMENT_SPEED
+                | SET_MOV_SPEED
                 | LENGTH
                 '''
 
 def p_declaracion(p):
-    'declaracion: tipo ID'
+    'declaracion : tipo ID'
 
 def p_inicializacion(p):
-    'inicializacion: tipo ID ASSIGN expresion'
+    'inicializacion : tipo ID ASSIGN expresion'
 
 def p_asignacion(p):
-    'asignacion: ID asignacion1 ASSIGN expresion'
+    'asignacion : ID asignacion1 ASSIGN expresion'
 
 def p_asignacion1(p):
-    '''asignacion1: L_BRACKET expresion R_BRACKET
+    '''asignacion1 : L_BRACKET expresion R_BRACKET
                     | empty'''
 
 def p_estatutos(p):
-    '''estatutos: asignacion SEMICOLON
+    '''estatutos : asignacion SEMICOLON
                   | condicion SEMICOLON
                   | for_loop SEMICOLON
                   | while_loop SEMICOLON
@@ -350,7 +360,7 @@ def p_empty(p):
 lex.lex()
 parser = yacc.yacc(start='start')
 
-with open('test.txt') as f:
-    read_data = f.read()
-
-parser.parse(read_data)
+# with open('test.txt') as f:
+#     read_data = f.read()
+#
+# parser.parse(read_data)
