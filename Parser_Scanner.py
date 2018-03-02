@@ -1,5 +1,6 @@
 import ply.lex as lex
 import ply.yacc as yacc
+import sys
 
 reserved = {
     'FUNCTIONS' : 'FUNCTIONS',
@@ -134,6 +135,7 @@ lex.lex()
 precedence = (
     ('left','PLUS','MINUS'),
     ('left','MULT','DIVISION'),
+    ('right', 'NOT')
 )
 
 def p_start(p):
@@ -167,7 +169,7 @@ def p_tipo(p):
             | BOOLEAN tipo1
             | COORD tipo1
             | FLOAT tipo1
-            | VOID tipo1'''
+            | VOID'''
 
 def p_tipo1(p):
     '''tipo1 : L_BRACKET tipo2 R_BRACKET
@@ -219,6 +221,7 @@ def p_for_loop(p):
 
 def p_var_cte(p):
     '''var_cte : ID var_cte1
+        | func_call var_cte1
         | CTE_I
         | CTE_F
         | TRUE
@@ -236,20 +239,10 @@ def p_var_cte1(p):
     '''
 
 def p_expresion(p):
-    'expresion : expresion1 expresion2'
-
-def p_expresion1(p):
-    '''expresion1 : NOT
-        | empty
-    '''
+    'expresion : exp expresion2'
 
 def p_expresion2(p):
-    '''expresion2 : func_call
-        | exp expresion3
-    '''
-
-def p_expresion3(p):
-    '''expresion3 : operators exp
+    '''expresion2 : operators exp
         | empty
     '''
 
@@ -259,6 +252,7 @@ def p_exp(p):
 def p_exp1(p):
     '''exp1 : PLUS exp
         | MINUS exp
+        | OR exp
         | empty'''
 
 def p_termino(p):
@@ -267,6 +261,7 @@ def p_termino(p):
 def p_termino1(p):
     '''termino1 : MULT termino
         | DIVISION termino
+        | AND termino
         | empty'''
 
 def p_operators(p):
@@ -276,15 +271,14 @@ def p_operators(p):
         | LESS_EQUAL
         | DIFFERENT
         | EQUAL
-        | AND
-        | OR
     '''
 
 def p_factor(p):
     '''factor : L_PAREN expresion R_PAREN
         | var_cte
-        | PLUS var_cte
-        | MINUS var_cte
+        | PLUS factor
+        | MINUS factor
+        | NOT factor
     '''
 
 def p_coord(p):
@@ -330,7 +324,7 @@ def p_func_id(p):
                 '''
 
 def p_declaracion(p):
-    'declaracion : tipo ID'
+    'declaracion : tipo ID asignacion2'
 
 def p_inicializacion(p):
     'inicializacion : tipo ID asignacion2 ASSIGN expresion'
@@ -356,6 +350,7 @@ def p_estatutos(p):
 def p_error(p):
     if p is not None:
         print("Syntax error at '%s'" % p)
+        sys.exit(1)
 
 def p_empty(p):
     'empty :'
@@ -368,4 +363,4 @@ parser = yacc.yacc(start='start')
 with open('test.txt') as f:
     read_data = f.read()
 
-parser.parse(read_data, tracking = True)
+parser.parse(read_data)

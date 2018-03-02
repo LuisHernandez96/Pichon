@@ -1,73 +1,75 @@
+
 FUNCTIONS{
   function coord getForwardCoord(){
-  	coord update;
-  	if (isFacingNorth()){
-      	update = (1, 0, 0);
-  	}
-  	elif (isFacingSouth()){
-      	update = (-1, 0, 0);
-  	}
-  	elif (isFacingEast()){
-      	update = (0, 1, 0);
-  	}
-  	elif (isFacingWest()){
-      	update = (0, -1, 0);
-  	};
+    coord update;
+    if (!isFacingNorth()){
+        update = (1, 0, 0);
+    }
+    elif (!isFacingSouth()){
+        update = (-1, 0, 0);
+    }
+    elif (!isFacingEast()){
+        update = (0, 1, 0);
+    }
+    elif (!isFacingWest()){
+        update = (0, -1, 0);
+    };
 
     return update;
   }
 
   function int availableSpacesForward(){
-  	int free = 0;
-  	coord update = getForwardCoord();
-  	coord pos = position(0.5);
+    int free = 0;
+    coord update = getForwardCoord();
+    coord pos = position() + update;
 
-  	while(true && true){
-    	    free = free + 1;
-    	    pos = pos + update;
- 	  };
+    while(!isBlocked(pos) && !outOfBounds(pos)){
+          free = free + 1;
+          pos = pos + update;
+    };
 
     return free;
   }
 
-  function boolean collectibleFront(){
-   	coord fwd = getForwardCoord();
-   	coord pos = position();
-    boolean ret;
-   	while(true){
-      pos = pos + fwd;
-   	};
+  function int[] func(int x, float y, coord z, boolean a, int[] x, float[] y, coord[] z, boolean[] a){
+    return (!funcCall() && !funcCall() * funcCall());
+  }
 
-   	if(isCollectible(pos)){
-      ret = true;
-   	}
-   	else{
-      ret = false;
-   	};
+  function boolean collectibleFront(){
+    coord fwd = getForwardCoord();
+    coord pos = position() + fwd;
+    boolean ret;
+    while(isCollectible(pos) && outOfBounds(pos)){
+            pos = pos + fwd;
+    };
+
+    if(isCollectible(pos)){
+            ret = true;
+    }
+    else{
+            ret = false;
+    };
 
     return ret;
   }
 }
 
 ENVIRONMENT{
-  
-  int xCoords[2] = {1, 3};
-  int yCoords[2] = {2, 4};
+
+  int xCoords[4] = {1, 3};
+  int yCoords[4] = {2, 4};
   int i;
-
   envSize((5, 5, 5));
-  yCoords[0] = 2;
-
-  for(i = 0; i < 5; 1){
- 	  spawnObject(CUBE, (xCoords[i], yCoords[i], (1 - 1)));
+  for(i = 0; i < length(xCoords); 1){
+    spawnObject(CUBE, (xCoords[i], yCoords[i], (1 - 1)));
   };
 
   xCoords = {2, 4};
   yCoords = {1, 3};
   i = 0;
-  while(i < 5){
- 	  spawnObject(SPHERE, (xCoords[i], yCoords[i], (1 - 1)));
- 	  i = i + 1;
+  while(i < length(xCoords)){
+    spawnObject(SPHERE, (xCoords[i], yCoords[i], (1 - 1)));
+    i = i + 1;
   };
 
   start((0, 0, 0));
@@ -75,40 +77,39 @@ ENVIRONMENT{
 }
 
 MOVEMENT{
-
   int available = availableSpacesForward();
   int i = 0;
   boolean pickedUp = false;
 
   setMovementSpeed(0.8);
-  while(i < 5){
-  	forward();
-  	i = i + 1;
+  while(i < available){
+    forward();
+    i = i + 1;
   };
 
   turn_right();
 
-  if(true){
-  	forward();
-  	pickUp();
+  if(isCollectible(position() + (0, 1, 0))){
+    forward();
+    pickUp();
   };
 
   forward();
   forward();
   turn_left();
-
   if(collectibleFront()){
     available = availableSpacesForward();
     i = 0;
-    while(true){
-      forward();
-    	if(isCollectible(position())){
-        pickUp();
-      	pickedUp = true;
-    	};
 
-    	i = i + 1;
-  	};
+    while(i < available){
+          forward();
+          if(isCollectible(position())){
+            pickUp();
+            pickedUp = true;
+          };
+
+          i = i + 1;
+    };
   };
 
 }
