@@ -140,6 +140,7 @@ precedence = (
 
 def p_start(p):
     'start : func_sec env_sec mov_sec'
+    print("Finished!")
 
 def p_func_sec(p):
     'func_sec : FUNCTIONS L_BRACE func_sec1 R_BRACE'
@@ -276,7 +277,6 @@ def p_operators(p):
 def p_factor(p):
     '''factor : L_PAREN expresion R_PAREN
         | var_cte
-        | PLUS factor
         | MINUS factor
         | NOT factor
     '''

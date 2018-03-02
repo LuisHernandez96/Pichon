@@ -32,7 +32,7 @@ FUNCTIONS{
   }
 
   function int[] func(int x, float y, coord z, boolean a, int[] x, float[] y, coord[] z, boolean[] a){
-    return (!funcCall() && !funcCall() * funcCall());
+    return ((!a*!b-!c*!d)>!c+!d*!e/!f) && !(!g*!h-!j>!l-!a) && !b+!c>!d*!f||!func(i[3],3,3.5,true) && !(!(position())) + 5 - 1 && true && !false + 3.8 * caca[4];
   }
 
   function boolean collectibleFront(){
