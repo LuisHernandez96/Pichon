@@ -77,19 +77,16 @@ tokens = [
 def t_CTE_F(t):
     r'[0-9]*[\.][0-9]+'
     t.value = float(t.value)
-    #print(str(t.type) + " " + str(t.value));
     return t
 
 def t_CTE_I(t):
     r'[0-9][0-9]*'
     t.value = int(t.value)
-    #print(str(t.type) + " " + str(t.value));
     return t
 
 def t_ID(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     t.type = reserved.get(t.value,'ID')
-    #print(str(t.type) + " " + str(t.value));
     return t
 
 t_COMMA         = r'\,'
@@ -223,16 +220,15 @@ def p_for_loop(p):
 def p_var_cte(p):
     '''var_cte : ID var_cte1
         | func_call var_cte1
+        | coord var_cte1
+        | list var_cte1
         | CTE_I
         | CTE_F
         | TRUE
         | FALSE
-        | coord
-        | list
         | CUBE
         | SPHERE
     '''
-    #print("Constante: " + str(p[1]))
 
 def p_var_cte1(p):
     '''var_cte1 : L_BRACKET expresion R_BRACKET
