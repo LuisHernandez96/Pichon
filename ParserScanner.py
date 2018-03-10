@@ -1,8 +1,24 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
+
+from enum import Enum
 from SymbolTables import *
 
+currentVarsTable = None
+currentDataType = -1
+currentId = ''
+
+class DataTypes(Enum):
+    INT = 1,
+    BOOLEAN = 2,
+    COORD = 3,
+    FLOAT = 4,
+    INT_LIST = 5,
+    BOOLEAN_LIST = 6,
+    COORD_LIST = 7,
+    FLOAT_LIST = 8,
+    VOID = 9
 
 SYMBOL_INIT(False)
 
@@ -91,6 +107,10 @@ def t_CTE_I(t):
 def t_ID(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     t.type = reserved.get(t.value,'ID')
+    if t.type == 'ID':
+        currentId = t.value
+    else:
+        currentId = ''
     return t
 
 t_COMMA         = r'\,'
@@ -151,7 +171,13 @@ def p_func_sec1(p):
         | empty'''
 
 def p_functions(p):
-    'functions : FUNCTION tipo ID L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
+    'functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
+
+def p_create_function_vars_table(p):
+    'create_function_vars_table :'
+    print('create_function_vars_table called!')
+    currentVarsTable = VARS_INIT()
+    print(currentVarsTable)
 
 def p_functions1(p):
     '''functions1 : params
@@ -172,17 +198,83 @@ def p_tipo(p):
             | COORD tipo1
             | FLOAT tipo1
             | VOID'''
+    #print('tipo finished!')
+    if len(p) == 3:
+        if p[2] is None:
+            if p[1] == 'int':
+                currentDataType = DataTypes.INT
+            elif p[1] == 'boolean':
+                currentDataType = DataTypes.BOOLEAN
+            elif p[1] == 'coord':
+                currentDataType = DataTypes.COORD
+            elif p[1] == 'float':
+                currentDataType = DataTypes.FLOAT
+            else:
+                currentDataType = DataTypes.VOID
+        else:
+            if p[1] == 'int':
+                currentDataType = DataTypes.INT_LIST
+            elif p[1] == 'boolean':
+                currentDataType = DataTypes.BOOLEAN_LIST
+            elif p[1] == 'coord':
+                currentDataType = DataTypes.COORD_LIST
+            elif p[1] == 'float':
+                currentDataType = DataTypes.FLOAT_LIST
+    else:
+        if p[1] == 'int':
+            currentDataType = DataTypes.INT
+        elif p[1] == 'boolean':
+            currentDataType = DataTypes.BOOLEAN
+        elif p[1] == 'coord':
+            currentDataType = DataTypes.COORD
+        elif p[1] == 'float':
+            currentDataType = DataTypes.FLOAT
+        else:
+            currentDataType = DataTypes.VOID
+    p[0] = currentDataType
 
 def p_tipo1(p):
-    '''tipo1 : L_BRACKET tipo2 R_BRACKET
+    '''tipo1 : L_BRACKET tipo2 R_BRACKET return_list
               | empty'''
+    #print('tipo1 finished!')
+    if len(p) == 5:
+        p[0] = {'isList' : p[4], 'listSize' : p[2]}
+    else:
+        p[0] = None
+    #print(p[0])
+
+def p_return_list(p):
+    'return_list : '
+    #print('return_list called!')
+    p[0] = True
 
 def p_tipo2(p):
-    '''tipo2 : CTE_I
+    '''tipo2 : CTE_I return_int
               | empty'''
+    #print('tipo2 finished!')
+    if len(p) == 3:
+        p[0] = p[2]
+    else:
+        p[0] = None
+    #print(p[0])
+
+def p_return_int(p):
+    'return_int : '
+    #print('return_int called!')
+    p[0] = p[-1]
+    #print(p[0])
 
 def p_params(p):
-    'params : tipo ID params1'
+    'params : tipo ID add_var params1'
+
+def p_add_var(p):
+    'add_var :'
+    global currentVarsTable
+    print('add_var called!')
+    print('currentId: ' + str(p[-1]))
+    print('currentDataType: ' + str(p[-2]))
+    print(currentVarsTable)
+    ADD_VAR(currentVarsTable, currentId, currentDataType)
 
 def p_params1(p):
     '''params1 : COMMA params
