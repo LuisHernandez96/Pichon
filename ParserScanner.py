@@ -1,8 +1,10 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
+from SymbolTables import *
 
 
+SYMBOL_INIT(False)
 
 reserved = {
     'FUNCTIONS' : 'FUNCTIONS',
