@@ -1,6 +1,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
+
 from enum import Enum
 from SymbolTables import *
 
@@ -18,6 +19,8 @@ class DataTypes(Enum):
     COORD_LIST = 7,
     FLOAT_LIST = 8,
     VOID = 9
+
+SYMBOL_INIT(False)
 
 reserved = {
     'FUNCTIONS' : 'FUNCTIONS',
