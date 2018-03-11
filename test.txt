@@ -1,7 +1,8 @@
 
 FUNCTIONS{
   function coord getForwardCoord(int[3] x, float y){
-    coord update;
+    int[5] update = 1+2;
+    int[3] update = 1+2;
     return update;
   }
 }

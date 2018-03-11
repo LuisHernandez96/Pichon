@@ -10,6 +10,7 @@ class GlobalVars:
         currentVarsTable = None
         currentDataType = -1
         currentId = ''
+        currentSize = None
 
 class DataTypes(Enum):
     INT = 1,
@@ -177,9 +178,7 @@ def p_functions(p):
 
 def p_create_function_vars_table(p):
     'create_function_vars_table :'
-    print('create_function_vars_table called!')
     globals.currentVarsTable = VARS_INIT()
-    print(globals.currentVarsTable)
 
 def p_functions1(p):
     '''functions1 : params
@@ -256,8 +255,10 @@ def p_tipo2(p):
     #print('tipo2 finished!')
     if len(p) == 3:
         p[0] = p[2]
+        globals.currentSize = p[1]
     else:
         p[0] = None
+        globals.currentSize = None
     #print(p[0])
 
 def p_return_int(p):
@@ -271,11 +272,10 @@ def p_params(p):
 
 def p_add_var(p):
     'add_var :'
-    print('add_var called!')
-    print('currentId: ' + str(globals.currentId))
-    print('currentDataType: ' + str(globals.currentDataType))
-    ADD_VAR(globals.currentVarsTable, globals.currentId, globals.currentDataType)
-    print('After add: ' + str(globals.currentVarsTable))
+    ADD_VAR(globals.currentVarsTable, globals.currentId, globals.currentDataType, size = globals.currentSize)
+    globals.currentId = ''
+    globals.currentDataType = -1
+    globals.currentSize = None
 
 def p_params1(p):
     '''params1 : COMMA params
@@ -417,10 +417,10 @@ def p_func_id(p):
                 '''
 
 def p_declaracion(p):
-    'declaracion : tipo ID asignacion2'
+    'declaracion : tipo ID asignacion2 add_var'
 
 def p_inicializacion(p):
-    'inicializacion : tipo ID asignacion2 ASSIGN expresion'
+    'inicializacion : tipo ID asignacion2 add_var ASSIGN expresion'
 
 def p_asignacion(p):
     'asignacion : ID asignacion1 ASSIGN expresion'
