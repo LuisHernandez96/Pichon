@@ -29,9 +29,21 @@ def ADD_FUNC(id, returnType, vars, debug):
             if(debug):
                 pprint.pprint(SYMBOL_TABLE)
         else:
-            print("ERROR, A FUNCTION WITH THE SAME ID ALREADY EXIST")
+            print("ERROR, A FUNCTION WITH THE SAME ID ALREADY EXIST",id)
     else:
         print("ERROR, S_T[FUNC] DOESNT EXIST")
+
+def ADD_ENV_VARS(vars, debug):
+    if ENV in SYMBOL_TABLE:
+        SYMBOL_TABLE[ENV][VARS] = vars
+        if (debug):
+            pprint.pprint(SYMBOL_TABLE)
+
+def ADD_MOV_VARS(vars, debug):
+    if MOV in SYMBOL_TABLE:
+        SYMBOL_TABLE[MOV][VARS] = vars
+        if (debug):
+            pprint.pprint(SYMBOL_TABLE)
 
 def VARS_INIT():
 	VARS_TABLE = dict()
