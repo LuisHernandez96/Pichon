@@ -5,9 +5,11 @@ import sys
 from enum import Enum
 from SymbolTables import *
 
-currentVarsTable = None
-currentDataType = -1
-currentId = ''
+class GlobalVars:
+    def __init__(self):
+        currentVarsTable = None
+        currentDataType = -1
+        currentId = ''
 
 class DataTypes(Enum):
     INT = 1,
@@ -108,9 +110,9 @@ def t_ID(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     t.type = reserved.get(t.value,'ID')
     if t.type == 'ID':
-        currentId = t.value
+        globals.currentId = t.value
     else:
-        currentId = ''
+        globals.currentId = ''
     return t
 
 t_COMMA         = r'\,'
@@ -176,8 +178,8 @@ def p_functions(p):
 def p_create_function_vars_table(p):
     'create_function_vars_table :'
     print('create_function_vars_table called!')
-    currentVarsTable = VARS_INIT()
-    print(currentVarsTable)
+    globals.currentVarsTable = VARS_INIT()
+    print(globals.currentVarsTable)
 
 def p_functions1(p):
     '''functions1 : params
@@ -202,36 +204,36 @@ def p_tipo(p):
     if len(p) == 3:
         if p[2] is None:
             if p[1] == 'int':
-                currentDataType = DataTypes.INT
+                globals.currentDataType = DataTypes.INT
             elif p[1] == 'boolean':
-                currentDataType = DataTypes.BOOLEAN
+                globals.currentDataType = DataTypes.BOOLEAN
             elif p[1] == 'coord':
-                currentDataType = DataTypes.COORD
+                globals.currentDataType = DataTypes.COORD
             elif p[1] == 'float':
-                currentDataType = DataTypes.FLOAT
+                globals.currentDataType = DataTypes.FLOAT
             else:
-                currentDataType = DataTypes.VOID
+                globals.currentDataType = DataTypes.VOID
         else:
             if p[1] == 'int':
-                currentDataType = DataTypes.INT_LIST
+                globals.currentDataType = DataTypes.INT_LIST
             elif p[1] == 'boolean':
-                currentDataType = DataTypes.BOOLEAN_LIST
+                globals.currentDataType = DataTypes.BOOLEAN_LIST
             elif p[1] == 'coord':
-                currentDataType = DataTypes.COORD_LIST
+                globals.currentDataType = DataTypes.COORD_LIST
             elif p[1] == 'float':
-                currentDataType = DataTypes.FLOAT_LIST
+                globals.currentDataType = DataTypes.FLOAT_LIST
     else:
         if p[1] == 'int':
-            currentDataType = DataTypes.INT
+            globals.currentDataType = DataTypes.INT
         elif p[1] == 'boolean':
-            currentDataType = DataTypes.BOOLEAN
+            globals.currentDataType = DataTypes.BOOLEAN
         elif p[1] == 'coord':
-            currentDataType = DataTypes.COORD
+            globals.currentDataType = DataTypes.COORD
         elif p[1] == 'float':
-            currentDataType = DataTypes.FLOAT
+            globals.currentDataType = DataTypes.FLOAT
         else:
-            currentDataType = DataTypes.VOID
-    p[0] = currentDataType
+            globals.currentDataType = DataTypes.VOID
+    p[0] = globals.currentDataType
 
 def p_tipo1(p):
     '''tipo1 : L_BRACKET tipo2 R_BRACKET return_list
@@ -269,12 +271,11 @@ def p_params(p):
 
 def p_add_var(p):
     'add_var :'
-    global currentVarsTable
     print('add_var called!')
-    print('currentId: ' + str(p[-1]))
-    print('currentDataType: ' + str(p[-2]))
-    print(currentVarsTable)
-    ADD_VAR(currentVarsTable, currentId, currentDataType)
+    print('currentId: ' + str(globals.currentId))
+    print('currentDataType: ' + str(globals.currentDataType))
+    ADD_VAR(globals.currentVarsTable, globals.currentId, globals.currentDataType)
+    print('After add: ' + str(globals.currentVarsTable))
 
 def p_params1(p):
     '''params1 : COMMA params
@@ -447,6 +448,8 @@ def p_error(p):
 def p_empty(p):
     'empty :'
     pass
+
+globals = GlobalVars()
 
 # Build the lexer
 lex.lex()
