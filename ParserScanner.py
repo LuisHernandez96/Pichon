@@ -23,6 +23,7 @@ class DataTypes(Enum):
     VOID = 9
 
 SYMBOL_INIT(False)
+globals = GlobalVars()
 
 reserved = {
     'FUNCTIONS' : 'FUNCTIONS',
@@ -450,8 +451,6 @@ def p_empty(p):
     'empty :'
     pass
 
-globals = GlobalVars()
-
 # Build the lexer
 lex.lex()
 parser = yacc.yacc(start='start')
@@ -460,3 +459,5 @@ with open('test.txt') as f:
     read_data = f.read()
 
 parser.parse(read_data)
+
+pprint.pprint(SYMBOL_TABLE)
