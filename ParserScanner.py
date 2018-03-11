@@ -154,13 +154,7 @@ def p_func_sec1(p):
 
 def p_functions(p):
     'functions : FUNCTION tipo ID L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
-
-    if TEMP_TYPE_ID.__len__() == 2:
-        TEMP_FUNC_ID = TEMP_TYPE_ID.pop()
-        TEMP_FUNC_TYPE = TEMP_TYPE_ID.pop()
-        ADD_FUNC(TEMP_FUNC_ID,TEMP_FUNC_TYPE,None,False)
-    else:
-        print("ERROR, VAR TYPES AND ID DON'T MATCH")
+    ADD_FUNC(p[3],p[2], globals.currentVarsTable, False)
 
 def p_functions1(p):
     '''functions1 : params
