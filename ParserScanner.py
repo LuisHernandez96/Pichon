@@ -1,9 +1,26 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
+
+from enum import Enum
 from SymbolTables import *
 
-# TEM
+class GlobalVars:
+    def __init__(self):
+        currentVarsTable = None
+        currentDataType = -1
+        currentId = ''
+
+class DataTypes(Enum):
+    INT = 1,
+    BOOLEAN = 2,
+    COORD = 3,
+    FLOAT = 4,
+    INT_LIST = 5,
+    BOOLEAN_LIST = 6,
+    COORD_LIST = 7,
+    FLOAT_LIST = 8,
+    VOID = 9
 
 SYMBOL_INIT(False)
 
@@ -92,7 +109,10 @@ def t_CTE_I(t):
 def t_ID(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     t.type = reserved.get(t.value,'ID')
-    pprint.pprint(t)
+    if t.type == 'ID':
+        globals.currentId = t.value
+    else:
+        globals.currentId = ''
     return t
 
 t_COMMA         = r'\,'
@@ -153,8 +173,14 @@ def p_func_sec1(p):
         | empty'''
 
 def p_functions(p):
-    'functions : FUNCTION tipo ID L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
+    'functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
     ADD_FUNC(p[3],p[2], globals.currentVarsTable, False)
+
+def p_create_function_vars_table(p):
+    'create_function_vars_table :'
+    print('create_function_vars_table called!')
+    globals.currentVarsTable = VARS_INIT()
+    print(globals.currentVarsTable)
 
 def p_functions1(p):
     '''functions1 : params
@@ -175,17 +201,82 @@ def p_tipo(p):
             | COORD tipo1
             | FLOAT tipo1
             | VOID'''
+    #print('tipo finished!')
+    if len(p) == 3:
+        if p[2] is None:
+            if p[1] == 'int':
+                globals.currentDataType = DataTypes.INT
+            elif p[1] == 'boolean':
+                globals.currentDataType = DataTypes.BOOLEAN
+            elif p[1] == 'coord':
+                globals.currentDataType = DataTypes.COORD
+            elif p[1] == 'float':
+                globals.currentDataType = DataTypes.FLOAT
+            else:
+                globals.currentDataType = DataTypes.VOID
+        else:
+            if p[1] == 'int':
+                globals.currentDataType = DataTypes.INT_LIST
+            elif p[1] == 'boolean':
+                globals.currentDataType = DataTypes.BOOLEAN_LIST
+            elif p[1] == 'coord':
+                globals.currentDataType = DataTypes.COORD_LIST
+            elif p[1] == 'float':
+                globals.currentDataType = DataTypes.FLOAT_LIST
+    else:
+        if p[1] == 'int':
+            globals.currentDataType = DataTypes.INT
+        elif p[1] == 'boolean':
+            globals.currentDataType = DataTypes.BOOLEAN
+        elif p[1] == 'coord':
+            globals.currentDataType = DataTypes.COORD
+        elif p[1] == 'float':
+            globals.currentDataType = DataTypes.FLOAT
+        else:
+            globals.currentDataType = DataTypes.VOID
+    p[0] = globals.currentDataType
 
 def p_tipo1(p):
-    '''tipo1 : L_BRACKET tipo2 R_BRACKET
+    '''tipo1 : L_BRACKET tipo2 R_BRACKET return_list
               | empty'''
+    #print('tipo1 finished!')
+    if len(p) == 5:
+        p[0] = {'isList' : p[4], 'listSize' : p[2]}
+    else:
+        p[0] = None
+    #print(p[0])
+
+def p_return_list(p):
+    'return_list : '
+    #print('return_list called!')
+    p[0] = True
 
 def p_tipo2(p):
-    '''tipo2 : CTE_I
+    '''tipo2 : CTE_I return_int
               | empty'''
+    #print('tipo2 finished!')
+    if len(p) == 3:
+        p[0] = p[2]
+    else:
+        p[0] = None
+    #print(p[0])
+
+def p_return_int(p):
+    'return_int : '
+    #print('return_int called!')
+    p[0] = p[-1]
+    #print(p[0])
 
 def p_params(p):
-    'params : tipo ID params1'
+    'params : tipo ID add_var params1'
+
+def p_add_var(p):
+    'add_var :'
+    print('add_var called!')
+    print('currentId: ' + str(globals.currentId))
+    print('currentDataType: ' + str(globals.currentDataType))
+    ADD_VAR(globals.currentVarsTable, globals.currentId, globals.currentDataType)
+    print('After add: ' + str(globals.currentVarsTable))
 
 def p_params1(p):
     '''params1 : COMMA params
@@ -358,6 +449,8 @@ def p_error(p):
 def p_empty(p):
     'empty :'
     pass
+
+globals = GlobalVars()
 
 # Build the lexer
 lex.lex()

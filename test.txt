@@ -1,115 +1,13 @@
 
 FUNCTIONS{
-  function coord getForwardCoord(){
+  function coord getForwardCoord(int[3] x, float y){
     coord update;
-    if (!isFacingNorth()){
-        update = (1, 0, 0);
-    }
-    elif (!isFacingSouth()){
-        update = (-1, 0, 0);
-    }
-    elif (!isFacingEast()){
-        update = (0, 1, 0);
-    }
-    elif (!isFacingWest()){
-        update = (0, -1, 0);
-    };
-
     return update;
-  }
-
-  function int availableSpacesForward(){
-    int free = 0;
-    coord update = getForwardCoord();
-    coord pos = position() + update;
-
-    while(!isBlocked(pos) && !outOfBounds(pos)){
-          free = free + 1;
-          pos = pos + update;
-    };
-
-    return free;
-  }
-
-  function int[] func(int x, float y, coord z, boolean a, int[] x, float[] y, coord[] z, boolean[] a){
-    return ((!a*!b-!c*!d)>!c+!d*!e/!f) && !(!g*!h-!j>!l-!a) && !b+!c>!d*!f||!func(i[3],3,3.5,true) && !(!(position())) + 5 - 1 && true && !false + 3.8 * caca[4];
-  }
-
-  function boolean collectibleFront(){
-    coord fwd = getForwardCoord();
-    coord pos = position() + fwd;
-    boolean ret;
-    while(isCollectible(pos) && outOfBounds(pos)){
-            pos = pos + fwd;
-    };
-
-    if(isCollectible(pos)){
-            ret = true;
-    }
-    else{
-            ret = false;
-    };
-
-    return ret;
   }
 }
 
 ENVIRONMENT{
-
-  int xCoords[4] = {1, 3};
-  int yCoords[4] = {2, 4};
-  int i;
-  envSize((5, 5, 5));
-  for(i = 0; i < length(xCoords); 1){
-    spawnObject(CUBE, (xCoords[i], yCoords[i], (1 - 1)));
-  };
-
-  xCoords = {2, 4};
-  yCoords = {1, 3};
-  i = 0;
-  while(i < length(xCoords)){
-    spawnObject(SPHERE, (xCoords[i], yCoords[i], (1 - 1)));
-    i = i + 1;
-  };
-
-  start((0, 0, 0));
-  goal((3, 3, 0));
 }
 
 MOVEMENT{
-  int available = availableSpacesForward();
-  int i = 0;
-  boolean pickedUp = false;
-
-  setMovementSpeed(0.8);
-  while(i < available){
-    forward();
-    i = i + 1;
-  };
-
-  turn_right();
-
-  if(isCollectible(position() + (0, 1, 0))){
-    forward();
-    pickUp();
-  };
-
-  forward();
-  forward();
-  turn_left();
-  if(collectibleFront()){
-    available = availableSpacesForward();
-    i = 0;
-
-    while(i < available){
-          forward();
-          if(isCollectible(position())){
-            pickUp();
-            pickedUp = true;
-          };
-
-          i = i + 1;
-    };
-  };
-
 }
