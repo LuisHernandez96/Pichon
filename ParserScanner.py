@@ -190,10 +190,13 @@ def p_fucntions2(p):
                    | empty'''
 
 def p_env_sec(p):
-    'env_sec : ENVIRONMENT L_BRACE vars bloque R_BRACE'
+    'env_sec : ENVIRONMENT create_function_vars_table L_BRACE vars bloque R_BRACE'
+    ADD_ENV_VARS(globals.currentVarsTable, False)
+
 
 def p_mov_sec(p):
-    'mov_sec : MOVEMENT L_BRACE vars bloque R_BRACE'
+    'mov_sec : MOVEMENT create_function_vars_table L_BRACE vars bloque R_BRACE'
+    ADD_MOV_VARS(globals.currentVarsTable, False)
 
 def p_tipo(p):
     '''tipo : INT tipo1
@@ -461,3 +464,5 @@ with open('test.txt') as f:
 parser.parse(read_data)
 
 pprint.pprint(SYMBOL_TABLE)
+
+pprint.pprint(SYMBOL_TABLE[ENV][VARS]["ayy"])
