@@ -5,10 +5,24 @@ FUNCTIONS{
     int[3] update = 1+2;
     return update;
   }
+
+  function void benis(int x, int y){
+    float lol = 0;
+    return lol;
+  }
+
+  function void benis(int x, int y){
+    float lol = 0;
+    return lol;
+  }
 }
 
 ENVIRONMENT{
+    float kek = 1;
+    int ayy = 0;
 }
 
 MOVEMENT{
+    float kek = 1;
+    int ayy = 0;
 }
