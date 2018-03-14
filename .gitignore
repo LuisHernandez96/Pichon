@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+.DS_Store
+__pycache__/
+parser.out
+parsetab.py
+parselog.txt
