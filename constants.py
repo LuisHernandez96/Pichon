@@ -1,0 +1,27 @@
+class DataTypes():
+	INT = 1
+	BOOLEAN = 2
+	COORD = 3
+	FLOAT = 4
+	INT_LIST = 5
+	BOOLEAN_LIST = 6
+	COORD_LIST = 7
+	FLOAT_LIST = 8
+	VOID = 9
+
+class Operators():
+	PLUS = 1
+	MINUS = 2
+	DIVISION = 3
+	MULT = 4
+	ASSIGN = 5
+	EQUAL = 6
+	LESS = 7
+	GREATER = 8
+	LESS_EQUAL = 9
+	GREATER_EQUAL = 10
+	DIFFERENT = 11
+	OR = 12
+	AND = 13
+	NOT = 14
+	NEGATIVE = 15

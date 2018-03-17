@@ -1,8 +1,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
-
-from enum import Enum
+from constants import *
 from SymbolTables import *
 
 class GlobalVars:
@@ -11,17 +10,6 @@ class GlobalVars:
         currentDataType = -1
         currentId = ''
         currentSize = None
-
-class DataTypes(Enum):
-    INT = 1,
-    BOOLEAN = 2,
-    COORD = 3,
-    FLOAT = 4,
-    INT_LIST = 5,
-    BOOLEAN_LIST = 6,
-    COORD_LIST = 7,
-    FLOAT_LIST = 8,
-    VOID = 9
 
 SYMBOL_INIT(False)
 globals = GlobalVars()
@@ -449,5 +437,4 @@ with open('test.txt') as f:
     read_data = f.read()
 
 parser.parse(read_data)
-
 pprint.pprint(SYMBOL_TABLE)
