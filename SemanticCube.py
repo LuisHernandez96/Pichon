@@ -1,48 +1,85 @@
 """
 DATA TYPES
-    INT = 0,
-    BOOLEAN = 1,
-    COORD = 2,
-    FLOAT = 3,
-    INT_LIST = 4,
-    BOOLEAN_LIST = 5,
-    COORD_LIST = 6,
-    FLOAT_LIST = 7,
-    VOID = 8
+    INT = 1,
+    BOOLEAN = 2,
+    COORD = 3,
+    FLOAT = 4,
+    INT_LIST = 5,
+    BOOLEAN_LIST = 6,
+    COORD_LIST = 7,
+    FLOAT_LIST = 8,
+    VOID = 9
 
 BINARY OPERATORS
-    +   0
-    -   1
-    /   2
-    *   3
-    =   4
-    ==  5
-    <   6
-    >   7
-    <=  8
-    >=  9
-    !=  10
-    ||  11
-    &&  12
+    +   1
+    -   2
+    /   3
+    *   4
+    =   5
+    ==  6
+    <   7
+    >   8
+    <=  9
+    >=  10
+    !=  11
+    ||  12
+    &&  13
 
 UNARY OPERATORS
-    !   13
-    -   14
+    !   14
+    -   15
+
+SEMANTIC ERROR = 99
 """
 
 SEMANTIC_CUBE = [
-    [],     #+
-    [],     #-
-    [],     #/
-    [],     #*
-    [],     #=
-    [],     #==
-    [],     #<
     [],     #
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
+    [
+        [],     #
+        [],     # INT
+        [],     # BOOLEAN
+        [],     #COORD
+    ],     #+
+    [
+
+    ],     #-
+    [
+
+    ],     #/
+    [
+
+    ],     #*
+    [
+
+    ],     #=
+    [
+
+    ],     #==
+    [
+
+    ],     #<
+    [
+
+    ],     #>
+    [
+
+    ],     #<=
+    [
+
+    ],     #>=
+    [
+
+    ],     #!=
+    [
+
+    ],     #||
+    [
+
+    ],     #&&
+    [
+
+    ],     #!
+    [
+
+    ]      #-
 ]
