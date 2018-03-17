@@ -2,7 +2,7 @@
 FUNCTIONS{
   function coord getForwardCoord(int[3] x, float y){
     int[5] update = 1+2;
-    int[3] update = 1+2;
+    int[3] varrrr = 1+2;
     return update;
   }
 
@@ -11,7 +11,7 @@ FUNCTIONS{
     return lol;
   }
 
-  function void benis(int x, int y){
+  function void benis2(int x, int y){
     float lol = 0;
     return lol;
   }

@@ -152,10 +152,6 @@ def t_error(t):
     print("Line: " + str(t.lexer.lineno))
     t.lexer.skip(1)
 
-
-# Build the lexer
-lex.lex()
-
 # Precedence rules for the arithmetic operators
 precedence = (
     ('left','PLUS','MINUS'),
@@ -204,39 +200,8 @@ def p_tipo(p):
             | COORD tipo1
             | FLOAT tipo1
             | VOID'''
-    #print('tipo finished!')
-    if len(p) == 3:
-        if p[2] is None:
-            if p[1] == 'int':
-                globals.currentDataType = DataTypes.INT
-            elif p[1] == 'boolean':
-                globals.currentDataType = DataTypes.BOOLEAN
-            elif p[1] == 'coord':
-                globals.currentDataType = DataTypes.COORD
-            elif p[1] == 'float':
-                globals.currentDataType = DataTypes.FLOAT
-            else:
-                globals.currentDataType = DataTypes.VOID
-        else:
-            if p[1] == 'int':
-                globals.currentDataType = DataTypes.INT_LIST
-            elif p[1] == 'boolean':
-                globals.currentDataType = DataTypes.BOOLEAN_LIST
-            elif p[1] == 'coord':
-                globals.currentDataType = DataTypes.COORD_LIST
-            elif p[1] == 'float':
-                globals.currentDataType = DataTypes.FLOAT_LIST
-    else:
-        if p[1] == 'int':
-            globals.currentDataType = DataTypes.INT
-        elif p[1] == 'boolean':
-            globals.currentDataType = DataTypes.BOOLEAN
-        elif p[1] == 'coord':
-            globals.currentDataType = DataTypes.COORD
-        elif p[1] == 'float':
-            globals.currentDataType = DataTypes.FLOAT
-        else:
-            globals.currentDataType = DataTypes.VOID
+    
+    setDataType(p)
     p[0] = globals.currentDataType
 
 def p_tipo1(p):
@@ -454,6 +419,28 @@ def p_empty(p):
     'empty :'
     pass
 
+def setDataType(p):
+	if (len(p) == 3 and p[2] is None) or len(p) != 3:
+		if p[1] == 'int':
+			globals.currentDataType = DataTypes.INT
+		elif p[1] == 'boolean':
+			globals.currentDataType = DataTypes.BOOLEAN
+		elif p[1] == 'coord':
+			globals.currentDataType = DataTypes.COORD
+		elif p[1] == 'float':
+			globals.currentDataType = DataTypes.FLOAT
+		else:
+			globals.currentDataType = DataTypes.VOID
+	elif len(p) == 3 and p[2] is not None:
+	    if p[1] == 'int':
+	        globals.currentDataType = DataTypes.INT_LIST
+	    elif p[1] == 'boolean':
+	        globals.currentDataType = DataTypes.BOOLEAN_LIST
+	    elif p[1] == 'coord':
+	        globals.currentDataType = DataTypes.COORD_LIST
+	    elif p[1] == 'float':
+	        globals.currentDataType = DataTypes.FLOAT_LIST
+
 # Build the lexer
 lex.lex()
 parser = yacc.yacc(start='start')
@@ -464,5 +451,3 @@ with open('test.txt') as f:
 parser.parse(read_data)
 
 pprint.pprint(SYMBOL_TABLE)
-
-pprint.pprint(SYMBOL_TABLE[ENV][VARS]["ayy"])
