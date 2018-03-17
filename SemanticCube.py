@@ -31,7 +31,7 @@ UNARY OPERATORS
     !   13
     -   14
 
-SEMANTIC ERROR = 99
+SEMANTIC ERROR  99
 """
 
 INT = "INT"

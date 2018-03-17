@@ -1,15 +1,19 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import sys
+from cuadruplo import *
 from constants import *
 from SymbolTables import *
 
 class GlobalVars:
     def __init__(self):
-        currentVarsTable = None
-        currentDataType = -1
-        currentId = ''
-        currentSize = None
+        self.currentVarsTable = None
+        self.currentDataType = -1
+        self.currentId = ''
+        self.currentSize = None
+        self.cuadruplos = []
+        self.operadores = []
+        self.operandos = []
 
 SYMBOL_INIT(False)
 globals = GlobalVars()
@@ -273,7 +277,7 @@ def p_for_loop(p):
     'for_loop : FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON expresion R_PAREN L_BRACE bloque R_BRACE'
 
 def p_var_cte(p):
-    '''var_cte : ID var_cte1
+    '''var_cte : ID push_operand_stack var_cte1
         | func_call var_cte1
         | coord var_cte1
         | list var_cte1
@@ -291,7 +295,7 @@ def p_var_cte1(p):
     '''
 
 def p_expresion(p):
-    'expresion : exp expresion2'
+    'expresion : push_open_paren exp expresion2'
 
 def p_expresion2(p):
     '''expresion2 : operators exp
@@ -302,35 +306,63 @@ def p_exp(p):
     'exp : termino exp1'
 
 def p_exp1(p):
-    '''exp1 : PLUS exp
-        | MINUS exp
-        | OR exp
+    '''exp1 : PLUS push_operator_stack exp
+        | MINUS push_operator_stack exp
+        | OR push_operator_stack exp
         | empty'''
 
 def p_termino(p):
-    'termino : factor termino1'
+    'termino : factor pending_factor_ops termino1'
+
+def p_pending_factor_ops(p):
+    'pending_factor_ops :'
+    if(len(globals.operadores) > 0):
+        if globals.operadores[-1] == '*' or globals.operadores[-1] == '/' or globals.operadores[-1] == '&&':
+            operando_der = globals.operandos.pop()
+            operando_izq = globals.operandos.pop()
+            operador = globals.operadores.pop()
+            cuad = Cuadruplo(operador, operando_izq, operando_der, 'tmp')
+            globals.operandos.append('tmp')
+            globals.cuadruplos.append(cuad)
 
 def p_termino1(p):
-    '''termino1 : MULT termino
-        | DIVISION termino
-        | AND termino
+    '''termino1 : MULT push_operator_stack termino
+        | DIVISION push_operator_stack termino
+        | AND push_operator_stack termino
         | empty'''
 
 def p_operators(p):
-    '''operators : GREATER
-        | GREATER_EQUAL
-        | LESS
-        | LESS_EQUAL
-        | DIFFERENT
-        | EQUAL
+    '''operators : GREATER push_operator_stack
+        | GREATER_EQUAL push_operator_stack
+        | LESS push_operator_stack
+        | LESS_EQUAL push_operator_stack
+        | DIFFERENT push_operator_stack
+        | EQUAL push_operator_stack
     '''
 
 def p_factor(p):
-    '''factor : L_PAREN expresion R_PAREN
+    '''factor : L_PAREN expresion R_PAREN pop_operator_stack
         | var_cte
-        | MINUS factor
-        | NOT factor
+        | MINUS push_operator_stack factor
+        | NOT push_operator_stack factor
     '''
+
+def p_push_operand_stack(p):
+    'push_operand_stack :'
+    globals.operandos.append(p[-1])
+
+def p_push_open_paren(p):
+    'push_open_paren :'
+    if p[-1] == '(':
+        globals.operadores.append(p[-1])
+
+def p_push_operator_stack(p):
+    'push_operator_stack :'
+    globals.operadores.append(p[-1])
+
+def p_pop_operator_stack(p):
+    'pop_operator_stack :'
+    globals.operadores.pop()
 
 def p_coord(p):
     'coord : L_PAREN xyz R_PAREN'
@@ -437,4 +469,8 @@ with open('test.txt') as f:
     read_data = f.read()
 
 parser.parse(read_data)
-pprint.pprint(SYMBOL_TABLE)
+#pprint.pprint(SYMBOL_TABLE)
+print(globals.operadores)
+print(globals.operandos)
+for i in range(0, len(globals.cuadruplos)):
+    print(globals.cuadruplos[i])
