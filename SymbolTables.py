@@ -46,14 +46,14 @@ def ADD_MOV_VARS(vars, debug):
             pprint.pprint(SYMBOL_TABLE)
 
 def VARS_INIT():
-	VARS_TABLE = dict()
-	return VARS_TABLE
+    VARS_TABLE = dict()
+    return VARS_TABLE
 
 def ADD_VAR(vars_table, id, data_type, value = None, size = None):
-	if id in vars_table:
-		print("ERROR: " + id + " ALREADY DEFINED")
-	else:
-		vars_table[id] = dict()
-		vars_table[id][DATA_TYPE] = data_type
-		vars_table[id][VALUE] = value
-		vars_table[id][SIZE] = size
+    if id in vars_table:
+        print("ERROR: " + id + " ALREADY DEFINED")
+    else:
+        vars_table[id] = dict()
+        vars_table[id][DATA_TYPE] = data_type
+        vars_table[id][VALUE] = value
+        vars_table[id][SIZE] = size
