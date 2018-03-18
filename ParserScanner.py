@@ -6,6 +6,12 @@ from constants import *
 from SymbolTables import *
 
 class GlobalVars:
+
+    def nextTmp(self):
+        nextTemporal = "tmp" + str(self.tmpCounter)
+        self.tmpCounter = self.tmpCounter + 1
+        return nextTemporal
+
     def __init__(self):
         self.currentVarsTable = None
         self.currentDataType = -1
@@ -14,6 +20,7 @@ class GlobalVars:
         self.cuadruplos = []
         self.operadores = []
         self.operandos = []
+        self.tmpCounter = 1
 
 SYMBOL_INIT(False)
 globals = GlobalVars()
@@ -146,6 +153,8 @@ def t_error(t):
 
 # Precedence rules for the arithmetic operators
 precedence = (
+    ('left', 'OR'),
+    ('left', 'AND'),
     ('left','PLUS','MINUS'),
     ('left','MULT','DIVISION'),
     ('right', 'NOT')
@@ -301,9 +310,31 @@ def p_expresion2(p):
     '''expresion2 : operators exp
         | empty
     '''
+    if len(p) == 3:
+        if(len(globals.operadores) > 0):
+            if globals.operadores[-1] == '<' or globals.operadores[-1] == '>' or globals.operadores[-1] == '<=' or globals.operadores[-1] == '>=' or globals.operadores[-1] == '==' or globals.operadores[-1] == '!=':
+                operando_der = globals.operandos.pop()
+                operando_izq = globals.operandos.pop()
+                operador = globals.operadores.pop()
+                result = globals.nextTmp()
+                cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+                globals.operandos.append(result)
+                globals.cuadruplos.append(cuad)
 
 def p_exp(p):
-    'exp : termino exp1'
+    'exp : termino pending_termino_ops exp1'
+
+def p_pending_termino_ops(p):
+    'pending_termino_ops :'
+    if(len(globals.operadores) > 0):
+        if globals.operadores[-1] == '+' or globals.operadores[-1] == '-' or globals.operadores[-1] == '||':
+            operando_der = globals.operandos.pop()
+            operando_izq = globals.operandos.pop()
+            operador = globals.operadores.pop()
+            result = globals.nextTmp()
+            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+            globals.operandos.append(result)
+            globals.cuadruplos.append(cuad)
 
 def p_exp1(p):
     '''exp1 : PLUS push_operator_stack exp
@@ -321,8 +352,9 @@ def p_pending_factor_ops(p):
             operando_der = globals.operandos.pop()
             operando_izq = globals.operandos.pop()
             operador = globals.operadores.pop()
-            cuad = Cuadruplo(operador, operando_izq, operando_der, 'tmp')
-            globals.operandos.append('tmp')
+            result = globals.nextTmp()
+            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+            globals.operandos.append(result)
             globals.cuadruplos.append(cuad)
 
 def p_termino1(p):

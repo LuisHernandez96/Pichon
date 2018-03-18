@@ -1,7 +1,7 @@
 
 FUNCTIONS{
   function coord getForwardCoord(int[3] x, float y){
-    int popo = (x*y)&&(w*z);
+    int popo = ((A*B-C*D)>C+D*E/F) && (G*H-J>L-A) && B+C>D*F;
   }
 
   function void benis(int x, int y){
