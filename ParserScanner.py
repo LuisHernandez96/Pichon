@@ -153,8 +153,6 @@ def t_error(t):
 
 # Precedence rules for the arithmetic operators
 precedence = (
-    ('left', 'OR'),
-    ('left', 'AND'),
     ('left','PLUS','MINUS'),
     ('left','MULT','DIVISION'),
     ('right', 'NOT')
@@ -304,7 +302,50 @@ def p_var_cte1(p):
     '''
 
 def p_expresion(p):
-    'expresion : push_open_paren exp expresion2'
+    'expresion : push_open_paren logical_or pending_or expresion2'
+
+def p_pending_or(p):
+    'pending_or :'
+    if(len(globals.operadores) > 0):
+        if globals.operadores[-1] == '||':
+            operando_der = globals.operandos.pop()
+            operando_izq = globals.operandos.pop()
+            operador = globals.operadores.pop()
+            result = globals.nextTmp()
+            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+            globals.operandos.append(result)
+            globals.cuadruplos.append(cuad)
+
+def p_logical_or(p):
+    'logical_or : logical_and pending_and logical_or1'
+
+def p_pending_and(p):
+    'pending_and :'
+    if(len(globals.operadores) > 0):
+        if globals.operadores[-1] == '&&':
+            operando_der = globals.operandos.pop()
+            operando_izq = globals.operandos.pop()
+            operador = globals.operadores.pop()
+            result = globals.nextTmp()
+            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+            globals.operandos.append(result)
+            globals.cuadruplos.append(cuad)
+
+def p_logical_or1(p):
+    '''logical_or1 : OR push_operator_stack logical_or
+                    | empty
+
+    '''
+
+def p_logical_and(p):
+    '''
+        logical_and : exp logical_and1
+    '''
+
+def p_logical_and1(p):
+    '''logical_and1 : AND push_operator_stack logical_and
+                    | empty
+    '''
 
 def p_expresion2(p):
     '''expresion2 : operators exp
@@ -327,7 +368,7 @@ def p_exp(p):
 def p_pending_termino_ops(p):
     'pending_termino_ops :'
     if(len(globals.operadores) > 0):
-        if globals.operadores[-1] == '+' or globals.operadores[-1] == '-' or globals.operadores[-1] == '||':
+        if globals.operadores[-1] == '+' or globals.operadores[-1] == '-':
             operando_der = globals.operandos.pop()
             operando_izq = globals.operandos.pop()
             operador = globals.operadores.pop()
@@ -339,7 +380,6 @@ def p_pending_termino_ops(p):
 def p_exp1(p):
     '''exp1 : PLUS push_operator_stack exp
         | MINUS push_operator_stack exp
-        | OR push_operator_stack exp
         | empty'''
 
 def p_termino(p):
@@ -348,7 +388,7 @@ def p_termino(p):
 def p_pending_factor_ops(p):
     'pending_factor_ops :'
     if(len(globals.operadores) > 0):
-        if globals.operadores[-1] == '*' or globals.operadores[-1] == '/' or globals.operadores[-1] == '&&':
+        if globals.operadores[-1] == '*' or globals.operadores[-1] == '/':
             operando_der = globals.operandos.pop()
             operando_izq = globals.operandos.pop()
             operador = globals.operadores.pop()
@@ -360,7 +400,6 @@ def p_pending_factor_ops(p):
 def p_termino1(p):
     '''termino1 : MULT push_operator_stack termino
         | DIVISION push_operator_stack termino
-        | AND push_operator_stack termino
         | empty'''
 
 def p_operators(p):
