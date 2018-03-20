@@ -4,6 +4,7 @@ import sys
 from cuadruplo import *
 from constants import *
 from SymbolTables import *
+from SemanticCube import *
 
 class GlobalVars:
 
@@ -173,12 +174,15 @@ def p_func_sec1(p):
 
 def p_functions(p):
     'functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
-    ADD_FUNC(p[3],p[2], globals.currentVarsTable, False)
 
 def p_create_function_vars_table(p):
     'create_function_vars_table :'
     globals.currentVarsTable = VARS_INIT()
     globals.currentScope = p[-1]
+    if globals.currentScope not in SYMBOL_TABLE.keys():
+        ADD_FUNC(p[-1], p[-2])
+    else:
+        ADD_SCOPE_VARS_TABLE(globals.currentScope)
 
 def p_functions1(p):
     '''functions1 : params
@@ -189,12 +193,9 @@ def p_fucntions2(p):
 
 def p_env_sec(p):
     'env_sec : ENVIRONMENT create_function_vars_table L_BRACE vars bloque R_BRACE'
-    ADD_ENV_VARS(globals.currentVarsTable, False)
-
 
 def p_mov_sec(p):
     'mov_sec : MOVEMENT create_function_vars_table L_BRACE vars bloque R_BRACE'
-    ADD_MOV_VARS(globals.currentVarsTable, False)
 
 def p_tipo(p):
     '''tipo : INT tipo1
@@ -239,7 +240,7 @@ def p_params(p):
 
 def p_add_var(p):
     'add_var :'
-    ADD_VAR(globals.currentVarsTable, globals.currentId, globals.currentDataType, size = globals.currentSize)
+    ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, size = globals.currentSize)
     globals.currentId = ''
     globals.currentDataType = -1
     globals.currentSize = None
@@ -493,7 +494,7 @@ def setDataType(p):
 
 def isValidResult(operador, tipo_izq, tipo_der):
 	returnDataType = SEMANTIC_CUBE[operador, tipo_izq, tipo_der]
-	if resultType == SEMANTIC_ERROR:
+	if returnDataType == SEMANTIC_ERROR:
 		sys.exit('Error: Type mismatch. Can not do {} with {} and {}'.format(operador, tipo_izq, tipo_der))
 
 def getIdDataType(id, scope):
@@ -535,9 +536,10 @@ with open('test.txt') as f:
 
 parser.parse(read_data)
 #pprint.pprint(SYMBOL_TABLE)
-print(globals.operadores)
-print(globals.operandos)
-print(globals.tipos)
-print(SYMBOL_TABLE[FUNC].keys())
-for i in range(0, len(globals.cuadruplos)):
-    print(globals.cuadruplos[i])
+# print(globals.operadores)
+# print(globals.operandos)
+# print(globals.tipos)
+# print(SYMBOL_TABLE[FUNC].keys())
+pprint.pprint(SYMBOL_TABLE)
+# for i in range(0, len(globals.cuadruplos)):
+#     print(globals.cuadruplos[i])

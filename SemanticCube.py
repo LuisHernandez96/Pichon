@@ -234,7 +234,7 @@ SEMANTIC_CUBE = [
     ]
 ]
 
-def main():
-    pprint.pprint(set_sem_cube(SEM_CUBE))
-
-main()
+# def main():
+#     pprint.pprint(set_sem_cube(SEM_CUBE))
+#
+# main()
