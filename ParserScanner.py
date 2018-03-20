@@ -17,8 +17,10 @@ class GlobalVars:
         self.currentDataType = -1
         self.currentId = ''
         self.currentSize = None
+        self.currentScope = FUNC
         self.cuadruplos = []
         self.operadores = []
+        self.tipos = []
         self.operandos = []
         self.tmpCounter = 1
 
@@ -176,6 +178,7 @@ def p_functions(p):
 def p_create_function_vars_table(p):
     'create_function_vars_table :'
     globals.currentVarsTable = VARS_INIT()
+    globals.currentScope = p[-1]
 
 def p_functions1(p):
     '''functions1 : params
@@ -199,19 +202,18 @@ def p_tipo(p):
             | COORD tipo1
             | FLOAT tipo1
             | VOID'''
-    
     setDataType(p)
+
+    # Avoid pushing in the stack function return types
     p[0] = globals.currentDataType
 
 def p_tipo1(p):
     '''tipo1 : L_BRACKET tipo2 R_BRACKET return_list
               | empty'''
-    #print('tipo1 finished!')
     if len(p) == 5:
         p[0] = {'isList' : p[4], 'listSize' : p[2]}
     else:
         p[0] = None
-    #print(p[0])
 
 def p_return_list(p):
     'return_list : '
@@ -221,20 +223,16 @@ def p_return_list(p):
 def p_tipo2(p):
     '''tipo2 : CTE_I return_int
               | empty'''
-    #print('tipo2 finished!')
     if len(p) == 3:
         p[0] = p[2]
         globals.currentSize = p[1]
     else:
         p[0] = None
         globals.currentSize = None
-    #print(p[0])
 
 def p_return_int(p):
     'return_int : '
-    #print('return_int called!')
     p[0] = p[-1]
-    #print(p[0])
 
 def p_params(p):
     'params : tipo ID add_var params1'
@@ -306,30 +304,14 @@ def p_expresion(p):
 
 def p_pending_or(p):
     'pending_or :'
-    if(len(globals.operadores) > 0):
-        if globals.operadores[-1] == '||':
-            operando_der = globals.operandos.pop()
-            operando_izq = globals.operandos.pop()
-            operador = globals.operadores.pop()
-            result = globals.nextTmp()
-            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
-            globals.operandos.append(result)
-            globals.cuadruplos.append(cuad)
+    crearCuadruploExpresion(validOperators = ['||'])
 
 def p_logical_or(p):
     'logical_or : logical_and pending_and logical_or1'
 
 def p_pending_and(p):
     'pending_and :'
-    if(len(globals.operadores) > 0):
-        if globals.operadores[-1] == '&&':
-            operando_der = globals.operandos.pop()
-            operando_izq = globals.operandos.pop()
-            operador = globals.operadores.pop()
-            result = globals.nextTmp()
-            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
-            globals.operandos.append(result)
-            globals.cuadruplos.append(cuad)
+    crearCuadruploExpresion(validOperators = ['&&'])
 
 def p_logical_or1(p):
     '''logical_or1 : OR push_operator_stack logical_or
@@ -352,30 +334,14 @@ def p_expresion2(p):
         | empty
     '''
     if len(p) == 3:
-        if(len(globals.operadores) > 0):
-            if globals.operadores[-1] == '<' or globals.operadores[-1] == '>' or globals.operadores[-1] == '<=' or globals.operadores[-1] == '>=' or globals.operadores[-1] == '==' or globals.operadores[-1] == '!=':
-                operando_der = globals.operandos.pop()
-                operando_izq = globals.operandos.pop()
-                operador = globals.operadores.pop()
-                result = globals.nextTmp()
-                cuad = Cuadruplo(operador, operando_izq, operando_der, result)
-                globals.operandos.append(result)
-                globals.cuadruplos.append(cuad)
+    	crearCuadruploExpresion(validOperators = ['<', '>', '<=', '>=', '==', '!='])
 
 def p_exp(p):
     'exp : termino pending_termino_ops exp1'
 
 def p_pending_termino_ops(p):
     'pending_termino_ops :'
-    if(len(globals.operadores) > 0):
-        if globals.operadores[-1] == '+' or globals.operadores[-1] == '-':
-            operando_der = globals.operandos.pop()
-            operando_izq = globals.operandos.pop()
-            operador = globals.operadores.pop()
-            result = globals.nextTmp()
-            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
-            globals.operandos.append(result)
-            globals.cuadruplos.append(cuad)
+    crearCuadruploExpresion(validOperators = ['+', '-'])
 
 def p_exp1(p):
     '''exp1 : PLUS push_operator_stack exp
@@ -387,15 +353,7 @@ def p_termino(p):
 
 def p_pending_factor_ops(p):
     'pending_factor_ops :'
-    if(len(globals.operadores) > 0):
-        if globals.operadores[-1] == '*' or globals.operadores[-1] == '/':
-            operando_der = globals.operandos.pop()
-            operando_izq = globals.operandos.pop()
-            operador = globals.operadores.pop()
-            result = globals.nextTmp()
-            cuad = Cuadruplo(operador, operando_izq, operando_der, result)
-            globals.operandos.append(result)
-            globals.cuadruplos.append(cuad)
+    crearCuadruploExpresion(validOperators = ['*', '/'])
 
 def p_termino1(p):
     '''termino1 : MULT push_operator_stack termino
@@ -420,6 +378,7 @@ def p_factor(p):
 
 def p_push_operand_stack(p):
     'push_operand_stack :'
+    globals.tipos.append(getIdDataType(id = p[-1], scope = globals.currentScope))
     globals.operandos.append(p[-1])
 
 def p_push_open_paren(p):
@@ -532,6 +491,41 @@ def setDataType(p):
 	    elif p[1] == 'float':
 	        globals.currentDataType = DataTypes.FLOAT_LIST
 
+def isValidResult(operador, tipo_izq, tipo_der):
+	returnDataType = SEMANTIC_CUBE[operador, tipo_izq, tipo_der]
+	if resultType == SEMANTIC_ERROR:
+		sys.exit('Error: Type mismatch. Can not do {} with {} and {}'.format(operador, tipo_izq, tipo_der))
+
+def getIdDataType(id, scope):
+	# We're in a function
+	if scope in SYMBOL_TABLE[FUNC].keys():
+		if id in SYMBOL_TABLE[FUNC][scope][VARS]:
+			return SYMBOL_TABLE[FUNC][scope][VARS][id][DATA_TYPE]
+		else:
+			sys.exit('Error: Variable {} not defined in the following scope: {}.'.format(id, scope))
+	else:
+		if id in SYMBOL_TABLE[scope][VARS]:
+			return SYMBOL_TABLE[scope][VARS][id][DATA_TYPE]
+		else:
+			sys.exit('Error: Variable {} not defined in the following scope: {}.'.format(id, scope))
+
+def crearCuadruploExpresion(validOperators):
+	if(len(globals.operadores) > 0):
+	    if globals.operadores[-1] in validOperators:
+	        operando_der = globals.operandos.pop()
+	        operando_izq = globals.operandos.pop()
+	        tipo_der = globals.tipos.pop()
+	        tipo_izq = globals.tipos.pop()
+	        operador = globals.operadores.pop()
+
+	        resultType = isValidResult(operador, tipo_izq, tipo_der)
+
+	        result = globals.nextTmp()
+	        cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+	        globals.operandos.append(result)
+	        globals.tipos.append(resultType)
+	        globals.cuadruplos.append(cuad)
+
 # Build the lexer
 lex.lex()
 parser = yacc.yacc(start='start')
@@ -543,5 +537,7 @@ parser.parse(read_data)
 #pprint.pprint(SYMBOL_TABLE)
 print(globals.operadores)
 print(globals.operandos)
+print(globals.tipos)
+print(SYMBOL_TABLE[FUNC].keys())
 for i in range(0, len(globals.cuadruplos)):
     print(globals.cuadruplos[i])

@@ -1,4 +1,5 @@
 import pprint
+import sys
 
 FUNC = "func"
 ENV = "env"
@@ -21,29 +22,27 @@ def SYMBOL_INIT(debug):
         pprint.pprint(SYMBOL_TABLE)
 
 def ADD_FUNC(id, returnType, vars, debug):
-    if FUNC in SYMBOL_TABLE:
-        if id not in SYMBOL_TABLE[FUNC]:
-            SYMBOL_TABLE[FUNC][id] = dict()
-            SYMBOL_TABLE[FUNC][id][RETURN_TYPE] = returnType
-            SYMBOL_TABLE[FUNC][id][VARS] = vars
-            if(debug):
-                pprint.pprint(SYMBOL_TABLE)
-        else:
-            print("ERROR, A FUNCTION WITH THE SAME ID ALREADY EXIST",id)
+    assert FUNC in SYMBOL_TABLE
+    if id not in SYMBOL_TABLE[FUNC]:
+        SYMBOL_TABLE[FUNC][id] = dict()
+        SYMBOL_TABLE[FUNC][id][RETURN_TYPE] = returnType
+        SYMBOL_TABLE[FUNC][id][VARS] = vars
+        if(debug):
+            pprint.pprint(SYMBOL_TABLE)
     else:
-        print("ERROR, S_T[FUNC] DOESNT EXIST")
+        sys.exit('Error: Function {} already defined!'.format(id))
 
 def ADD_ENV_VARS(vars, debug):
-    if ENV in SYMBOL_TABLE:
-        SYMBOL_TABLE[ENV][VARS] = vars
-        if (debug):
-            pprint.pprint(SYMBOL_TABLE)
+    assert ENV in SYMBOL_TABLE
+    SYMBOL_TABLE[ENV][VARS] = vars
+    if (debug):
+        pprint.pprint(SYMBOL_TABLE)
 
 def ADD_MOV_VARS(vars, debug):
-    if MOV in SYMBOL_TABLE:
-        SYMBOL_TABLE[MOV][VARS] = vars
-        if (debug):
-            pprint.pprint(SYMBOL_TABLE)
+    assert MOV in SYMBOL_TABLE
+    SYMBOL_TABLE[MOV][VARS] = vars
+    if (debug):
+        pprint.pprint(SYMBOL_TABLE)
 
 def VARS_INIT():
     VARS_TABLE = dict()
@@ -51,7 +50,7 @@ def VARS_INIT():
 
 def ADD_VAR(vars_table, id, data_type, value = None, size = None):
     if id in vars_table:
-        print("ERROR: " + id + " ALREADY DEFINED")
+        sys.exit('Error: Variable {} already defined!'.format(id))
     else:
         vars_table[id] = dict()
         vars_table[id][DATA_TYPE] = data_type
