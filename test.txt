@@ -1,26 +1,19 @@
 
 FUNCTIONS{
-  function coord getForwardCoord(int[3] x, float y){
-    int va1 = 0;
-    int va2 = 1;
-    int popo = ((A*B-C*D)>C+D*E/F) && (G*H-J>L-A) && B+C>D*F;
-  }
-
-  function void benis(int x, int y){
-    float va3 = 0;
-  }
-
-  function void benis2(int x, int y){
-    float va4 = 0;
+  function coord getForwardCoord(){
+    float v1 = 0.0;
+    float v2 = 3.5;
+    float v3 = v1;
+    boolean b1 = true;
+    boolean b2 = false;
+    boolean b3 = b1 && b2 || b1 && !b2;
+    v3 = v1;
+    v3 = v1 + v2 * v3 + 4.0 * v2;
   }
 }
 
 ENVIRONMENT{
-    int dasjnsdjkas= 0;
-    int jasn= 0;
 }
 
 MOVEMENT{
-    int asakdmak= 0;
-    int kwmek= 0;
 }

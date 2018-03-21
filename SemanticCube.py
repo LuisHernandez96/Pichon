@@ -45,49 +45,49 @@ COORD_LIST = "COORD_LIST"
 VOID = "VOID"
 SEMANTIC_ERROR = 99
 
-ARR_DATA_TYPES = [
-    (INT, 0),
-    (FLOAT, 1),
-    (COORD, 2),
-    (BOOLEAN, 3),
-    (INT_LIST, 4),
-    (FLOAT_LIST, 5),
-    (BOOLEAN_LIST, 6),
-    (COORD_LIST, 7),
-    (VOID, 8)
-]
+ARR_DATA_TYPES = {
+    INT : 0,
+    FLOAT : 1,
+    COORD : 2,
+    BOOLEAN : 3,
+    INT_LIST : 4,
+    FLOAT_LIST : 5,
+    BOOLEAN_LIST : 6,
+    COORD_LIST : 7,
+    VOID : 8,
+}
 
-ARR_OPERATORS = [
-    ("+", 0),
-    ("-", 1),
-    ("/", 2),
-    ("*", 3),
-
-    ("=", 4),
-
-    ("==", 5),
-    ("<", 6),
-    (">", 7),
-    ("<=", 8),
-    (">=", 9),
-    ("!=", 10),
-    ("||", 11),
-    ("&&", 12),
-
-    ("!", 13),
-    ("-", 14)
-]
+ARR_OPERATORS = {
+    # Arithmetic
+    "+" : 0,
+    "-" : 1,
+    "/" : 2,
+    "*" : 3,
+    "=" : 4,
+    # Relational
+    "==" : 5,
+    "<" : 6,
+    ">" : 7,
+    "<=" : 8,
+    ">=" : 9,
+    "!=" : 10,
+    "||" : 11,
+    "&&" : 12,
+    # Unary
+    "!" : 13,
+    "~" : 14,
+}
 
 SEM_CUBE = []
 
 def set_sem_cube(SEM_CUBE):
-    for dataType1 in ARR_DATA_TYPES:
+    for dataType1 in ARR_DATA_TYPES.keys():
         mat_kek = []
 
-        for dataType2 in ARR_DATA_TYPES:
+        for dataType2 in ARR_DATA_TYPES.keys():
             arr_op = []
 
-            for operator in ARR_OPERATORS:
+            for operator in ARR_OPERATORS.keys():
                 res = None
 
                 if operator[1] <= 3:
