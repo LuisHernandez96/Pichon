@@ -25,6 +25,7 @@ class GlobalVars:
 		self.tipos = []
 		self.operandos = []
 		self.tmpCounter = 1
+		self.cuadCounter = 0
 
 SYMBOL_INIT(False)
 globals = GlobalVars()
@@ -561,10 +562,11 @@ def crearCuadruploExpresion(validOperators):
 			result = globals.nextTmp()
 
 			if operador == '=':
-				cuad = Cuadruplo(operador, operand1 = operando_izq, result = operando_der)
+				cuad = Cuadruplo(operador, operand1 = operando_izq, result = operando_der, counter = globals.cuadCounter)
 			else:
-				cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+				cuad = Cuadruplo(operador, operando_izq, operando_der, result, counter = globals.cuadCounter)
 
+			globals.cuadCounter = globals.cuadCounter + 1
 			globals.operandos.append(result)
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
@@ -579,8 +581,9 @@ def crearCuadruploUnario(validOperators):
 			resultType = isValidResult(operador, tipo)
 
 			result = globals.nextTmp()
-			cuad = Cuadruplo(operador, operand1 = operando, result = result)
+			cuad = Cuadruplo(operador, operand1 = operando, result = result, counter = globals.cuadCounter)
 
+			globals.cuadCounter = globals.cuadCounter + 1
 			globals.operandos.append(result)
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
