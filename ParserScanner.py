@@ -287,12 +287,21 @@ def p_return(p):
 	'return : RETURN expresion SEMICOLON'
 
 def p_condicion(p):
-	'condicion : IF L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE condicion1'
+	'condicion : IF L_PAREN expresion checkBool R_PAREN L_BRACE bloque R_BRACE condicion1'
 
 def p_condicion1(p):
 	'''condicion1 : ELSE L_BRACE bloque R_BRACE
 		| ELIF L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE condicion1
 		| empty'''
+
+def p_checkBool(p):
+	'checkBool : '
+	if globals.tipos[-1] != ARR_DATA_TYPES[BOOLEAN]:
+		sys.exit('Error: Type mismatch. IF/ELIF expression has to be boolean'.format(p))
+	else:
+
+		globals.operandos.append()
+		crearCuadruploExpresion(validOperators= ['GoToF'])
 
 def p_while_loop(p):
 	'while_loop : WHILE push_quad_jump L_PAREN expresion push_goto_false R_PAREN L_BRACE bloque R_BRACE'
