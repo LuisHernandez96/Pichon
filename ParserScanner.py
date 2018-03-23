@@ -292,7 +292,7 @@ def p_while_loop(p):
 	'while_loop : WHILE L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE'
 
 def p_for_loop(p):
-	'for_loop : FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON expresion R_PAREN L_BRACE bloque R_BRACE'
+	'for_loop : FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON asignacion R_PAREN L_BRACE bloque R_BRACE'
 
 def p_var_cte(p):
 	'''var_cte : ID push_operand_stack var_cte1
