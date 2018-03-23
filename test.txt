@@ -1,15 +1,14 @@
 
 FUNCTIONS{
-  function coord getForwardCoord(int[3] x, float y){
-    int popo = (x*y)&&(w*z);
-  }
-
-  function void benis(int x, int y){
-    float lol = 0;
-  }
-
-  function void benis2(int x, int y){
-    float lol = 0;
+  function coord getForwardCoord(){
+    float v1 = 0.0;
+    float v2 = 3.5;
+    float v3 = v1;
+    boolean b1 = true;
+    boolean b2 = false;
+    boolean b3 = b1 && b2 || b1 && !b2;
+    v3 = v1;
+    v3 = v1 + v2 * v3 + 4.0 * v2;
   }
 }
 

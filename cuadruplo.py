@@ -6,4 +6,4 @@ class Cuadruplo:
 		self.result = result
 
 	def __str__(self):
-		return "<{}, {}, {}, {}>".format(self.operator, self.operand1, self.operand2, self.result)
+		return "<{},\t{},\t{},\t{}>".format(self.operator, self.operand1, self.operand2, self.result)
