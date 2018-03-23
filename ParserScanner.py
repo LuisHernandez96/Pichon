@@ -14,6 +14,10 @@ class GlobalVars:
 		self.tmpCounter = self.tmpCounter + 1
 		return nextTemporal
 
+	def prevTmp(self):
+		prevTemporal = "tmp" + str(self.tmpCounter - 1)
+		return prevTemporal 
+
 	def __init__(self):
 		self.currentVarsTable = None
 		self.currentDataType = -1
@@ -22,9 +26,11 @@ class GlobalVars:
 		self.currentScope = FUNC
 		self.cuadruplos = []
 		self.operadores = []
+		self.saltos = []
 		self.tipos = []
 		self.operandos = []
 		self.tmpCounter = 1
+		self.cuadCounter = 0
 
 SYMBOL_INIT(False)
 globals = GlobalVars()
@@ -289,10 +295,27 @@ def p_condicion1(p):
 		| empty'''
 
 def p_while_loop(p):
-	'while_loop : WHILE L_PAREN expresion R_PAREN L_BRACE bloque R_BRACE'
+	'while_loop : WHILE push_quad_jump L_PAREN expresion push_goto_false R_PAREN L_BRACE bloque R_BRACE'
+	end = globals.saltos.pop()
+	ret = globals.saltos.pop()
+	cuad = Cuadruplo('GOTO', result = ret, counter = globals.cuadCounter)
+	globals.cuadCounter += 1
+	globals.cuadruplos[end].result = globals.cuadCounter
+	globals.cuadruplos.append(cuad)
+
+def p_push_gotofalse(p):
+	'push_goto_false :'
+	cuad = Cuadruplo('GOTO_FALSE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
+	globals.saltos.append(globals.cuadCounter)
+	globals.cuadruplos.append(cuad)
+	globals.cuadCounter += 1
+
+def p_push_quad_jump(p):
+	'push_quad_jump :'
+	globals.saltos.append(globals.cuadCounter)
 
 def p_for_loop(p):
-	'for_loop : FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON expresion R_PAREN L_BRACE bloque R_BRACE'
+	'for_loop : FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON asignacion R_PAREN L_BRACE bloque R_BRACE'
 
 def p_var_cte(p):
 	'''var_cte : ID push_operand_stack var_cte1
@@ -558,14 +581,14 @@ def crearCuadruploExpresion(validOperators):
 
 			resultType = isValidResult(operador, tipo_izq, tipo_der)
 
-			result = globals.nextTmp()
-
 			if operador == '=':
-				cuad = Cuadruplo(operador, operand1 = operando_izq, result = operando_der)
+				cuad = Cuadruplo(operador, operand1 = operando_izq, result = operando_der, counter = globals.cuadCounter)
 			else:
-				cuad = Cuadruplo(operador, operando_izq, operando_der, result)
+				result = globals.nextTmp()
+				cuad = Cuadruplo(operador, operando_izq, operando_der, result = result, counter = globals.cuadCounter)
+				globals.operandos.append(result)
 
-			globals.operandos.append(result)
+			globals.cuadCounter = globals.cuadCounter + 1
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
 
@@ -579,8 +602,9 @@ def crearCuadruploUnario(validOperators):
 			resultType = isValidResult(operador, tipo)
 
 			result = globals.nextTmp()
-			cuad = Cuadruplo(operador, operand1 = operando, result = result)
+			cuad = Cuadruplo(operador, operand1 = operando, result = result, counter = globals.cuadCounter)
 
+			globals.cuadCounter = globals.cuadCounter + 1
 			globals.operandos.append(result)
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
