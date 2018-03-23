@@ -324,7 +324,37 @@ def p_push_quad_jump(p):
 	globals.saltos.append(globals.cuadCounter)
 
 def p_for_loop(p):
-	'for_loop : FOR L_PAREN asignacion SEMICOLON expresion SEMICOLON asignacion R_PAREN L_BRACE bloque R_BRACE'
+	'for_loop : FOR L_PAREN asignacion SEMICOLON push_quad_jump expresion cuads_true_false SEMICOLON push_quad_jump asignacion push_goto R_PAREN L_BRACE push_quad_jump bloque push_goto R_BRACE'
+	goToBlockEnd = globals.saltos.pop()
+	blockStart = globals.saltos.pop()
+	stepGoTo = globals.saltos.pop()
+	stepStart = globals.saltos.pop()
+	goToFalseCondition = globals.saltos.pop()
+	goToTrueCondition = globals.saltos.pop()
+	conditionStart = globals.saltos.pop()
+
+	globals.cuadruplos[goToBlockEnd].result = stepStart
+	globals.cuadruplos[stepGoTo].result = conditionStart
+	globals.cuadruplos[goToTrueCondition].result = blockStart
+	globals.cuadruplos[goToFalseCondition].result = globals.cuadCounter
+
+def p_push_goto(p):
+	'push_goto :'
+	cuad = Cuadruplo('GOTO', counter = globals.cuadCounter)
+	globals.saltos.append(globals.cuadCounter)
+	globals.cuadruplos.append(cuad)
+	globals.cuadCounter += 1
+
+def p_cuads_true_false(p):
+	'cuads_true_false :'
+	cuad_true = Cuadruplo('GOTO_TRUE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
+	globals.saltos.append(globals.cuadCounter)
+	globals.cuadruplos.append(cuad_true)
+	globals.cuadCounter += 1
+	cuad_false = Cuadruplo('GOTO_FALSE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
+	globals.saltos.append(globals.cuadCounter)
+	globals.cuadruplos.append(cuad_false)
+	globals.cuadCounter += 1
 
 def p_var_cte(p):
 	'''var_cte : ID push_operand_stack var_cte1
@@ -626,11 +656,8 @@ with open('test.txt') as f:
 	read_data = f.read()
 
 parser.parse(read_data)
-#pprint.pprint(SYMBOL_TABLE)
-#print(globals.operadores)
-#print(globals.operandos)
-# print(globals.tipos)
-# print(SYMBOL_TABLE[FUNC].keys())
-#pprint.pprint(SYMBOL_TABLE)
 for i in range(0, len(globals.cuadruplos)):
 	print(globals.cuadruplos[i])
+
+assert len(globals.operadores) == 0
+assert len(globals.saltos) == 0
