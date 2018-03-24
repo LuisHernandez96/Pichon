@@ -287,22 +287,40 @@ def p_return(p):
 	'return : RETURN expresion SEMICOLON'
 
 def p_condicion(p):
-	'condicion : IF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none condicion1'
+	'condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none_1 condicion1 cond_remove_lid'
 
 def p_condicion1(p):
-	'''condicion1 :  ELSE L_BRACE bloque R_BRACE
-		| ELIF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none condicion1
+	'''condicion1 : push_goto ELSE L_BRACE bloque R_BRACE cond_replace_none_0
+		| push_goto ELIF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none_1 condicion1
 		| empty'''
+
+def p_cond_add_lid(p):
+	'cond_add_lid : '
+	globals.saltos.append('*')
+
+def p_cond_remove_lid(p):
+	'cond_remove_lid : '
+	globals.saltos.pop()
 
 def p_cond_check_bool(p):
 	'cond_check_bool : '
+	print("check_bool")
+	globals.operadores.pop()
 	if globals.tipos[-1] != ARR_DATA_TYPES[BOOLEAN]:
 		sys.exit('Error: Type mismatch. IF/ELIF expression has to be boolean'.format(p))
 
-def p_cond_replace_none(p):
-    'cond_replace_none : '
-    goto = globals.saltos.pop()
-    globals.cuadruplos[goto].result = globals.cuadCounter
+def p_cond_replace_none_1(p):
+	'cond_replace_none_1 : '
+	print(globals.cuadCounter,"replace_none")
+	goto = globals.saltos.pop()
+	globals.cuadruplos[goto].result = globals.cuadCounter+1
+
+def p_cond_replace_none_0(p):
+	'cond_replace_none_0 : '
+	print(globals.cuadCounter,"replace_none")
+	while globals.saltos[-1]!='*':
+		goto = globals.saltos.pop()
+		globals.cuadruplos[goto].result = globals.cuadCounter
 
 def p_while_loop(p):
 	'while_loop : WHILE push_quad_jump L_PAREN expresion push_goto_false R_PAREN L_BRACE bloque R_BRACE'
@@ -341,10 +359,12 @@ def p_for_loop(p):
 
 def p_push_goto(p):
 	'push_goto :'
+	print(globals.cuadCounter)
 	cuad = Cuadruplo('GOTO', counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad)
 	globals.cuadCounter += 1
+	print(globals.cuadCounter)
 
 def p_cuads_true_false(p):
 	'cuads_true_false :'
@@ -661,4 +681,5 @@ for i in range(0, len(globals.cuadruplos)):
 	print(globals.cuadruplos[i])
 
 assert len(globals.operadores) == 0
+print(globals.saltos)
 assert len(globals.saltos) == 0
