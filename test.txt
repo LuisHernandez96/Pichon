@@ -4,7 +4,27 @@ FUNCTIONS{
   float v1 = 0.0;
     if (1<2) {
         v1 = 1.1;
+    } elif (true && true) {
+        v1 = 1.0;
+    } elif (true && true) {
+        if (1<2) {
+            v1 = 1.1;
+        } elif (true && true) {
+            v1 = 1.0;
+        } elif (true && true) {
+            v1 = 1.0;
+        } elif (true && true) {
+            v1 = 1.0;
+        } else {
+            v1 = 1.2;
+        };
+        v1 = 9.9;
+    } elif (true && true) {
+        v1 = 1.0;
+    } else {
+        v1 = 1.2;
     };
+    v1 = 9.9;
   }
 }
 
