@@ -2,10 +2,10 @@ import ply.lex as lex
 import ply.yacc as yacc
 import sys
 import re
+import constants as constants
 from cuadruplo import *
-from constants import *
 from SymbolTables import *
-from SemanticCube import *
+from SemanticCube import SEMANTIC_CUBE
 
 class GlobalVars:
 
@@ -306,7 +306,7 @@ def p_cond_check_bool(p):
 	'cond_check_bool : '
 	print("check_bool")
 	globals.operadores.pop()
-	if globals.tipos[-1] != ARR_DATA_TYPES[BOOLEAN]:
+	if globals.tipos[-1] != constants.DATA_TYPES[constants.BOOLEAN]:
 		sys.exit('Error: Type mismatch. IF/ELIF expression has to be boolean'.format(p))
 
 def p_cond_replace_none_1(p):
@@ -483,11 +483,11 @@ def p_push_operand_stack(p):
 def p_push_constant_operand_stack(p):
 	'push_constant_operand_stack :'
 	if regex_boolean.match(str(p[-1])):
-		globals.tipos.append(ARR_DATA_TYPES[BOOLEAN])
+		globals.tipos.append(constants.DATA_TYPES[constants.BOOLEAN])
 	elif regex_float.match(str(p[-1])):
-		globals.tipos.append(ARR_DATA_TYPES[FLOAT])
+		globals.tipos.append(constants.DATA_TYPES[constants.FLOAT])
 	elif regex_int.match(str(p[-1])):
-		globals.tipos.append(ARR_DATA_TYPES[INT])
+		globals.tipos.append(constants.DATA_TYPES[constants.INT])
 	globals.operandos.append(p[-1])
 
 def p_push_open_paren(p):
@@ -587,32 +587,32 @@ def p_empty(p):
 def setDataType(p):
 	if (len(p) == 3 and p[2] is None) or len(p) != 3:
 		if p[1] == 'int':
-			globals.currentDataType = ARR_DATA_TYPES[INT]
+			globals.currentDataType = constants.DATA_TYPES[constants.INT]
 		elif p[1] == 'boolean':
-			globals.currentDataType = ARR_DATA_TYPES[BOOLEAN]
+			globals.currentDataType = constants.DATA_TYPES[constants.BOOLEAN]
 		elif p[1] == 'coord':
-			globals.currentDataType = ARR_DATA_TYPES[COORD]
+			globals.currentDataType = constants.DATA_TYPES[constants.COORD]
 		elif p[1] == 'float':
-			globals.currentDataType = ARR_DATA_TYPES[FLOAT]
+			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT]
 		else:
-			globals.currentDataType = ARR_DATA_TYPES[VOID]
+			globals.currentDataType = constants.DATA_TYPES[constants.VOID]
 	elif len(p) == 3 and p[2] is not None:
 		if p[1] == 'int':
-			globals.currentDataType = ARR_DATA_TYPES[INT_LIST]
+			globals.currentDataType = constants.DATA_TYPES[constants.INT_LIST]
 		elif p[1] == 'boolean':
-			globals.currentDataType = ARR_DATA_TYPES[BOOLEAN_LIST]
+			globals.currentDataType = constants.DATA_TYPES[constants.BOOLEAN_LIST]
 		elif p[1] == 'coord':
-			globals.currentDataType = ARR_DATA_TYPES[COORD_LIST]
+			globals.currentDataType = constants.DATA_TYPES[constants.COORD_LIST]
 		elif p[1] == 'float':
-			globals.currentDataType = ARR_DATA_TYPES[FLOAT_LIST]
+			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT_LIST]
 
 def isValidResult(operador, tipo_izq, tipo_der = None):
 	#print(type(operador))
 	#print(type(tipo_izq))
 	#print(type(tipo_der))
 	#print()
-	returnDataType = SEMANTIC_CUBE[tipo_izq][tipo_der if tipo_der != None else ARR_DATA_TYPES[VOID]][ARR_OPERATORS[operador]]
-	if returnDataType == SEMANTIC_ERROR:
+	returnDataType = SEMANTIC_CUBE[tipo_izq][tipo_der if tipo_der != None else constants.DATA_TYPES[constants.VOID]][constants.OPERATORS[operador]]
+	if returnDataType == constants.SEMANTIC_ERROR:
 		sys.exit('Error: Type mismatch. Can not do {} with {} and {}'.format(operador, tipo_izq, tipo_der))
 	return returnDataType
 

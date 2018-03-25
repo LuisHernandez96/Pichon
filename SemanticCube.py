@@ -1,93 +1,16 @@
 import pprint
-
-"""
-DATA TYPES
-    INT = 0,
-    BOOLEAN = 1,
-    COORD = 2,
-    FLOAT = 3,
-    INT_LIST = 4,
-    BOOLEAN_LIST = 5,
-    COORD_LIST = 6,
-    FLOAT_LIST = 7,
-    VOID = 8
-
-BINARY OPERATORS
-    +   0
-    -   1
-    /   2
-    *   3
-    =   4
-    ==  5
-    <   6
-    >   7
-    <=  8
-    >=  9
-    !=  10
-    ||  11
-    &&  12
-
-UNARY OPERATORS
-    !   13
-    -   14
-
-SEMANTIC ERROR  99
-"""
-
-INT = "INT"
-FLOAT = "FLOAT"
-COORD = "COORD"
-BOOLEAN = "BOOLEAN"
-INT_LIST = "INT_LIST"
-FLOAT_LIST = "FLOAT_LIST"
-BOOLEAN_LIST = "BOOLEAN_LIST"
-COORD_LIST = "COORD_LIST"
-VOID = "VOID"
-SEMANTIC_ERROR = 99
-
-ARR_DATA_TYPES = {
-    INT : 0,
-    FLOAT : 1,
-    COORD : 2,
-    BOOLEAN : 3,
-    INT_LIST : 4,
-    FLOAT_LIST : 5,
-    BOOLEAN_LIST : 6,
-    COORD_LIST : 7,
-    VOID : 8,
-}
-
-ARR_OPERATORS = {
-    # Arithmetic
-    "+" : 0,
-    "-" : 1,
-    "/" : 2,
-    "*" : 3,
-    "=" : 4,
-    # Relational
-    "==" : 5,
-    "<" : 6,
-    ">" : 7,
-    "<=" : 8,
-    ">=" : 9,
-    "!=" : 10,
-    "||" : 11,
-    "&&" : 12,
-    # Unary
-    "!" : 13,
-    "~" : 14,
-}
+import constants as constants
 
 SEM_CUBE = []
 
 def set_sem_cube(SEM_CUBE):
-    for dataType1 in ARR_DATA_TYPES.keys():
+    for dataType1 in constants.DATA_TYPES.keys():
         mat_kek = []
 
-        for dataType2 in ARR_DATA_TYPES.keys():
+        for dataType2 in constants.DATA_TYPES.keys():
             arr_op = []
 
-            for operator in ARR_OPERATORS.keys():
+            for operator in constants.OPERATORS.keys():
                 res = None
 
                 if operator[1] <= 3:
@@ -95,38 +18,38 @@ def set_sem_cube(SEM_CUBE):
                         if dataType1[1] <= 2:
                             res = dataType1[1]
                         else:
-                            res = SEMANTIC_ERROR
+                            res = constants.SEMANTIC_ERROR
                     else:
                         if dataType1[1] <= 1 and dataType2[1] <= 1:
                             res = 1
                         else:
-                            res = SEMANTIC_ERROR
+                            res = constants.SEMANTIC_ERROR
                 elif operator[1] == 4:
                     if dataType1 == dataType2:
                         if dataType1[1] <= 7:
                             res = dataType1[1]
                         else:
-                            res = SEMANTIC_ERROR
+                            res = constants.SEMANTIC_ERROR
                     else:
-                        res = SEMANTIC_ERROR
+                        res = constants.SEMANTIC_ERROR
                 elif operator[1] <= 12:
                     if dataType1 == dataType2:
                         if dataType1[1] <= 7:
                             res = 3
                         else:
-                            res = SEMANTIC_ERROR
+                            res = constants.SEMANTIC_ERROR
                     else:
-                        res = SEMANTIC_ERROR
+                        res = constants.SEMANTIC_ERROR
                 elif operator[1] == 13:
                     if dataType1[1] == 3 and dataType2[1] == 8:
                         res = 3
                     else:
-                        res = SEMANTIC_ERROR
+                        res = constants.SEMANTIC_ERROR
                 elif operator[1] == 14:
                     if dataType1[1] <= 2 and dataType2[1] == 8:
                         res = dataType1[1]
                     else:
-                        res = SEMANTIC_ERROR
+                        res = constants.SEMANTIC_ERROR
                 arr_op += [res]
             mat_kek += [arr_op]
         SEM_CUBE += [mat_kek]
@@ -233,8 +156,3 @@ SEMANTIC_CUBE = [
         [99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99]
     ]
 ]
-
-# def main():
-#     pprint.pprint(set_sem_cube(SEM_CUBE))
-#
-# main()
