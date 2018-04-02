@@ -4,36 +4,11 @@ import sys
 import re
 import constants as constants
 from cuadruplo import Cuadruplo
+from GlobalVars import globals
 import SymbolTables as st
 from SemanticCube import SEMANTIC_CUBE
 
-class GlobalVars:
-
-	def nextTmp(self):
-		nextTemporal = "tmp" + str(self.tmpCounter)
-		self.tmpCounter = self.tmpCounter + 1
-		return nextTemporal
-
-	def prevTmp(self):
-		prevTemporal = "tmp" + str(self.tmpCounter - 1)
-		return prevTemporal 
-
-	def __init__(self):
-		self.currentVarsTable = None
-		self.currentDataType = -1
-		self.currentId = ''
-		self.currentSize = None
-		self.currentScope = st.FUNC
-		self.cuadruplos = []
-		self.operadores = []
-		self.saltos = []
-		self.tipos = []
-		self.operandos = []
-		self.tmpCounter = 1
-		self.cuadCounter = 0
-
 st.SYMBOL_INIT(False)
-globals = GlobalVars()
 
 reserved = {
 	'FUNCTIONS' : 'FUNCTIONS',
@@ -180,21 +155,21 @@ precedence = (
 )
 
 def p_start(p):
-	'start : func_sec env_sec mov_sec'
+	'''start : func_sec env_sec mov_sec'''
 	print("Finished!")
 
 def p_func_sec(p):
-	'func_sec : FUNCTIONS L_BRACE func_sec1 R_BRACE'
+	'''func_sec : FUNCTIONS L_BRACE func_sec1 R_BRACE'''
 
 def p_func_sec1(p):
 	'''func_sec1 : functions func_sec1
 		| empty'''
 
 def p_functions(p):
-	'functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'
+	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'''
 
 def p_create_function_vars_table(p):
-	'create_function_vars_table :'
+	'''create_function_vars_table :'''
 	globals.currentVarsTable = st.VARS_INIT()
 	globals.currentScope = p[-1]
 	if globals.currentScope not in st.SYMBOL_TABLE.keys():
@@ -210,10 +185,10 @@ def p_fucntions2(p):
 				   | empty'''
 
 def p_env_sec(p):
-	'env_sec : ENVIRONMENT create_function_vars_table L_BRACE vars bloque R_BRACE'
+	'''env_sec : ENVIRONMENT create_function_vars_table L_BRACE vars bloque R_BRACE'''
 
 def p_mov_sec(p):
-	'mov_sec : MOVEMENT create_function_vars_table L_BRACE vars bloque R_BRACE'
+	'''mov_sec : MOVEMENT create_function_vars_table L_BRACE vars bloque R_BRACE'''
 
 def p_tipo(p):
 	'''tipo : INT tipo1
@@ -235,7 +210,7 @@ def p_tipo1(p):
 		p[0] = None
 
 def p_return_list(p):
-	'return_list : '
+	'''return_list : '''
 	p[0] = True
 
 def p_tipo2(p):
@@ -253,7 +228,7 @@ def p_return_int(p):
 	p[0] = p[-1]
 
 def p_params(p):
-	'params : tipo ID add_var params1'
+	'''params : tipo ID add_var params1'''
 
 def p_add_var(p):
 	'add_var :'
@@ -276,17 +251,17 @@ def p_vars(p):
 		| empty'''
 
 def p_list(p):
-	'list : L_BRACE expresion list1 R_BRACE'
+	'''list : L_BRACE expresion list1 R_BRACE'''
 
 def p_list1(p):
 	'''list1 : COMMA expresion list1
 			  | empty'''
 
 def p_return(p):
-	'return : RETURN expresion SEMICOLON'
+	'''return : RETURN expresion SEMICOLON'''
 
 def p_condicion(p):
-	'condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none_1 condicion1 cond_remove_lid'
+	'''condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none_1 condicion1 cond_remove_lid'''
 
 def p_condicion1(p):
 	'''condicion1 : push_goto ELSE L_BRACE bloque R_BRACE cond_replace_none_0
@@ -294,32 +269,32 @@ def p_condicion1(p):
 		| empty'''
 
 def p_cond_add_lid(p):
-	'cond_add_lid : '
+	'''cond_add_lid : '''
 	globals.saltos.append('*')
 
 def p_cond_remove_lid(p):
-	'cond_remove_lid : '
+	'''cond_remove_lid : '''
 	globals.saltos.pop()
 
 def p_cond_check_bool(p):
-	'cond_check_bool : '
+	'''cond_check_bool : '''
 	globals.operadores.pop()
 	if globals.tipos[-1] != constants.DATA_TYPES[constants.BOOLEAN]:
 		sys.exit('Error: Type mismatch. IF/ELIF expression has to be boolean'.format(p))
 
 def p_cond_replace_none_1(p):
-	'cond_replace_none_1 : '
+	'''cond_replace_none_1 : '''
 	goto = globals.saltos.pop()
 	globals.cuadruplos[goto].result = globals.cuadCounter+1
 
 def p_cond_replace_none_0(p):
-	'cond_replace_none_0 : '
+	'''cond_replace_none_0 : '''
 	while globals.saltos[-1]!='*':
 		goto = globals.saltos.pop()
 		globals.cuadruplos[goto].result = globals.cuadCounter
 
 def p_while_loop(p):
-	'while_loop : WHILE push_quad_jump L_PAREN expresion push_goto_false R_PAREN L_BRACE bloque R_BRACE'
+	'''while_loop : WHILE push_quad_jump L_PAREN expresion push_goto_false R_PAREN L_BRACE bloque R_BRACE'''
 	end = globals.saltos.pop()
 	ret = globals.saltos.pop()
 	cuad = Cuadruplo('GOTO', result = ret, counter = globals.cuadCounter)
@@ -328,18 +303,18 @@ def p_while_loop(p):
 	globals.cuadruplos.append(cuad)
 
 def p_push_gotofalse(p):
-	'push_goto_false :'
+	'''push_goto_false :'''
 	cuad = Cuadruplo('GOTO_FALSE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad)
 	globals.cuadCounter += 1
 
 def p_push_quad_jump(p):
-	'push_quad_jump :'
+	'''push_quad_jump :'''
 	globals.saltos.append(globals.cuadCounter)
 
 def p_for_loop(p):
-	'for_loop : FOR L_PAREN asignacion SEMICOLON push_quad_jump expresion cuads_true_false SEMICOLON push_quad_jump asignacion push_goto R_PAREN L_BRACE push_quad_jump bloque push_goto R_BRACE'
+	'''for_loop : FOR L_PAREN asignacion SEMICOLON push_quad_jump expresion cuads_true_false SEMICOLON push_quad_jump asignacion push_goto R_PAREN L_BRACE push_quad_jump bloque push_goto R_BRACE'''
 	goToBlockEnd = globals.saltos.pop()
 	blockStart = globals.saltos.pop()
 	stepGoTo = globals.saltos.pop()
@@ -354,14 +329,14 @@ def p_for_loop(p):
 	globals.cuadruplos[goToFalseCondition].result = globals.cuadCounter
 
 def p_push_goto(p):
-	'push_goto :'
+	'''push_goto :'''
 	cuad = Cuadruplo('GOTO', counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad)
 	globals.cuadCounter += 1
 
 def p_cuads_true_false(p):
-	'cuads_true_false :'
+	'''cuads_true_false :'''
 	cuad_true = Cuadruplo('GOTO_TRUE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad_true)
@@ -390,17 +365,17 @@ def p_var_cte1(p):
 	'''
 
 def p_expresion(p):
-	'expresion : push_open_paren logical_or pending_or expresion2'
+	'''expresion : push_open_paren logical_or pending_or expresion2'''
 
 def p_pending_or(p):
-	'pending_or :'
+	'''pending_or :'''
 	crearCuadruploExpresion(validOperators = ['||'])
 
 def p_logical_or(p):
-	'logical_or : logical_and pending_and logical_or1'
+	'''logical_or : logical_and pending_and logical_or1'''
 
 def p_pending_and(p):
-	'pending_and :'
+	'''pending_and :'''
 	crearCuadruploExpresion(validOperators = ['&&'])
 
 def p_logical_or1(p):
@@ -427,10 +402,10 @@ def p_expresion2(p):
 		crearCuadruploExpresion(validOperators = ['<', '>', '<=', '>=', '==', '!='])
 
 def p_exp(p):
-	'exp : termino pending_termino_ops exp1'
+	'''exp : termino pending_termino_ops exp1'''
 
 def p_pending_termino_ops(p):
-	'pending_termino_ops :'
+	'''pending_termino_ops :'''
 	crearCuadruploExpresion(validOperators = ['+', '-'])
 
 def p_exp1(p):
@@ -439,10 +414,10 @@ def p_exp1(p):
 		| empty'''
 
 def p_termino(p):
-	'termino : factor pending_factor_ops termino1'
+	'''termino : factor pending_factor_ops termino1'''
 
 def p_pending_factor_ops(p):
-	'pending_factor_ops :'
+	'''pending_factor_ops :'''
 	crearCuadruploExpresion(validOperators = ['*', '/'])
 
 def p_termino1(p):
@@ -470,7 +445,7 @@ def p_factor(p):
 		crearCuadruploUnario(validOperators = ['!', '~']) 
 
 def p_push_operand_stack(p):
-	'push_operand_stack :'
+	'''push_operand_stack :'''
 	globals.tipos.append(getIdDataType(id = p[-1], scope = globals.currentScope))
 	globals.operandos.append(p[-1])
 
@@ -485,26 +460,26 @@ def p_push_constant_operand_stack(p):
 	globals.operandos.append(p[-1])
 
 def p_push_open_paren(p):
-	'push_open_paren :'
+	'''push_open_paren :'''
 	if p[-1] == '(':
 		globals.operadores.append(p[-1])
 
 def p_push_operator_stack(p):
-	'push_operator_stack :'
+	'''push_operator_stack :'''
 	globals.operadores.append(p[-1])
 
 def p_pop_operator_stack(p):
-	'pop_operator_stack :'
+	'''pop_operator_stack :'''
 	globals.operadores.pop()
 
 def p_coord(p):
-	'coord : L_PAREN xyz R_PAREN'
+	'''coord : L_PAREN xyz R_PAREN'''
 
 def p_xyz(p):
-	'xyz : expresion COMMA expresion COMMA expresion'
+	'''xyz : expresion COMMA expresion COMMA expresion'''
 
 def p_func_call(p):
-	'func_call : func_id L_PAREN func_call1 R_PAREN'
+	'''func_call : func_id L_PAREN func_call1 R_PAREN'''
 
 def p_func_call1(p):
 	'''func_call1 : expresion func_call2
@@ -540,16 +515,16 @@ def p_func_id(p):
 				'''
 
 def p_declaracion(p):
-	'declaracion : tipo ID asignacion2 add_var'
+	'''declaracion : tipo ID asignacion2 add_var'''
 
 def p_inicializacion(p):
-	'inicializacion : tipo ID asignacion2 add_var ASSIGN push_operator_stack expresion'
+	'''inicializacion : tipo ID asignacion2 add_var ASSIGN push_operator_stack expresion'''
 	globals.operandos.append(p[2])
 	globals.tipos.append(p[1])
 	crearCuadruploExpresion(['='])
 
 def p_asignacion(p):
-	'asignacion : ID asignacion1 ASSIGN push_operator_stack expresion'
+	'''asignacion : ID asignacion1 ASSIGN push_operator_stack expresion'''
 	globals.operandos.append(p[1])
 	globals.tipos.append(getIdDataType(p[1], globals.currentScope))
 	crearCuadruploExpresion(['='])
@@ -575,7 +550,7 @@ def p_error(p):
 		sys.exit(1)
 
 def p_empty(p):
-	'empty :'
+	'''empty :'''
 	pass
 
 def setDataType(p):
