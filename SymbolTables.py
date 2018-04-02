@@ -35,30 +35,11 @@ def ADD_FUNC(id, returnType, debug = False):
 def ADD_SCOPE_VARS_TABLE(currentScope):
     SYMBOL_TABLE[currentScope][VARS] = dict()
 
-# def ADD_ENV_VARS(vars, debug):
-#     assert ENV in SYMBOL_TABLE
-#     SYMBOL_TABLE[ENV][VARS] = vars
-#     if (debug):
-#         pprint.pprint(SYMBOL_TABLE)
-#
-# def ADD_MOV_VARS(vars, debug):
-#     assert MOV in SYMBOL_TABLE
-#     SYMBOL_TABLE[MOV][VARS] = vars
-#     if (debug):
-#         pprint.pprint(SYMBOL_TABLE)
-
 def VARS_INIT():
     VARS_TABLE = dict()
     return VARS_TABLE
 
 def ADD_VAR(scope, id, data_type, value = None, size = None):
-    # if id in scope:
-    #     sys.exit('Error: Variable {} already defined!'.format(id))
-    # else:
-    #     scope[id] = dict()
-    #     scope[id][DATA_TYPE] = data_type
-    #     scope[id][VALUE] = value
-    #     scope[id][SIZE] = size
 
     if scope in SYMBOL_TABLE[FUNC].keys():
         if id in SYMBOL_TABLE[FUNC][scope][VARS]:

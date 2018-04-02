@@ -1,27 +1,45 @@
-class DataTypes():
-	INT = 0
-	BOOLEAN = 1
-	COORD = 2
-	FLOAT = 3
-	INT_LIST = 4
-	BOOLEAN_LIST = 5
-	COORD_LIST = 6
-	FLOAT_LIST = 7
-	VOID = 8
+INT = "INT"
+FLOAT = "FLOAT"
+COORD = "COORD"
+BOOLEAN = "BOOLEAN"
+INT_LIST = "INT_LIST"
+FLOAT_LIST = "FLOAT_LIST"
+BOOLEAN_LIST = "BOOLEAN_LIST"
+COORD_LIST = "COORD_LIST"
+VOID = "VOID"
+SEMANTIC_ERROR = 99
 
-class Operators():
-	PLUS = 0
-	MINUS = 1
-	DIVISION = 2
-	MULT = 3
-	ASSIGN = 4
-	EQUAL = 5
-	LESS = 6
-	GREATER = 7
-	LESS_EQUAL = 8
-	GREATER_EQUAL = 9
-	DIFFERENT = 10
-	OR = 11
-	AND = 12
-	NOT = 13
-	NEGATIVE = 14
+DATA_TYPES = {
+    INT : 0,
+    FLOAT : 1,
+    COORD : 2,
+    BOOLEAN : 3,
+    INT_LIST : 4,
+    FLOAT_LIST : 5,
+    BOOLEAN_LIST : 6,
+    COORD_LIST : 7,
+    VOID : 8,
+}
+
+OPERATORS = {
+    # Arithmetic
+    "+" : 0,
+    "-" : 1,
+    "/" : 2,
+    "*" : 3,
+    "=" : 4,
+
+    # Relational
+    "==" : 5,
+    "<" : 6,
+    ">" : 7,
+    "<=" : 8,
+    ">=" : 9,
+    "!=" : 10,
+    "||" : 11,
+    "&&" : 12,
+
+    # Unary
+    "!" : 13,
+    "~" : 14,
+}
