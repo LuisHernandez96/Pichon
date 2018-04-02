@@ -3,8 +3,8 @@ import ply.yacc as yacc
 import sys
 import re
 import constants as constants
-from cuadruplo import *
-from SymbolTables import *
+from cuadruplo import Cuadruplo
+import SymbolTables as st
 from SemanticCube import SEMANTIC_CUBE
 
 class GlobalVars:
@@ -23,7 +23,7 @@ class GlobalVars:
 		self.currentDataType = -1
 		self.currentId = ''
 		self.currentSize = None
-		self.currentScope = FUNC
+		self.currentScope = st.FUNC
 		self.cuadruplos = []
 		self.operadores = []
 		self.saltos = []
@@ -32,7 +32,7 @@ class GlobalVars:
 		self.tmpCounter = 1
 		self.cuadCounter = 0
 
-SYMBOL_INIT(False)
+st.SYMBOL_INIT(False)
 globals = GlobalVars()
 
 reserved = {
@@ -195,12 +195,12 @@ def p_functions(p):
 
 def p_create_function_vars_table(p):
 	'create_function_vars_table :'
-	globals.currentVarsTable = VARS_INIT()
+	globals.currentVarsTable = st.VARS_INIT()
 	globals.currentScope = p[-1]
-	if globals.currentScope not in SYMBOL_TABLE.keys():
-		ADD_FUNC(p[-1], p[-2])
+	if globals.currentScope not in st.SYMBOL_TABLE.keys():
+		st.ADD_FUNC(p[-1], p[-2])
 	else:
-		ADD_SCOPE_VARS_TABLE(globals.currentScope)
+		st.ADD_SCOPE_VARS_TABLE(globals.currentScope)
 
 def p_functions1(p):
 	'''functions1 : params
@@ -236,7 +236,6 @@ def p_tipo1(p):
 
 def p_return_list(p):
 	'return_list : '
-	#print('return_list called!')
 	p[0] = True
 
 def p_tipo2(p):
@@ -258,7 +257,7 @@ def p_params(p):
 
 def p_add_var(p):
 	'add_var :'
-	ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, size = globals.currentSize)
+	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, size = globals.currentSize)
 	globals.currentId = ''
 	globals.currentDataType = -1
 	globals.currentSize = None
@@ -304,20 +303,17 @@ def p_cond_remove_lid(p):
 
 def p_cond_check_bool(p):
 	'cond_check_bool : '
-	print("check_bool")
 	globals.operadores.pop()
 	if globals.tipos[-1] != constants.DATA_TYPES[constants.BOOLEAN]:
 		sys.exit('Error: Type mismatch. IF/ELIF expression has to be boolean'.format(p))
 
 def p_cond_replace_none_1(p):
 	'cond_replace_none_1 : '
-	print(globals.cuadCounter,"replace_none")
 	goto = globals.saltos.pop()
 	globals.cuadruplos[goto].result = globals.cuadCounter+1
 
 def p_cond_replace_none_0(p):
 	'cond_replace_none_0 : '
-	print(globals.cuadCounter,"replace_none")
 	while globals.saltos[-1]!='*':
 		goto = globals.saltos.pop()
 		globals.cuadruplos[goto].result = globals.cuadCounter
@@ -359,12 +355,10 @@ def p_for_loop(p):
 
 def p_push_goto(p):
 	'push_goto :'
-	print(globals.cuadCounter)
 	cuad = Cuadruplo('GOTO', counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad)
 	globals.cuadCounter += 1
-	print(globals.cuadCounter)
 
 def p_cuads_true_false(p):
 	'cuads_true_false :'
@@ -607,10 +601,6 @@ def setDataType(p):
 			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT_LIST]
 
 def isValidResult(operador, tipo_izq, tipo_der = None):
-	#print(type(operador))
-	#print(type(tipo_izq))
-	#print(type(tipo_der))
-	#print()
 	returnDataType = SEMANTIC_CUBE[tipo_izq][tipo_der if tipo_der != None else constants.DATA_TYPES[constants.VOID]][constants.OPERATORS[operador]]
 	if returnDataType == constants.SEMANTIC_ERROR:
 		sys.exit('Error: Type mismatch. Can not do {} with {} and {}'.format(operador, tipo_izq, tipo_der))
@@ -618,14 +608,14 @@ def isValidResult(operador, tipo_izq, tipo_der = None):
 
 def getIdDataType(id, scope):
 	# We're in a function
-	if scope in SYMBOL_TABLE[FUNC].keys():
-		if id in SYMBOL_TABLE[FUNC][scope][VARS]:
-			resultType = SYMBOL_TABLE[FUNC][scope][VARS][id][DATA_TYPE]
+	if scope in st.SYMBOL_TABLE[st.FUNC].keys():
+		if id in st.SYMBOL_TABLE[st.FUNC][scope][st.VARS]:
+			resultType = st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.DATA_TYPE]
 		else:
 			sys.exit('Error: Variable {} not defined in the following scope: {}.'.format(id, scope))
 	else:
-		if id in SYMBOL_TABLE[scope][VARS]:
-			resultType = SYMBOL_TABLE[scope][VARS][id][DATA_TYPE]
+		if id in st.SYMBOL_TABLE[scope][st.VARS]:
+			resultType = st.SYMBOL_TABLE[scope][st.VARS][id][st.DATA_TYPE]
 		else:
 			sys.exit('Error: Variable {} not defined in the following scope: {}.'.format(id, scope))
 	return resultType
@@ -681,5 +671,4 @@ for i in range(0, len(globals.cuadruplos)):
 	print(globals.cuadruplos[i])
 
 assert len(globals.operadores) == 0
-print(globals.saltos)
 assert len(globals.saltos) == 0
