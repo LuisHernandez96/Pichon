@@ -316,7 +316,7 @@ def p_push_constant_operand_stack(p):
 
 def p_push_open_paren(p):
 	'''push_open_paren :'''
-	if p[-1] == '(':
+	if p[-1] == '(' and p[-3] != 'while':
 		globals.operadores.append(p[-1])
 
 def p_push_operator_stack(p):
