@@ -133,9 +133,9 @@ def p_cond_remove_lid(p):
 
 def p_cond_check_bool(p):
 	'''cond_check_bool : '''
-	globals.operadores.pop()
+	# globals.operadores.pop()
 	if globals.tipos[-1] != constants.DATA_TYPES[constants.BOOLEAN]:
-		sys.exit('Error: Type mismatch. IF/ELIF expression has to be boolean'.format(p))
+		sys.exit('Error: Type mismatch at line {}. Expression has to be boolean'.format(globals.lineNumber + 1))
 
 def p_cond_replace_none_1(p):
 	'''cond_replace_none_1 : '''
@@ -149,7 +149,7 @@ def p_cond_replace_none_0(p):
 		globals.cuadruplos[goto].result = globals.cuadCounter
 
 def p_while_loop(p):
-	'''while_loop : WHILE push_quad_jump L_PAREN expresion push_goto_false R_PAREN L_BRACE bloque R_BRACE'''
+	'''while_loop : WHILE push_quad_jump L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE'''
 	end = globals.saltos.pop()
 	ret = globals.saltos.pop()
 	cuad = Cuadruplo('GOTO', result = ret, counter = globals.cuadCounter)
@@ -169,7 +169,7 @@ def p_push_quad_jump(p):
 	globals.saltos.append(globals.cuadCounter)
 
 def p_for_loop(p):
-	'''for_loop : FOR L_PAREN asignacion SEMICOLON push_quad_jump expresion cuads_true_false SEMICOLON push_quad_jump asignacion push_goto R_PAREN L_BRACE push_quad_jump bloque push_goto R_BRACE'''
+	'''for_loop : FOR L_PAREN asignacion SEMICOLON push_quad_jump expresion cond_check_bool cuads_true_false SEMICOLON push_quad_jump asignacion push_goto R_PAREN L_BRACE push_quad_jump bloque push_goto R_BRACE'''
 	goToBlockEnd = globals.saltos.pop()
 	blockStart = globals.saltos.pop()
 	stepGoTo = globals.saltos.pop()
@@ -316,7 +316,7 @@ def p_push_constant_operand_stack(p):
 
 def p_push_open_paren(p):
 	'''push_open_paren :'''
-	if p[-1] == '(' and p[-3] != 'while':
+	if p[-1] == '(' and p[-3] != 'while' and p[-2] != 'if' and p[-2] != 'elif':
 		globals.operadores.append(p[-1])
 
 def p_push_operator_stack(p):

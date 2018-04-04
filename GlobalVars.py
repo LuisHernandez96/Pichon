@@ -24,5 +24,6 @@ class GlobalVars:
 		self.operandos = []
 		self.tmpCounter = 1
 		self.cuadCounter = 0
+		self.lineNumber = 0
 
 globals = GlobalVars()

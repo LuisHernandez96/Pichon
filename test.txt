@@ -1,17 +1,22 @@
-
 FUNCTIONS{
   function coord getForwardCoord(){
     int a = 1;
     int b = 3;
+
+
+
     while(a > b){
         a = 3;
     };
 
     if(a > b){
         a = 3;
+    }
+    elif(a > b){
+        b = 6;
     };
 
-    for(a = 3; a < 5; a = a + 1){
+    for(a = 3; a > 5; a = a + 1){
         b = a + b;
     };
 
