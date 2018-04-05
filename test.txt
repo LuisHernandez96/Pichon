@@ -1,45 +1,10 @@
 FUNCTIONS{
-  function void getForwardCoord(){
-    int a = 1;
-    int b = 3;
-
-    if(a > b){
-        a = 3;
-    }
-    elif(a > b){
-        a = 4;
-    }
-    elif(a > b){
-        a = 5;
-    }
-    else{
-        a = 6;
-    };
-
-    if(a > b){
-        a = 3;
-    };
-
-    if(a > b){
-        a = 3;
-    }
-    else{
-        a = 4;
-    };
-
-    if(a > b){
-        a = 3;
-    }
-    elif(a > b){
-        a = 4;
-    };
-
-    a = 7;
+  function void getForwardCoord(int[5] x, float[5] y){
   }
 }
 
 ENVIRONMENT{
-    getForwardCoord(3);
+    getForwardCoord(3, 3.5);
 }
 
 MOVEMENT{

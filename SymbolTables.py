@@ -10,6 +10,7 @@ DATA_TYPE = "data_type"
 VALUE = "value"
 SIZE = "size"
 LIST = "list"
+PARAMS = "parameters"
 
 SYMBOL_TABLE = dict()
 
@@ -27,10 +28,14 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id] = dict()
         SYMBOL_TABLE[FUNC][id][RETURN_TYPE] = returnType
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
+        SYMBOL_TABLE[FUNC][id][PARAMS] = []
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
         sys.exit('Error: Function {} already defined!'.format(id))
+
+def ADD_PARAM_FUNCTION(functionID, dataType):
+    SYMBOL_TABLE[FUNC][functionID][PARAMS].append(dataType)
 
 def ADD_SCOPE_VARS_TABLE(currentScope):
     SYMBOL_TABLE[currentScope][VARS] = dict()

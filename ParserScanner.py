@@ -62,8 +62,10 @@ def p_tipo(p):
 def p_tipo1(p):
 	'''tipo1 : L_BRACKET tipo2 R_BRACKET return_list
 			  | empty'''
+	globals.currentDataTypeString += p[-1]
 	if len(p) == 5:
 		p[0] = {'isList' : p[4], 'listSize' : p[2]}
+		globals.currentDataTypeString += ('[' + str(p[2]) + ']')
 	else:
 		p[0] = None
 
@@ -86,11 +88,21 @@ def p_return_int(p):
 	p[0] = p[-1]
 
 def p_params(p):
-	'''params : tipo ID add_var params1'''
+	'''params : tipo ID add_param params1'''
 
 def p_add_var(p):
 	'add_var :'
 	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, size = globals.currentSize)
+
+	globals.currentId = ''
+	globals.currentDataType = -1
+	globals.currentSize = None
+
+def p_add_param(p):
+	'add_param :'
+	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, size = globals.currentSize)
+	st.ADD_PARAM_FUNCTION(globals.currentScope, globals.currentDataTypeString)
+	globals.currentDataTypeString = ""
 	globals.currentId = ''
 	globals.currentDataType = -1
 	globals.currentSize = None
@@ -426,7 +438,7 @@ def main():
 	for i in range(0, len(globals.cuadruplos)):
 		print(globals.cuadruplos[i])
 
-	print(globals.saltos)
+	print(st.SYMBOL_TABLE[st.FUNC])
 	assert len(globals.operadores) == 0
 	assert len(globals.saltos) == 0
 
