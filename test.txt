@@ -1,5 +1,5 @@
 FUNCTIONS{
-  function coord getForwardCoord(){
+  function void getForwardCoord(){
     int a = 1;
     int b = 3;
 
@@ -39,6 +39,7 @@ FUNCTIONS{
 }
 
 ENVIRONMENT{
+    getForwardCoord(3);
 }
 
 MOVEMENT{

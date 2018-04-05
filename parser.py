@@ -297,7 +297,7 @@ def p_factor(p):
 	'''
 	# If unary operation
 	if len(p) == 4:
-		crearCuadruploUnario(validOperators = ['!', '~']) 
+		crearCuadruploUnario(validOperators = ['!', '~'])
 
 def p_push_operand_stack(p):
 	'''push_operand_stack :'''
@@ -316,7 +316,7 @@ def p_push_constant_operand_stack(p):
 
 def p_push_open_paren(p):
 	'''push_open_paren :'''
-	if p[-1] == '(' and p[-3] != 'while' and p[-2] != 'if' and p[-2] != 'elif':
+	if p[-1] == '(' and p[-3] != 'while' and p[-2] != 'if' and p[-2] != 'elif' and p[-2] not in st.SYMBOL_TABLE[st.FUNC].keys():
 		globals.operadores.append(p[-1])
 
 def p_push_operator_stack(p):
@@ -368,6 +368,7 @@ def p_func_id(p):
 				| LENGTH
 				| ID
 				'''
+	p[0] = p[1]
 
 def p_declaracion(p):
 	'''declaracion : tipo ID asignacion2 add_var'''
