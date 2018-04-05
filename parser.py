@@ -116,11 +116,11 @@ def p_return(p):
 	'''return : RETURN expresion SEMICOLON'''
 
 def p_condicion(p):
-	'''condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none_1 condicion1 cond_remove_lid'''
+	'''condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE condicion1 cond_replace_none_0 cond_remove_lid'''
 
 def p_condicion1(p):
-	'''condicion1 : push_goto ELSE L_BRACE bloque R_BRACE cond_replace_none_0
-		| push_goto ELIF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE cond_replace_none_1 condicion1
+	'''condicion1 : cond_replace_none_1 push_goto ELSE L_BRACE bloque R_BRACE
+		| cond_replace_none_1 push_goto ELIF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE condicion1
 		| empty'''
 
 def p_cond_add_lid(p):
@@ -129,18 +129,18 @@ def p_cond_add_lid(p):
 
 def p_cond_remove_lid(p):
 	'''cond_remove_lid : '''
-	globals.saltos.pop()
+	if globals.saltos[-1] == '*':
+		globals.saltos.pop()
 
 def p_cond_check_bool(p):
 	'''cond_check_bool : '''
-	# globals.operadores.pop()
 	if globals.tipos[-1] != constants.DATA_TYPES[constants.BOOLEAN]:
 		sys.exit('Error: Type mismatch at line {}. Expression has to be boolean'.format(globals.lineNumber + 1))
 
 def p_cond_replace_none_1(p):
 	'''cond_replace_none_1 : '''
 	goto = globals.saltos.pop()
-	globals.cuadruplos[goto].result = globals.cuadCounter+1
+	globals.cuadruplos[goto].result = globals.cuadCounter + 1
 
 def p_cond_replace_none_0(p):
 	'''cond_replace_none_0 : '''
