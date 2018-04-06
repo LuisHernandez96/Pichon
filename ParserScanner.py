@@ -1,6 +1,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import SymbolTables as st
+import pprint
 from GlobalVars import globals
 from lexer import *
 from utils import *
@@ -34,10 +35,12 @@ def p_create_function_vars_table(p):
 		st.ADD_FUNC(p[-1], p[-2])
 	else:
 		st.ADD_SCOPE_VARS_TABLE(globals.currentScope)
+	globals.currentDataTypeString = ""
 
 def p_functions1(p):
 	'''functions1 : params
 				   | empty '''
+
 def p_fucntions2(p):
 	'''functions2 : return
 				   | empty'''
@@ -56,16 +59,16 @@ def p_tipo(p):
 			| VOID'''
 	setDataType(p)
 
+	globals.currentDataTypeString = p[1] + globals.currentDataTypeString
+
 	# Avoid pushing in the stack function return types
 	p[0] = globals.currentDataType
 
 def p_tipo1(p):
-	'''tipo1 : L_BRACKET tipo2 R_BRACKET return_list
+	'''tipo1 : L_BRACKET CTE_I return_int R_BRACKET tipo1 return_list
 			  | empty'''
-	globals.currentDataTypeString += p[-1]
-	if len(p) == 5:
-		p[0] = {'isList' : p[4], 'listSize' : p[2]}
-		globals.currentDataTypeString += ('[' + str(p[2]) + ']')
+	if len(p) == 7:
+		p[0] = {'isList' : p[6], 'listSize' : p[2]}
 	else:
 		p[0] = None
 
@@ -73,18 +76,10 @@ def p_return_list(p):
 	'''return_list : '''
 	p[0] = True
 
-def p_tipo2(p):
-	'''tipo2 : CTE_I return_int
-			  | empty'''
-	if len(p) == 3:
-		p[0] = p[2]
-		globals.currentSize = p[1]
-	else:
-		p[0] = None
-		globals.currentSize = None
-
 def p_return_int(p):
 	'return_int : '
+	globals.currentDataTypeString += ('[' + str(p[-1]) + ']')
+	globals.currentSize *= p[-1]
 	p[0] = p[-1]
 
 def p_params(p):
@@ -92,20 +87,20 @@ def p_params(p):
 
 def p_add_var(p):
 	'add_var :'
-	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, size = globals.currentSize)
-
+	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString, size = globals.currentSize)
+	globals.currentDataTypeString = ""
 	globals.currentId = ''
 	globals.currentDataType = -1
-	globals.currentSize = None
+	globals.currentSize = 1
 
 def p_add_param(p):
 	'add_param :'
-	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, size = globals.currentSize)
+	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString, size = globals.currentSize)
 	st.ADD_PARAM_FUNCTION(globals.currentScope, globals.currentDataTypeString)
 	globals.currentDataTypeString = ""
 	globals.currentId = ''
 	globals.currentDataType = -1
-	globals.currentSize = None
+	globals.currentSize = 1
 
 def p_params1(p):
 	'''params1 : COMMA params
@@ -438,7 +433,7 @@ def main():
 	for i in range(0, len(globals.cuadruplos)):
 		print(globals.cuadruplos[i])
 
-	print(st.SYMBOL_TABLE[st.FUNC])
+	pprint.pprint(st.SYMBOL_TABLE)
 	assert len(globals.operadores) == 0
 	assert len(globals.saltos) == 0
 
