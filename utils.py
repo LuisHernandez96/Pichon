@@ -72,7 +72,7 @@ def crearCuadruploExpresion(validOperators):
 				cuad = Cuadruplo(operador, operand1 = operando_izq, result = operando_der, counter = globals.cuadCounter)
 			else:
 				result = globals.nextTmp()
-				st.ADD_MEMORY(globals.currentScope, resultType, 1)
+				st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
 				cuad = Cuadruplo(operador, operando_izq, operando_der, result = result, counter = globals.cuadCounter)
 				globals.operandos.append(result)
 
@@ -90,7 +90,7 @@ def crearCuadruploUnario(validOperators):
 			resultType = isValidResult(operador, tipo)
 
 			result = globals.nextTmp()
-			st.ADD_MEMORY(globals.currentScope, resultType, 1)
+			st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
 			cuad = Cuadruplo(operador, operand1 = operando, result = result, counter = globals.cuadCounter)
 
 			globals.cuadCounter = globals.cuadCounter + 1
