@@ -27,4 +27,4 @@ class NeededSize:
 		if temp:
 			self.tempBooleans += Booleans
 		else:
-			self.localFloats += Booleans
+			self.localBooleans += Booleans
