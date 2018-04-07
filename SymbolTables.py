@@ -1,5 +1,6 @@
 import pprint
 import sys
+import NeededSize as n
 
 FUNC = "FUNCTIONS"
 ENV = "ENVIRONMENT"
@@ -12,6 +13,7 @@ VALUE = "value"
 SIZE = "size"
 LIST = "list"
 PARAMS = "parameters"
+NEEDS = "needs"
 
 SYMBOL_TABLE = dict()
 
@@ -30,10 +32,25 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][RETURN_TYPE] = returnType
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
         SYMBOL_TABLE[FUNC][id][PARAMS] = []
+        SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
         sys.exit('Error: Function {} already defined!'.format(id))
+
+def ADD_MEMORY(functionID, dataType, amount):
+    assert functionID in SYMBOL_TABLE[FUNC].keys()
+
+    # Integers
+    if dataType in [0, 4]:
+        SYMBOL_TABLE[FUNC][functionID][NEEDS].addInts(amount)
+    # Floats (and coordinates)
+    elif dataType in [1, 5, 2, 7]:
+        SYMBOL_TABLE[FUNC][functionID][NEEDS].addFloats(amount)
+    # Booleans
+    elif dataType in [3, 6]:
+        SYMBOL_TABLE[FUNC][functionID][NEEDS].addFloats(amount)
+
 
 def ADD_PARAM_FUNCTION(functionID, dataType):
     SYMBOL_TABLE[FUNC][functionID][PARAMS].append(dataType)

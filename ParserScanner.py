@@ -26,7 +26,8 @@ def p_func_sec1(p):
 
 def p_functions(p):
 	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'''
-
+	print(globals.currentScope)
+	
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
 	globals.currentVarsTable = st.VARS_INIT()
