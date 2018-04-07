@@ -15,7 +15,7 @@ class GlobalVars:
 		self.currentVarsTable = None
 		self.currentDataType = -1
 		self.currentId = ''
-		self.currentSize = None
+		self.currentSize = 1
 		self.currentScope = st.FUNC
 		self.cuadruplos = []
 		self.operadores = []
@@ -25,5 +25,6 @@ class GlobalVars:
 		self.tmpCounter = 1
 		self.cuadCounter = 0
 		self.lineNumber = 0
+		self.currentDataTypeString = ""
 
 globals = GlobalVars()
