@@ -49,7 +49,7 @@ def ADD_MEMORY(functionID, dataType, amount):
         SYMBOL_TABLE[FUNC][functionID][NEEDS].addFloats(amount)
     # Booleans
     elif dataType in [3, 6]:
-        SYMBOL_TABLE[FUNC][functionID][NEEDS].addFloats(amount)
+        SYMBOL_TABLE[FUNC][functionID][NEEDS].addBooleans(amount)
 
 
 def ADD_PARAM_FUNCTION(functionID, dataType):
