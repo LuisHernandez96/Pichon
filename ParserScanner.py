@@ -27,6 +27,7 @@ def p_func_sec1(p):
 def p_functions(p):
 	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'''
 	print(globals.currentScope)
+	st.ADD_FUNC_MEMORY(globals.currentScope)
 
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
@@ -431,8 +432,8 @@ def main():
 		read_data = f.read()
 
 	parser.parse(read_data)
-	for i in range(0, len(globals.cuadruplos)):
-		print(globals.cuadruplos[i])
+	# for i in range(0, len(globals.cuadruplos)):
+	# 	print(globals.cuadruplos[i])
 
 	for func in st.SYMBOL_TABLE[st.FUNC].keys():
 		print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))

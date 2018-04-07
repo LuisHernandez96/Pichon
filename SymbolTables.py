@@ -38,19 +38,29 @@ def ADD_FUNC(id, returnType, debug = False):
     else:
         sys.exit('Error: Function {} already defined!'.format(id))
 
-def ADD_MEMORY(functionID, dataType, amount):
+def ADD_MEMORY(functionID, dataType, amount, temp):
     assert functionID in SYMBOL_TABLE[FUNC].keys()
 
     # Integers
     if dataType in [0, 4]:
-        SYMBOL_TABLE[FUNC][functionID][NEEDS].addInts(amount)
+        SYMBOL_TABLE[FUNC][functionID][NEEDS].addInts(amount, temp)
     # Floats (and coordinates)
     elif dataType in [1, 5, 2, 7]:
-        SYMBOL_TABLE[FUNC][functionID][NEEDS].addFloats(amount)
+        SYMBOL_TABLE[FUNC][functionID][NEEDS].addFloats(amount, temp)
     # Booleans
     elif dataType in [3, 6]:
-        SYMBOL_TABLE[FUNC][functionID][NEEDS].addBooleans(amount)
+        SYMBOL_TABLE[FUNC][functionID][NEEDS].addBooleans(amount, temp)
 
+def ADD_FUNC_MEMORY(functionID):
+    assert functionID in SYMBOL_TABLE[FUNC].keys()
+    for var_name in SYMBOL_TABLE[FUNC][functionID][VARS]:
+        var = SYMBOL_TABLE[FUNC][functionID][VARS][var_name]
+        data_type = var["data_type"]
+        size = var["size"]
+        ADD_MEMORY(functionID, data_type, size, False)
+
+        # print("add_func_mem")
+        # pprint.pprint(keks)
 
 def ADD_PARAM_FUNCTION(functionID, dataType):
     SYMBOL_TABLE[FUNC][functionID][PARAMS].append(dataType)
