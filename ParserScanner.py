@@ -27,7 +27,7 @@ def p_func_sec1(p):
 def p_functions(p):
 	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'''
 	print(globals.currentScope)
-	
+
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
 	globals.currentVarsTable = st.VARS_INIT()
@@ -434,7 +434,9 @@ def main():
 	for i in range(0, len(globals.cuadruplos)):
 		print(globals.cuadruplos[i])
 
-	pprint.pprint(st.SYMBOL_TABLE)
+	for func in st.SYMBOL_TABLE[st.FUNC].keys():
+		print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))
+
 	assert len(globals.operadores) == 0
 	assert len(globals.saltos) == 0
 

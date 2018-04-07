@@ -5,7 +5,7 @@ class NeededSize:
 		self.amountBooleans = amountBooleans
 
 	def __str__(self):
-		return "ints: {}\nfloats {}\nbooleans: {}".format(self.amountInts, self.amountFloats, self.amountBooleans)
+		return "ints: {} floats: {} booleans: {}".format(self.amountInts, self.amountFloats, self.amountBooleans)
 
 	def addInts(self, amountInts):
 		self.amountInts += amountInts
