@@ -25,9 +25,8 @@ def p_func_sec1(p):
 		| empty'''
 
 def p_functions(p):
-	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'''
-	print(globals.currentScope)
-	st.ADD_FUNC_MEMORY(globals.currentScope)
+	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
+	st.ADD_SCOPE_MEMORY(globals.currentScope)
 
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
@@ -39,6 +38,10 @@ def p_create_function_vars_table(p):
 		st.ADD_SCOPE_VARS_TABLE(globals.currentScope)
 	globals.currentDataTypeString = ""
 
+def p_set_start_cuad(p):
+	'''set_start_cuad : '''
+	st.SET_START_CUAD(globals.currentScope, globals.cuadCounter)
+
 def p_functions1(p):
 	'''functions1 : params
 				   | empty '''
@@ -48,10 +51,12 @@ def p_fucntions2(p):
 				   | empty'''
 
 def p_env_sec(p):
-	'''env_sec : ENVIRONMENT create_function_vars_table L_BRACE vars bloque R_BRACE'''
+	'''env_sec : ENVIRONMENT create_function_vars_table L_BRACE set_start_cuad vars bloque R_BRACE'''
+	st.ADD_SCOPE_MEMORY(globals.currentScope)
 
 def p_mov_sec(p):
-	'''mov_sec : MOVEMENT create_function_vars_table L_BRACE vars bloque R_BRACE'''
+	'''mov_sec : MOVEMENT create_function_vars_table L_BRACE set_start_cuad vars bloque R_BRACE'''
+	st.ADD_SCOPE_MEMORY(globals.currentScope)
 
 def p_tipo(p):
 	'''tipo : INT tipo1
@@ -432,11 +437,20 @@ def main():
 		read_data = f.read()
 
 	parser.parse(read_data)
-	# for i in range(0, len(globals.cuadruplos)):
-	# 	print(globals.cuadruplos[i])
+	for i in range(0, len(globals.cuadruplos)):
+	 	print(globals.cuadruplos[i])
 
-	for func in st.SYMBOL_TABLE[st.FUNC].keys():
-		print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))
+	#print("FUNCTIONS")
+	#for func in st.SYMBOL_TABLE[st.FUNC].keys():
+	#	print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))
+#
+	#print("\nENVIRONMENT")
+	#print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
+#
+	#print("\nMOVEMENT")
+	#print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
+
+	pprint.pprint(st.SYMBOL_TABLE)
 
 	assert len(globals.operadores) == 0
 	assert len(globals.saltos) == 0

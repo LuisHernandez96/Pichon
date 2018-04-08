@@ -14,8 +14,15 @@ SIZE = "size"
 LIST = "list"
 PARAMS = "parameters"
 NEEDS = "needs"
+PROC_START = "proc_start"
 
 SYMBOL_TABLE = dict()
+
+def getScope(scope):
+    if scope in SYMBOL_TABLE[FUNC].keys():
+        return SYMBOL_TABLE[FUNC][scope]
+
+    return SYMBOL_TABLE[scope]
 
 def SYMBOL_INIT(debug):
     SYMBOL_TABLE[FUNC] = dict()
@@ -38,55 +45,51 @@ def ADD_FUNC(id, returnType, debug = False):
     else:
         sys.exit('Error: Function {} already defined!'.format(id))
 
-def ADD_MEMORY(functionID, dataType, amount, temp):
-    assert functionID in SYMBOL_TABLE[FUNC].keys()
+def ADD_MEMORY(currentScope, dataType, amount, temp):
+
+    scope = getScope(currentScope)
 
     # Integers
     if dataType in [0, 4]:
-        SYMBOL_TABLE[FUNC][functionID][NEEDS].addInts(amount, temp)
+        scope[NEEDS].addInts(amount, temp)
     # Floats (and coordinates)
     elif dataType in [1, 5, 2, 7]:
-        SYMBOL_TABLE[FUNC][functionID][NEEDS].addFloats(amount, temp)
+        scope[NEEDS].addFloats(amount, temp)
     # Booleans
     elif dataType in [3, 6]:
-        SYMBOL_TABLE[FUNC][functionID][NEEDS].addBooleans(amount, temp)
+        scope[NEEDS].addBooleans(amount, temp)
 
-def ADD_FUNC_MEMORY(functionID):
-    assert functionID in SYMBOL_TABLE[FUNC].keys()
-    for var_name in SYMBOL_TABLE[FUNC][functionID][VARS]:
-        var = SYMBOL_TABLE[FUNC][functionID][VARS][var_name]
-        data_type = var["data_type"]
-        size = var["size"]
-        ADD_MEMORY(functionID, data_type, size, False)
-
-        # print("add_func_mem")
-        # pprint.pprint(keks)
+def ADD_SCOPE_MEMORY(currentScope):
+    scope = getScope(currentScope)
+    for var_name in scope[VARS]:
+        var = scope[VARS][var_name]
+        data_type = var[DATA_TYPE]
+        size = var[SIZE]
+        ADD_MEMORY(currentScope, data_type, size, False)
 
 def ADD_PARAM_FUNCTION(functionID, dataType):
     SYMBOL_TABLE[FUNC][functionID][PARAMS].append(dataType)
 
 def ADD_SCOPE_VARS_TABLE(currentScope):
     SYMBOL_TABLE[currentScope][VARS] = dict()
+    SYMBOL_TABLE[currentScope][NEEDS] = n.NeededSize()
+
+def SET_START_CUAD(currentScope, start):
+    scope = getScope(currentScope)
+    scope[PROC_START] = start
 
 def VARS_INIT():
     VARS_TABLE = dict()
     return VARS_TABLE
 
-def ADD_VAR(scope, id, data_type, data_type_string, size = None):
+def ADD_VAR(currentScope, id, data_type, data_type_string, size = None):
 
-    if scope in SYMBOL_TABLE[FUNC].keys():
-        if id in SYMBOL_TABLE[FUNC][scope][VARS]:
-            sys.exit('Error: Variable {} already defined!'.format(id))
-        else:
-            SYMBOL_TABLE[FUNC][scope][VARS][id] = dict()
-            SYMBOL_TABLE[FUNC][scope][VARS][id][DATA_TYPE] = data_type
-            SYMBOL_TABLE[FUNC][scope][VARS][id][DATA_TYPE_STRING] = data_type_string
-            SYMBOL_TABLE[FUNC][scope][VARS][id][SIZE] = size
+    scope = getScope(currentScope)
+
+    if id in scope[VARS]:
+        sys.exit('Error: Variable {} already defined!'.format(id))
     else:
-        if id in SYMBOL_TABLE[scope][VARS]:
-            sys.exit('Error: Variable {} already defined!'.format(id))
-        else:
-            SYMBOL_TABLE[scope][VARS][id] = dict()
-            SYMBOL_TABLE[scope][VARS][id][DATA_TYPE] = data_type
-            SYMBOL_TABLE[scope][VARS][id][DATA_TYPE_STRING] = data_type_string
-            SYMBOL_TABLE[scope][VARS][id][SIZE] = size
+        scope[VARS][id] = dict()
+        scope[VARS][id][DATA_TYPE] = data_type
+        scope[VARS][id][DATA_TYPE_STRING] = data_type_string
+        scope[VARS][id][SIZE] = size
