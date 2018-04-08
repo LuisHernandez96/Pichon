@@ -385,6 +385,7 @@ def p_func_id(p):
 				| LENGTH
 				| ID
 				'''
+	st.CHECK_FUNCTION_DEFINED(p[1])
 	p[0] = p[1]
 
 def p_declaracion(p):

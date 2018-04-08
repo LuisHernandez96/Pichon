@@ -78,6 +78,10 @@ def SET_START_CUAD(currentScope, start):
     scope = getScope(currentScope)
     scope[PROC_START] = start
 
+def CHECK_FUNCTION_DEFINED(functionID):
+    if functionID not in SYMBOL_TABLE[FUNC]:
+        sys.exit("Error: Function {} not defined.".format(functionID))
+
 def VARS_INIT():
     VARS_TABLE = dict()
     return VARS_TABLE
