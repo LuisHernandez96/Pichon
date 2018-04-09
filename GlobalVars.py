@@ -26,5 +26,7 @@ class GlobalVars:
 		self.cuadCounter = 0
 		self.lineNumber = 0
 		self.currentDataTypeString = ""
+		self.parameterCounter = 0
+		self.functionCalled = ""
 
 globals = GlobalVars()

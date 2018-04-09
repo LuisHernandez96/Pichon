@@ -25,9 +25,9 @@ def p_func_sec1(p):
 		| empty'''
 
 def p_functions(p):
-	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE vars bloque functions2 R_BRACE'''
-	print(globals.currentScope)
-	st.ADD_FUNC_MEMORY(globals.currentScope)
+	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
+	st.ADD_SCOPE_MEMORY(globals.currentScope)
+	createEndProc()
 
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
@@ -39,6 +39,10 @@ def p_create_function_vars_table(p):
 		st.ADD_SCOPE_VARS_TABLE(globals.currentScope)
 	globals.currentDataTypeString = ""
 
+def p_set_start_cuad(p):
+	'''set_start_cuad : '''
+	st.SET_START_CUAD(globals.currentScope, globals.cuadCounter)
+
 def p_functions1(p):
 	'''functions1 : params
 				   | empty '''
@@ -48,10 +52,12 @@ def p_fucntions2(p):
 				   | empty'''
 
 def p_env_sec(p):
-	'''env_sec : ENVIRONMENT create_function_vars_table L_BRACE vars bloque R_BRACE'''
+	'''env_sec : ENVIRONMENT create_function_vars_table L_BRACE set_start_cuad vars bloque R_BRACE'''
+	st.ADD_SCOPE_MEMORY(globals.currentScope)
 
 def p_mov_sec(p):
-	'''mov_sec : MOVEMENT create_function_vars_table L_BRACE vars bloque R_BRACE'''
+	'''mov_sec : MOVEMENT create_function_vars_table L_BRACE set_start_cuad vars bloque R_BRACE'''
+	st.ADD_SCOPE_MEMORY(globals.currentScope)
 
 def p_tipo(p):
 	'''tipo : INT tipo1
@@ -128,11 +134,11 @@ def p_return(p):
 	'''return : RETURN expresion SEMICOLON'''
 
 def p_condicion(p):
-	'''condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE condicion1 cond_replace_none_0 cond_remove_lid'''
+	'''condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_expression_tmp push_goto_false R_PAREN L_BRACE bloque R_BRACE condicion1 cond_replace_none_0 cond_remove_lid'''
 
 def p_condicion1(p):
 	'''condicion1 : cond_replace_none_1 push_goto ELSE L_BRACE bloque R_BRACE
-		| cond_replace_none_1 push_goto ELIF L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE condicion1
+		| cond_replace_none_1 push_goto ELIF L_PAREN expresion cond_check_bool push_expression_tmp push_goto_false R_PAREN L_BRACE bloque R_BRACE condicion1
 		| empty'''
 
 def p_cond_add_lid(p):
@@ -146,7 +152,7 @@ def p_cond_remove_lid(p):
 
 def p_cond_check_bool(p):
 	'''cond_check_bool : '''
-	if globals.tipos[-1] != constants.DATA_TYPES[constants.BOOLEAN]:
+	if globals.tipos.pop() != constants.DATA_TYPES[constants.BOOLEAN]:
 		sys.exit('Error: Type mismatch at line {}. Expression has to be boolean'.format(globals.lineNumber + 1))
 
 def p_cond_replace_none_1(p):
@@ -161,13 +167,20 @@ def p_cond_replace_none_0(p):
 		globals.cuadruplos[goto].result = globals.cuadCounter
 
 def p_while_loop(p):
-	'''while_loop : WHILE push_quad_jump L_PAREN expresion cond_check_bool push_goto_false R_PAREN L_BRACE bloque R_BRACE'''
+	'''while_loop : WHILE push_quad_jump L_PAREN expresion cond_check_bool push_expression_tmp push_goto_false R_PAREN L_BRACE bloque R_BRACE'''
 	end = globals.saltos.pop()
 	ret = globals.saltos.pop()
 	cuad = Cuadruplo('GOTO', result = ret, counter = globals.cuadCounter)
 	globals.cuadCounter += 1
 	globals.cuadruplos[end].result = globals.cuadCounter
 	globals.cuadruplos.append(cuad)
+
+def p_push_expression_tmp(p):
+	'''push_expression_tmp :'''
+	cuad = Cuadruplo('=', operand1 = globals.operandos.pop(), result = globals.nextTmp(), counter = globals.cuadCounter)
+	st.ADD_MEMORY(globals.currentScope, constants.DATA_TYPES[constants.BOOLEAN], 1, True)
+	globals.cuadruplos.append(cuad)
+	globals.cuadCounter += 1
 
 def p_push_gotofalse(p):
 	'''push_goto_false :'''
@@ -181,7 +194,7 @@ def p_push_quad_jump(p):
 	globals.saltos.append(globals.cuadCounter)
 
 def p_for_loop(p):
-	'''for_loop : FOR L_PAREN asignacion SEMICOLON push_quad_jump expresion cond_check_bool cuads_true_false SEMICOLON push_quad_jump asignacion push_goto R_PAREN L_BRACE push_quad_jump bloque push_goto R_BRACE'''
+	'''for_loop : FOR L_PAREN asignacion SEMICOLON push_quad_jump expresion cond_check_bool push_expression_tmp cuads_true_false SEMICOLON push_quad_jump asignacion push_goto R_PAREN L_BRACE push_quad_jump bloque push_goto R_BRACE'''
 	goToBlockEnd = globals.saltos.pop()
 	blockStart = globals.saltos.pop()
 	stepGoTo = globals.saltos.pop()
@@ -347,14 +360,24 @@ def p_xyz(p):
 
 def p_func_call(p):
 	'''func_call : func_id L_PAREN func_call1 R_PAREN'''
+	checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
+	createGoSub(globals.functionCalled)
+	globals.parameterCounter = 0
 
 def p_func_call1(p):
-	'''func_call1 : expresion func_call2
+	'''func_call1 : expresion check_parameter func_call2
 					| empty'''
 
 def p_func_call2(p):
-	'''func_call2 : COMMA expresion func_call2
+	'''func_call2 : COMMA expresion check_parameter func_call2
 					| empty'''
+
+def p_check_parameter(p):
+	'''check_parameter :'''
+	argumentDataType = globals.tipos.pop()
+	checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType), globals.parameterCounter)
+	createParam(globals.parameterCounter, globals.operandos.pop())
+	globals.parameterCounter += 1
 
 def p_func_id(p):
 	'''func_id : DOWN
@@ -380,6 +403,10 @@ def p_func_id(p):
 				| LENGTH
 				| ID
 				'''
+	st.CHECK_FUNCTION_DEFINED(p[1])
+	globals.functionCalled = p[1]
+	createERA(globals.functionCalled)
+	globals.parameterCounter = 0
 	p[0] = p[1]
 
 def p_declaracion(p):
@@ -432,13 +459,28 @@ def main():
 		read_data = f.read()
 
 	parser.parse(read_data)
-	# for i in range(0, len(globals.cuadruplos)):
-	# 	print(globals.cuadruplos[i])
+	for i in range(0, len(globals.cuadruplos)):
+	 	print(globals.cuadruplos[i])
 
+	print()
+
+	print("FUNCTIONS")
 	for func in st.SYMBOL_TABLE[st.FUNC].keys():
 		print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))
 
+	print("\nENVIRONMENT")
+	print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
+
+	print("\nMOVEMENT")
+	print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
+
+	# print(globals.operadores)
+	# print(globals.operandos)
+	# print(globals.tipos)
+	# print(globals.saltos)
 	assert len(globals.operadores) == 0
+	assert len(globals.operandos) == 0
+	assert len(globals.tipos) == 0
 	assert len(globals.saltos) == 0
 
 if __name__ == '__main__':

@@ -8,7 +8,7 @@ class NeededSize:
 		self.tempBooleans = tempBooleans
 
 	def __str__(self):
-		return "localInts: {} localFloats: {} localBooleans: {}\n\ttempInts: {} tempFloats: {} tempBooleans: {}".format(
+		return "localInts: {} localFloats: {} localBooleans: {} tempInts: {} tempFloats: {} tempBooleans: {}".format(
 			self.localInts, self.localFloats, self.localBooleans, self.tempInts, self.tempFloats, self.tempBooleans)
 
 	def addInts(self, Ints, temp):
