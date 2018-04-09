@@ -27,6 +27,7 @@ def p_func_sec1(p):
 def p_functions(p):
 	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
 	st.ADD_SCOPE_MEMORY(globals.currentScope)
+	createEndProc()
 
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
@@ -360,6 +361,7 @@ def p_xyz(p):
 def p_func_call(p):
 	'''func_call : func_id L_PAREN func_call1 R_PAREN'''
 	checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
+	createGoSub(globals.functionCalled)
 	globals.parameterCounter = 0
 
 def p_func_call1(p):
@@ -373,8 +375,8 @@ def p_func_call2(p):
 def p_check_parameter(p):
 	'''check_parameter :'''
 	argumentDataType = globals.tipos.pop()
-	globals.operandos.pop()
 	checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType), globals.parameterCounter)
+	createParam(globals.parameterCounter, globals.operandos.pop())
 	globals.parameterCounter += 1
 
 def p_func_id(p):
@@ -403,6 +405,7 @@ def p_func_id(p):
 				'''
 	st.CHECK_FUNCTION_DEFINED(p[1])
 	globals.functionCalled = p[1]
+	createERA(globals.functionCalled)
 	globals.parameterCounter = 0
 	p[0] = p[1]
 
@@ -459,6 +462,8 @@ def main():
 	for i in range(0, len(globals.cuadruplos)):
 	 	print(globals.cuadruplos[i])
 
+	print()
+
 	print("FUNCTIONS")
 	for func in st.SYMBOL_TABLE[st.FUNC].keys():
 		print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))
@@ -469,11 +474,10 @@ def main():
 	print("\nMOVEMENT")
 	print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
-	print(globals.operadores)
-	print(globals.operandos)
-	print(globals.tipos)
-	print(globals.saltos)
-
+	# print(globals.operadores)
+	# print(globals.operandos)
+	# print(globals.tipos)
+	# print(globals.saltos)
 	assert len(globals.operadores) == 0
 	assert len(globals.operandos) == 0
 	assert len(globals.tipos) == 0

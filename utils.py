@@ -117,6 +117,24 @@ def checkIncompleteParameters(functionID, parameterCounter):
 	if parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		sys.exit("Error: {} expects {} argument(s). ({})".format(functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
+def createEndProc():
+	cuad = Cuadruplo('ENDPROC', counter = globals.cuadCounter)
+	globals.cuadCounter = globals.cuadCounter + 1
+	globals.cuadruplos.append(cuad)
 
+def createERA(functionCalled):
+	cuad = Cuadruplo('ERA', operand1 = st.SYMBOL_TABLE[st.FUNC][functionCalled][st.NEEDS], counter = globals.cuadCounter)
+	globals.cuadCounter = globals.cuadCounter + 1
+	globals.cuadruplos.append(cuad)
 
+def createParam(paramCounter, operand):
+	cuad = Cuadruplo('PARAMETER', operand, result = 'PARAM{}'.format(paramCounter), counter = globals.cuadCounter)
+	globals.cuadCounter = globals.cuadCounter + 1
+	globals.cuadruplos.append(cuad)
 
+def createGoSub(functionCalled):
+	initialAddress = st.SYMBOL_TABLE[st.FUNC][functionCalled][st.PROC_START]
+	cuad = Cuadruplo('GOSUB', functionCalled, result = initialAddress, counter = globals.cuadCounter)
+	globals.cuadCounter = globals.cuadCounter + 1
+	globals.cuadruplos.append(cuad)
+	
