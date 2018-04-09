@@ -74,10 +74,10 @@ def crearCuadruploExpresion(validOperators):
 				result = globals.nextTmp()
 				st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
 				cuad = Cuadruplo(operador, operando_izq, operando_der, result = result, counter = globals.cuadCounter)
+				globals.tipos.append(resultType)
 				globals.operandos.append(result)
 
 			globals.cuadCounter = globals.cuadCounter + 1
-			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
 
 def crearCuadruploUnario(validOperators):
@@ -97,3 +97,26 @@ def crearCuadruploUnario(validOperators):
 			globals.operandos.append(result)
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
+
+def dataTypeToString(dataType):
+	if dataType == constants.DATA_TYPES[constants.INT]:
+		return constants.INT.lower()
+	elif dataType == constants.DATA_TYPES[constants.FLOAT]:
+		return constants.FLOAT.lower()
+	elif dataType == constants.DATA_TYPES[constants.BOOLEAN]:
+		return constants.BOOLEAN.lower()
+
+def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
+	if len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]) > 0 and parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
+		if argumentDataType != st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter]:
+			sys.exit("Error: {} Expected: {} Received: {}.".format(functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))
+	elif parameterCounter >= len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
+		sys.exit("Error: {} expects {} argument(s). ({})".format(functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
+
+def checkIncompleteParameters(functionID, parameterCounter):
+	if parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
+		sys.exit("Error: {} expects {} argument(s). ({})".format(functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
+
+
+
+
