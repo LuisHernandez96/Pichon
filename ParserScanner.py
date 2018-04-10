@@ -14,7 +14,7 @@ precedence = (
 )
 
 def p_start(p):
-	'''start : func_sec env_sec mov_sec'''
+	'''start : push_goto func_sec env_sec mov_sec'''
 	print("Finished!")
 
 def p_func_sec(p):
@@ -52,7 +52,7 @@ def p_fucntions2(p):
 				   | empty'''
 
 def p_env_sec(p):
-	'''env_sec : ENVIRONMENT create_function_vars_table L_BRACE set_start_cuad vars bloque R_BRACE'''
+	'''env_sec : ENVIRONMENT create_function_vars_table cond_replace_none_2 L_BRACE set_start_cuad vars bloque R_BRACE'''
 	st.ADD_SCOPE_MEMORY(globals.currentScope)
 
 def p_mov_sec(p):
@@ -172,6 +172,11 @@ def p_cond_replace_none_1(p):
 	'''cond_replace_none_1 : '''
 	goto = globals.saltos.pop()
 	globals.cuadruplos[goto].result = globals.cuadCounter + 1
+
+def p_cond_replace_none_2(p):
+	'''cond_replace_none_2 : '''
+	goto = globals.saltos.pop()
+	globals.cuadruplos[goto].result = globals.cuadCounter
 
 def p_cond_replace_none_0(p):
 	'''cond_replace_none_0 : '''
