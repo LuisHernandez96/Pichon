@@ -131,7 +131,20 @@ def p_list1(p):
 			  | empty'''
 
 def p_return(p):
-	'''return : RETURN expresion SEMICOLON'''
+	'''return : RETURN expresion SEMICOLON push_return'''
+
+def p_push_return(p):
+	'''push_return : '''
+	typ = globals.tipos.pop()
+	res = globals.operandos.pop()
+	retType = st.getReturnType(st.getScope(globals.currentScope))
+
+	if (retType != typ):
+		sys.exit("Error, return {} does not match declared function type {}".format(typ,retType))
+	else:
+		cuad = Cuadruplo('RETURN', result=res, counter=globals.cuadCounter)
+		globals.cuadruplos.append(cuad)
+		globals.cuadCounter += 1
 
 def p_condicion(p):
 	'''condicion : cond_add_lid IF L_PAREN expresion cond_check_bool push_expression_tmp push_goto_false R_PAREN L_BRACE bloque R_BRACE condicion1 cond_replace_none_0 cond_remove_lid'''
@@ -362,6 +375,19 @@ def p_func_call(p):
 	'''func_call : func_id L_PAREN func_call1 R_PAREN'''
 	checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
 	createGoSub(globals.functionCalled)
+
+	retType = st.getReturnType(st.getScope(globals.functionCalled))
+	next_temp = globals.nextTmp()
+	globals.operandos.append(next_temp)
+	globals.tipos.append(retType)
+
+	if retType != constants.DATA_TYPES[constants.VOID]:
+	# 	create cuad = func _ temp1
+		cuad = Cuadruplo('=', operand1=globals.functionCalled, result=next_temp, counter=globals.cuadCounter)
+		st.ADD_MEMORY(globals.currentScope, retType, 1, True)
+		globals.cuadruplos.append(cuad)
+		globals.cuadCounter += 1
+
 	globals.parameterCounter = 0
 
 def p_func_call1(p):
@@ -437,7 +463,13 @@ def p_estatutos(p):
 				  | condicion SEMICOLON
 				  | for_loop SEMICOLON
 				  | while_loop SEMICOLON
-				  | func_call SEMICOLON'''
+				  | func_call SEMICOLON top_kek'''
+
+def p_top_kek(p):
+	'top_kek : '
+	print("kek")
+	globals.operandos.pop()
+	globals.tipos.pop()
 
 def p_error(p):
 	if p is not None:
@@ -474,9 +506,9 @@ def main():
 	print("\nMOVEMENT")
 	print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
-	# print(globals.operadores)
-	# print(globals.operandos)
-	# print(globals.tipos)
+	print(globals.operadores)
+	print(globals.operandos)
+	print(globals.tipos)
 	# print(globals.saltos)
 	assert len(globals.operadores) == 0
 	assert len(globals.operandos) == 0

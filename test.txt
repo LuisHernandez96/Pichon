@@ -22,6 +22,5 @@ ENVIRONMENT{
 
 MOVEMENT{
 	boolean b = false;
-	getForwardCoord(2+2+2, 3.5);
 	caca(b);
 }
