@@ -18,6 +18,9 @@ PROC_START = "proc_start"
 
 SYMBOL_TABLE = dict()
 
+def getReturnType(scope):
+    return scope[RETURN_TYPE]
+
 def getScope(scope):
     if scope in SYMBOL_TABLE[FUNC].keys():
         return SYMBOL_TABLE[FUNC][scope]
