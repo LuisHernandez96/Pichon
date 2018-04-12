@@ -40,7 +40,7 @@ def setDataType(p):
 def isValidResult(operador, tipo_izq, tipo_der = None):
 	returnDataType = SEMANTIC_CUBE[tipo_izq][tipo_der if tipo_der != None else constants.DATA_TYPES[constants.VOID]][constants.OPERATORS[operador]]
 	if returnDataType == constants.SEMANTIC_ERROR:
-		sys.exit('Error: Type mismatch. Can not do {} with {} and {}'.format(operador, tipo_izq, tipo_der))
+		sys.exit('Error at line {}: Type mismatch. Can not do {} with {} and {}'.format(globals.lineNumber + 1, operador, tipo_izq, tipo_der))
 	return returnDataType
 
 def getIdDataType(id, scope):
@@ -49,12 +49,12 @@ def getIdDataType(id, scope):
 		if id in st.SYMBOL_TABLE[st.FUNC][scope][st.VARS]:
 			resultType = st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.DATA_TYPE]
 		else:
-			sys.exit('Error: Variable {} not defined in the following scope: {}.'.format(id, scope))
+			sys.exit('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
 	else:
 		if id in st.SYMBOL_TABLE[scope][st.VARS]:
 			resultType = st.SYMBOL_TABLE[scope][st.VARS][id][st.DATA_TYPE]
 		else:
-			sys.exit('Error: Variable {} not defined in the following scope: {}.'.format(id, scope))
+			sys.exit('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
 	return resultType
 
 def crearCuadruploExpresion(validOperators):
@@ -109,13 +109,13 @@ def dataTypeToString(dataType):
 def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
 	if len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]) > 0 and parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		if argumentDataType != st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter]:
-			sys.exit("Error: {} Expected: {} Received: {}.".format(functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))
+			sys.exit("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))
 	elif parameterCounter >= len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
-		sys.exit("Error: {} expects {} argument(s). ({})".format(functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
+		sys.exit("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
 def checkIncompleteParameters(functionID, parameterCounter):
 	if parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
-		sys.exit("Error: {} expects {} argument(s). ({})".format(functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
+		sys.exit("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
 def createEndProc():
 	cuad = Cuadruplo('ENDPROC', counter = globals.cuadCounter)
