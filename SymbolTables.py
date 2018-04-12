@@ -46,7 +46,7 @@ def ADD_FUNC(id, returnType, debug = False):
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
-        sys.exit('Error: Function {} already defined!'.format(id))
+        sys.exit('Error at line {}: Function {} already defined!'.format(globals.lineNumber + 1, id))
 
 def ADD_MEMORY(currentScope, dataType, amount, temp):
 
@@ -83,7 +83,7 @@ def SET_START_CUAD(currentScope, start):
 
 def CHECK_FUNCTION_DEFINED(functionID):
     if functionID not in SYMBOL_TABLE[FUNC]:
-        sys.exit("Error: Function {} not defined.".format(functionID))
+        sys.exit("Error at line {}: Function {} not defined.".format(globals.lineNumber + 1, functionID))
 
 def VARS_INIT():
     VARS_TABLE = dict()
@@ -94,7 +94,7 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None):
     scope = getScope(currentScope)
 
     if id in scope[VARS]:
-        sys.exit('Error: Variable {} already defined!'.format(id))
+        sys.exit('Error at line {}: Variable {} already defined!'.format(globals.lineNumber + 1, id))
     else:
         scope[VARS][id] = dict()
         scope[VARS][id][DATA_TYPE] = data_type

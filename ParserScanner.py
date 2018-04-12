@@ -140,7 +140,7 @@ def p_push_return(p):
 	retType = st.getReturnType(st.getScope(globals.currentScope))
 
 	if (retType != typ):
-		sys.exit("Error, return {} does not match declared function type {}".format(typ,retType))
+		sys.exit("Error at line {}: return {} does not match declared function type {}".format(globals.lineNumber + 1, typ, retType))
 	else:
 		cuad = Cuadruplo('RETURN', result=res, counter=globals.cuadCounter)
 		globals.cuadruplos.append(cuad)
@@ -166,7 +166,7 @@ def p_cond_remove_lid(p):
 def p_cond_check_bool(p):
 	'''cond_check_bool : '''
 	if globals.tipos.pop() != constants.DATA_TYPES[constants.BOOLEAN]:
-		sys.exit('Error: Type mismatch at line {}. Expression has to be boolean'.format(globals.lineNumber + 1))
+		sys.exit('Error at line {}: Type mismatch. Expression has to be boolean'.format(globals.lineNumber + 1))
 
 def p_cond_replace_none_1(p):
 	'''cond_replace_none_1 : '''
