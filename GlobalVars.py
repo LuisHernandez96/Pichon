@@ -1,5 +1,3 @@
-import SymbolTables as st
-
 class GlobalVars:
 
 	def nextTmp(self):
@@ -16,7 +14,7 @@ class GlobalVars:
 		self.currentDataType = -1
 		self.currentId = ''
 		self.currentSize = 1
-		self.currentScope = st.FUNC
+		self.currentScope = "FUNCTIONS"
 		self.cuadruplos = []
 		self.operadores = []
 		self.saltos = []

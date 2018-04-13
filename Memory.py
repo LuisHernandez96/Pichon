@@ -36,6 +36,9 @@ class Memory:
 			assignedMemory = self.CURRENT_TEMP_BOOLEAN
 			self.CURRENT_TEMP_BOOLEAN += 1
 			self.LOCAL_MEMORY["BOOLEAN_MEM"][self.CURRENT_TEMP_BOOLEAN] = None
+		elif data_type == constants.DATA_TYPES[constants.VOID]:
+			assignedMemory = -1
+		
 		return assignedMemory
 
 	def PREVIOUS_ADDRESS(self, data_type):

@@ -1,39 +1,25 @@
 FUNCTIONS{
-  function int getForwardCoord(int a, int b){
+
+  function void caca(int a, int b){
   	int d = 2;
   	int c = a + b;
   	int e = d + c;
   	int f = 2 + 2;
-  	return c;
+  	down();
+  }
+
+  function void caca2(int a, int b){
+  	int d = 2;
+  	int c = a + b;
+  	int e = d + c;
+  	int f = 2 + 2;
   }
 }
 
 ENVIRONMENT{
-	int b = 5;
-	int c = 6;
-	int a = getForwardCoord(b, c);
-	if(true){
-		b = a;
-	}
-	elif(false){
-		b = c;
-	}
-	elif(c == a){
-		a = 5;
-	}
-	else{
-		c = 8;
-	};
-
-	while(c < b){
-		c = c + 1;
-	};
-
-	for(a = 5; a <= b; a = a + 2){
-		b = c + a;
-	};
-
+	up();
 }
 
 MOVEMENT{
+	down();
 }

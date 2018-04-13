@@ -1,6 +1,8 @@
 import pprint
 import sys
+import constants
 import NeededSize as n
+from GlobalVars import globals
 
 FUNC = "FUNCTIONS"
 ENV = "ENVIRONMENT"
@@ -16,6 +18,7 @@ PARAMS = "parameters"
 NEEDS = "needs"
 PROC_START = "proc_start"
 ADDRESS = "address"
+RESERVED = "reserved"
 
 SYMBOL_TABLE = dict()
 
@@ -28,10 +31,78 @@ def getScope(scope):
 
     return SYMBOL_TABLE[scope]
 
+def ADD_PREDEFINED_FUNCTIONS():
+    predefined_functions = {
+        "down" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "up" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "forward" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "turnLeft" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "turnRight" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "isFacingNorth" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "isFacingEast" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "isFacingWest" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "isFacingSouth" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "canMoveForward" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "envSize" : {
+            PARAMS : ['int', 'int', 'int'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        },
+        "setMovementSpeed" : {
+            PARAMS : ['float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RESERVED : True
+        }
+    }
+
+    SYMBOL_TABLE[FUNC].update(predefined_functions)
+
 def SYMBOL_INIT(debug):
     SYMBOL_TABLE[FUNC] = dict()
     SYMBOL_TABLE[ENV] = dict()
     SYMBOL_TABLE[MOV] = dict()
+
+    ADD_PREDEFINED_FUNCTIONS()
 
     if(debug):
         pprint.pprint(SYMBOL_TABLE)

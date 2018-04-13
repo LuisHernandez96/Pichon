@@ -26,9 +26,37 @@ def p_func_sec1(p):
 		| empty'''
 
 def p_functions(p):
-	'''functions : FUNCTION tipo ID create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
+	'''functions : FUNCTION tipo function_header_id create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
 	st.ADD_SCOPE_MEMORY(globals.currentScope)
 	createEndProc()
+
+def p_function_header_id(p):
+	'''function_header_id : DOWN
+				| UP
+				| FORWARD
+				| TURN_LEFT
+				| TURN_RIGHT
+				| IS_FACING_NORTH
+				| IS_FACING_SOUTH
+				| IS_FACING_EAST
+				| IS_FACING_WEST
+				| GOAL
+				| START
+				| OUT_OF_BOUNDS
+				| CAN_MOVE_FORWARD
+				| IS_BLOCKED
+				| IS_COLLECTIBLE
+				| PICK_UP
+				| POSITION
+				| SPAWN_OBJECT
+				| ENV_SIZE
+				| SET_MOV_SPEED
+				| LENGTH
+				| ID
+				'''
+	if p[1] in reserved:
+		sys.exit('Error at line {}: {} is a reserved function and cannot be redefined.'.format(globals.lineNumber + 1, p[1]))
+	p[0] = p[1]
 
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
@@ -390,7 +418,8 @@ def p_xyz(p):
 def p_func_call(p):
 	'''func_call : func_id L_PAREN func_call1 R_PAREN'''
 	checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
-	createGoSub(globals.functionCalled)
+	if globals.functionCalled not in reserved:
+		createGoSub(globals.functionCalled)
 
 	retType = st.getReturnType(st.getScope(globals.functionCalled))
 	virtualAddress = memory.ADD_NEW_VAR(retType)
@@ -447,7 +476,8 @@ def p_func_id(p):
 				'''
 	st.CHECK_FUNCTION_DEFINED(p[1])
 	globals.functionCalled = p[1]
-	createERA(globals.functionCalled)
+	if p[1] not in reserved:
+		createERA(globals.functionCalled)
 	globals.parameterCounter = 0
 	p[0] = p[1]
 
@@ -487,7 +517,7 @@ def p_estatutos(p):
 
 def p_top_kek(p):
 	'top_kek : '
-	print("kek")
+	# print("kek")
 	globals.operandos.pop()
 	globals.tipos.pop()
 
@@ -514,7 +544,7 @@ def main():
 	for i in range(0, len(globals.cuadruplos)):
 	 	print(globals.cuadruplos[i])
 
-	print()
+	#pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
 	#print("FUNCTIONS")
 	#for func in st.SYMBOL_TABLE[st.FUNC].keys():
