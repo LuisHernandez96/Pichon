@@ -19,6 +19,10 @@ NEEDS = "needs"
 PROC_START = "proc_start"
 ADDRESS = "address"
 RESERVED = "reserved"
+FUNCTION_TYPE = "function_type"
+MOVEMENT_TYPE = 0
+ENV_TYPE = 1
+NONE_TYPE = 2
 
 SYMBOL_TABLE = dict()
 
@@ -36,62 +40,74 @@ def ADD_PREDEFINED_FUNCTIONS():
         "down" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "up" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "forward" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "turnLeft" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "turnRight" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingNorth" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingEast" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingWest" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingSouth" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "canMoveForward" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "envSize" : {
             PARAMS : ['int', 'int', 'int'],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : ENV_TYPE
         },
         "setMovementSpeed" : {
             PARAMS : ['float'],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RESERVED : True
+            RESERVED : True,
+            FUNCTION_TYPE : NONE_TYPE
         }
     }
 
@@ -115,6 +131,7 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
         SYMBOL_TABLE[FUNC][id][PARAMS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
+        SYMBOL_TABLE[FUNC][FUNCTION_TYPE] = NONE_TYPE
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
