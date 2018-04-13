@@ -13,13 +13,15 @@ FUNCTIONS{
   	int c = a + b;
   	int e = d + c;
   	int f = 2 + 2;
+  	turnLeft();
+  	caca(d, c);
   }
 }
 
 ENVIRONMENT{
-	up();
 }
 
 MOVEMENT{
+up();
 	down();
 }

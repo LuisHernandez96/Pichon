@@ -418,6 +418,7 @@ def p_xyz(p):
 def p_func_call(p):
 	'''func_call : func_id L_PAREN func_call1 R_PAREN'''
 	checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
+	checkUpdateFunctionType(globals.currentScope, globals.functionCalled);
 	if globals.functionCalled not in reserved:
 		createGoSub(globals.functionCalled)
 
@@ -541,10 +542,10 @@ def main():
 		read_data = f.read()
 
 	parser.parse(read_data)
-	for i in range(0, len(globals.cuadruplos)):
-	 	print(globals.cuadruplos[i])
+	#for i in range(0, len(globals.cuadruplos)):
+	# 	print(globals.cuadruplos[i])
 
-	#pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
+	pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
 	#print("FUNCTIONS")
 	#for func in st.SYMBOL_TABLE[st.FUNC].keys():

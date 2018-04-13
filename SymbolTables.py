@@ -59,7 +59,7 @@ def ADD_PREDEFINED_FUNCTIONS():
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RESERVED : True,
-            FUNCTION_TYPE : MOVEMENT_TYPE
+            FUNCTION_TYPE : ENV_TYPE
         },
         "turnRight" : {
             PARAMS : [],
@@ -131,7 +131,7 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
         SYMBOL_TABLE[FUNC][id][PARAMS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
-        SYMBOL_TABLE[FUNC][FUNCTION_TYPE] = NONE_TYPE
+        SYMBOL_TABLE[FUNC][id][FUNCTION_TYPE] = NONE_TYPE
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:

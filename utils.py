@@ -153,4 +153,28 @@ def createGoSub(functionCalled):
 	cuad = Cuadruplo('GOSUB', functionCalled, result = initialAddress, counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
+
+def getFunctionType(functionID):
+	return st.SYMBOL_TABLE[st.FUNC][functionID][st.FUNCTION_TYPE]
+
+def setFunctionType(functionID, functionType):
+	st.SYMBOL_TABLE[st.FUNC][functionID][st.FUNCTION_TYPE] = functionType
+
+def checkUpdateFunctionType(currentScope, functionCalled):
+	functionCalledType = getFunctionType(functionCalled)
+	if currentScope == "ENVIRONMENT":
+		if functionCalledType == st.MOVEMENT_TYPE:
+			sys.exit('Error at line {}: Only environment type functions can be called inside ENVIRONMENT.'.format(globals.lineNumber + 1))
+	elif currentScope == "MOVEMENT":
+		if functionCalledType == st.ENV_TYPE:
+			sys.exit('Error at line {}: Only movement type functions can be called inside MOVEMENT.'.format(globals.lineNumber + 1))
+	else:
+		currentFunctionType = getFunctionType(currentScope)
+		if currentFunctionType == st.NONE_TYPE:
+			setFunctionType(currentScope, functionCalledType)
+		elif currentFunctionType == st.MOVEMENT_TYPE and functionCalledType == st.ENV_TYPE:
+			sys.exit('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
+		elif currentFunctionType == st.ENV_TYPE and functionCalledType == st.MOVEMENT_TYPE:
+			sys.exit('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
+
 	
