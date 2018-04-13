@@ -199,14 +199,17 @@ def p_while_loop(p):
 
 def p_push_expression_tmp(p):
 	'''push_expression_tmp :'''
-	cuad = Cuadruplo('=', operand1 = globals.operandos.pop(), result = globals.nextTmp(), counter = globals.cuadCounter)
-	st.ADD_MEMORY(globals.currentScope, constants.DATA_TYPES[constants.BOOLEAN], 1, True)
+	expressionDataType = constants.DATA_TYPES[constants.BOOLEAN]
+	virtualAddress = memory.ADD_NEW_VAR(expressionDataType)
+	cuad = Cuadruplo('=', operand1 = globals.operandos.pop(), result = virtualAddress, counter = globals.cuadCounter)
+	st.ADD_MEMORY(globals.currentScope, expressionDataType, 1, True)
 	globals.cuadruplos.append(cuad)
 	globals.cuadCounter += 1
 
 def p_push_gotofalse(p):
 	'''push_goto_false :'''
-	cuad = Cuadruplo('GOTO_FALSE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
+	virtualAddress = memory.PREVIOUS_ADDRESS(constants.DATA_TYPES[constants.BOOLEAN])
+	cuad = Cuadruplo('GOTO_FALSE', operand1 = virtualAddress, counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad)
 	globals.cuadCounter += 1
@@ -239,11 +242,13 @@ def p_push_goto(p):
 
 def p_cuads_true_false(p):
 	'''cuads_true_false :'''
-	cuad_true = Cuadruplo('GOTO_TRUE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
+	virtualAddress = memory.PREVIOUS_ADDRESS(constants.DATA_TYPES[constants.BOOLEAN])
+	cuad_true = Cuadruplo('GOTO_TRUE', operand1 = virtualAddress, counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad_true)
 	globals.cuadCounter += 1
-	cuad_false = Cuadruplo('GOTO_FALSE', operand1 = globals.prevTmp(), counter = globals.cuadCounter)
+	virtualAddress = memory.PREVIOUS_ADDRESS(constants.DATA_TYPES[constants.BOOLEAN])
+	cuad_false = Cuadruplo('GOTO_FALSE', operand1 = virtualAddress, counter = globals.cuadCounter)
 	globals.saltos.append(globals.cuadCounter)
 	globals.cuadruplos.append(cuad_false)
 	globals.cuadCounter += 1
@@ -459,10 +464,10 @@ def p_inicializacion(p):
 
 def p_asignacion(p):
 	'''asignacion : ID asignacion1 ASSIGN push_operator_stack expresion'''
-	dataType = getIdDataType(p[1])
+	dataType = getIdDataType(p[1], globals.currentScope)
 	virtualAddress = getIdAddress(p[1], dataType, globals.currentScope)
 	globals.operandos.append(virtualAddress)
-	globals.tipos.append(dataType, globals.currentScope)
+	globals.tipos.append(dataType)
 	crearCuadruploExpresion(['='])
 
 def p_asignacion1(p):
