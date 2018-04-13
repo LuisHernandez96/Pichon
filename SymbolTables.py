@@ -59,7 +59,7 @@ def ADD_PREDEFINED_FUNCTIONS():
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RESERVED : True,
-            FUNCTION_TYPE : ENV_TYPE
+            FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "turnRight" : {
             PARAMS : [],

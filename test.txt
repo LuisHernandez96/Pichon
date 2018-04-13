@@ -8,13 +8,14 @@ FUNCTIONS{
   	down();
   }
 
-  function void caca2(int a, int b){
+  function int caca2(int a, int b){
   	int d = 2;
   	int c = a + b;
   	int e = d + c;
   	int f = 2 + 2;
   	turnLeft();
   	caca(d, c);
+  	return a;
   }
 }
 
@@ -22,6 +23,7 @@ ENVIRONMENT{
 }
 
 MOVEMENT{
+caca2(2, 2);
 up();
 	down();
 }
