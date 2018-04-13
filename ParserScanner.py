@@ -1,6 +1,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 import SymbolTables as st
+from Memory import memory
 import pprint
 from GlobalVars import globals
 from lexer import *
@@ -32,6 +33,7 @@ def p_functions(p):
 def p_create_function_vars_table(p):
 	'''create_function_vars_table :'''
 	globals.currentVarsTable = st.VARS_INIT()
+	memory.CLEAR_MEMORY()
 	globals.currentScope = p[-1]
 	if globals.currentScope not in st.SYMBOL_TABLE.keys():
 		st.ADD_FUNC(p[-1], p[-2])
@@ -105,6 +107,8 @@ def p_add_param(p):
 	'add_param :'
 	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString, size = globals.currentSize)
 	st.ADD_PARAM_FUNCTION(globals.currentScope, globals.currentDataTypeString)
+	paramDataType = getIdDataType(globals.currentId, globals.currentScope)
+	paramVirtualAddress = getIdAddress(globals.currentId, paramDataType, globals.currentScope)
 	globals.currentDataTypeString = ""
 	globals.currentId = ''
 	globals.currentDataType = -1
@@ -344,8 +348,10 @@ def p_factor(p):
 
 def p_push_operand_stack(p):
 	'''push_operand_stack :'''
-	globals.tipos.append(getIdDataType(id = p[-1], scope = globals.currentScope))
-	globals.operandos.append(p[-1])
+	dataType = getIdDataType(id = p[-1], scope = globals.currentScope)
+	virtualAddress = getIdAddress(id = p[-1], dataType = dataType, scope = globals.currentScope)
+	globals.tipos.append(dataType)
+	globals.operandos.append(virtualAddress)
 
 def p_push_constant_operand_stack(p):
 	'push_constant_operand_stack :'
@@ -355,7 +361,7 @@ def p_push_constant_operand_stack(p):
 		globals.tipos.append(constants.DATA_TYPES[constants.FLOAT])
 	elif regex_int.match(str(p[-1])):
 		globals.tipos.append(constants.DATA_TYPES[constants.INT])
-	globals.operandos.append(p[-1])
+	globals.operandos.append('%' + str(p[-1]))
 
 def p_push_open_paren(p):
 	'''push_open_paren :'''
@@ -382,13 +388,13 @@ def p_func_call(p):
 	createGoSub(globals.functionCalled)
 
 	retType = st.getReturnType(st.getScope(globals.functionCalled))
-	next_temp = globals.nextTmp()
-	globals.operandos.append(next_temp)
+	virtualAddress = memory.ADD_NEW_VAR(retType)
+	globals.operandos.append(virtualAddress)
 	globals.tipos.append(retType)
 
 	if retType != constants.DATA_TYPES[constants.VOID]:
 	# 	create cuad = func _ temp1
-		cuad = Cuadruplo('=', operand1=globals.functionCalled, result=next_temp, counter=globals.cuadCounter)
+		cuad = Cuadruplo('=', operand1=globals.functionCalled, result=virtualAddress, counter=globals.cuadCounter)
 		st.ADD_MEMORY(globals.currentScope, retType, 1, True)
 		globals.cuadruplos.append(cuad)
 		globals.cuadCounter += 1
@@ -445,14 +451,18 @@ def p_declaracion(p):
 
 def p_inicializacion(p):
 	'''inicializacion : tipo ID asignacion2 add_var ASSIGN push_operator_stack expresion'''
-	globals.operandos.append(p[2])
+	dataType = p[1]
+	virtualAddress = getIdAddress(p[2], dataType, globals.currentScope)
+	globals.operandos.append(virtualAddress)
 	globals.tipos.append(p[1])
 	crearCuadruploExpresion(['='])
 
 def p_asignacion(p):
 	'''asignacion : ID asignacion1 ASSIGN push_operator_stack expresion'''
-	globals.operandos.append(p[1])
-	globals.tipos.append(getIdDataType(p[1], globals.currentScope))
+	dataType = getIdDataType(p[1])
+	virtualAddress = getIdAddress(p[1], dataType, globals.currentScope)
+	globals.operandos.append(virtualAddress)
+	globals.tipos.append(dataType, globals.currentScope)
 	crearCuadruploExpresion(['='])
 
 def p_asignacion1(p):
@@ -501,20 +511,20 @@ def main():
 
 	print()
 
-	print("FUNCTIONS")
-	for func in st.SYMBOL_TABLE[st.FUNC].keys():
-		print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))
+	#print("FUNCTIONS")
+	#for func in st.SYMBOL_TABLE[st.FUNC].keys():
+	#	print("{} - {}".format(func, st.SYMBOL_TABLE[st.FUNC][func][st.NEEDS]))
 
-	print("\nENVIRONMENT")
-	print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
+	#print("\nENVIRONMENT")
+	#print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
 
-	print("\nMOVEMENT")
-	print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
+	#print("\nMOVEMENT")
+	#print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
-	print(globals.operadores)
-	print(globals.operandos)
-	print(globals.tipos)
-	# print(globals.saltos)
+	#print(globals.operadores)
+	#print(globals.operandos)
+	#print(globals.tipos)
+	#print(globals.saltos)
 	assert len(globals.operadores) == 0
 	assert len(globals.operandos) == 0
 	assert len(globals.tipos) == 0

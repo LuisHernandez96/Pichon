@@ -1,26 +1,18 @@
 FUNCTIONS{
-  function void getForwardCoord(int a, float b){
-  	a = 2;
-  }
-
-  function void caca(boolean b){
-  	b = true;
+  function int getForwardCoord(int a, int b){
+  	int d = 2;
+  	int c = a + b;
+  	int e = d + c;
+  	int f = 2 + 2;
+  	return c;
   }
 }
 
 ENVIRONMENT{
-	int a;
-	boolean b = true && false;
-	if(true){
-		a = 1;
-	};
-
-	if(b){
-		a = 2;
-	};
+	int b = 5;
+	int c = 6;
+	int a = getForwardCoord(b, c);
 }
 
 MOVEMENT{
-	boolean b = false;
-	caca(b);
 }

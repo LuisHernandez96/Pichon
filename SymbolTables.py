@@ -15,6 +15,7 @@ LIST = "list"
 PARAMS = "parameters"
 NEEDS = "needs"
 PROC_START = "proc_start"
+ADDRESS = "address"
 
 SYMBOL_TABLE = dict()
 

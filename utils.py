@@ -2,6 +2,7 @@ import constants as constants
 import re
 import sys
 import SymbolTables as st
+from Memory import memory
 from GlobalVars import globals
 from SemanticCube import SEMANTIC_CUBE
 from cuadruplo import Cuadruplo
@@ -57,6 +58,21 @@ def getIdDataType(id, scope):
 			sys.exit('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
 	return resultType
 
+def getIdAddress(id, dataType, scope):
+	# We're in a function
+	if scope in st.SYMBOL_TABLE[st.FUNC].keys():
+		if st.ADDRESS in st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id]:
+			return st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.ADDRESS]
+		else:
+			st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.ADDRESS] = memory.ADD_NEW_VAR(dataType)
+			return st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.ADDRESS]
+	else:
+		if st.ADDRESS in st.SYMBOL_TABLE[scope][st.VARS][id]:
+			return st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS]
+		else:
+			st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS] = memory.ADD_NEW_VAR(dataType)
+			return st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS]
+
 def crearCuadruploExpresion(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
@@ -71,7 +87,7 @@ def crearCuadruploExpresion(validOperators):
 			if operador == '=':
 				cuad = Cuadruplo(operador, operand1 = operando_izq, result = operando_der, counter = globals.cuadCounter)
 			else:
-				result = globals.nextTmp()
+				result = memory.ADD_NEW_VAR(resultType)
 				st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
 				cuad = Cuadruplo(operador, operando_izq, operando_der, result = result, counter = globals.cuadCounter)
 				globals.tipos.append(resultType)
@@ -89,7 +105,7 @@ def crearCuadruploUnario(validOperators):
 
 			resultType = isValidResult(operador, tipo)
 
-			result = globals.nextTmp()
+			virtualAddress = memory.ADD_NEW_VAR("TEMP", resultType)
 			st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
 			cuad = Cuadruplo(operador, operand1 = operando, result = result, counter = globals.cuadCounter)
 
