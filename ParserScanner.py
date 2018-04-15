@@ -194,6 +194,8 @@ def p_expression_list(p):
     if p[1] == True:
         p[0] = True
     else:
+        print("dummy",len(globals.dummyArray))
+        print("opers", len(globals.operandos))
         globals.dummyArray[-1].append(globals.operandos[-1])
 
 def p_list(p):
@@ -388,8 +390,8 @@ def p_save_index(p):
     print("Saved_dims_2", globals.saved_dims)
 
     if len(globals.operandos)>0:
-        globals.saved_dims.append(globals.operandos.pop())
-        globals.tipos.pop()
+        globals.saved_dims.append(globals.operandos[-1])
+        # globals.tipos.pop()
 
     print("Opers_3", globals.operandos)
     print("Saved_dims_4", globals.saved_dims)
