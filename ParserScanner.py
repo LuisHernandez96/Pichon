@@ -123,6 +123,16 @@ def p_tipo(p):
     setDataType(p)
     globals.currentDataTypeString = p[1] + globals.currentDataTypeString
 
+    globals.suma = 0
+    for desc in globals.dimensiones:
+        desc['m'] = int(globals.R / (desc['sup'] - desc['inf'] + 1))
+        globals.R = desc['m']
+        globals.suma += (desc['inf'] * desc['m'])
+
+    if len(globals.dimensiones) > 0:
+        globals.dimensiones[-1]['m'] = -globals.suma
+
+    globals.R = 1
     # Avoid pushing in the stack function return types
     p[0] = globals.currentDataType
 
@@ -146,7 +156,8 @@ def p_return_int(p):
     globals.currentDataTypeString += ('[' + str(p[-1]) + ']')
     globals.currentSize *= p[-1]
     globals.isArr = True
-    globals.dimensiones.append(int(p[-1]))
+    globals.dimensiones.append({'inf' : 0, 'sup' : int(p[-1]), 'm' : None})
+    globals.R = (globals.dimensiones[-1]['sup'] - globals.dimensiones[-1]['inf'] + 1) * globals.R
     p[0] = p[-1]
 
 
@@ -194,9 +205,8 @@ def p_expression_list(p):
     if p[1] == True:
         p[0] = True
     else:
-        print("dummy",len(globals.dummyArray))
-        print("opers", len(globals.operandos))
-        globals.dummyArray[-1].append(globals.operandos[-1])
+        if len(globals.dummyArray) > 0:
+            globals.dummyArray[-1].append(globals.operandos[-1])
 
 def p_list(p):
     '''list : L_BRACE push_dummy_array expression_list list1 nacada R_BRACE'''
@@ -441,7 +451,6 @@ def p_print_saved_dims(p):
 def p_expresion(p):
     '''expresion : push_open_paren logical_or pending_or expresion2'''
 
-
 def p_pending_or(p):
     '''pending_or :'''
     crearCuadruploExpresion(validOperators=['||'])
@@ -676,6 +685,9 @@ def p_inicializacion(p):
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
+        print('Assigned array', assignedArray)
+        print('Dimensions', dimensions)
+
         if not checkArrayDimensions(assignedArray, dimensions, index = 0):
             sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
@@ -714,6 +726,8 @@ def p_inicializacion(p):
         else:
             globals.operandos.append(firstAddress)
 
+        globals.dummyArray = []
+
     dataType = p[1]
     virtualAddress = getIdAddress(p[2], dataType, globals.currentScope)
     globals.operandos.append(virtualAddress)
@@ -732,11 +746,18 @@ def p_asignacion(p):
     '''asignacion : ID asignacion1 ASSIGN push_operator_stack expression_list'''
 
     if p[5] == True:
-
+        print(p[1])
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
-        globals.dummyArray = None
+        assignedArray = globals.dummyArray.pop()
+        dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
+
+        print('Assigned array', assignedArray)
+        print('Dimensions', dimensions)
+
+        if not checkArrayDimensions(assignedArray, dimensions, index = 0):
+            sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -776,6 +797,8 @@ def p_asignacion(p):
             globals.operandos.append(firstPendingAddress)
         else:
             globals.operandos.append(firstAddress)
+
+        globals.dummyArray = []
 
     dataType = getIdDataType(p[1], globals.currentScope)
     virtualAddress = getIdAddress(p[1], dataType, globals.currentScope)

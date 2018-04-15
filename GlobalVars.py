@@ -31,16 +31,17 @@ class GlobalVars:
         self.arrayPendingAddress = []
         self.arrayPendingTypes = []
 
-        # De aquí para abajo puede que haya cosas que no se están usando
-        self.isAssigning = False
-        self.assigningID = ""
-        self.dimensiones = []
-        self.dummyArray = []
-        self.currentDim = 0
-        self.assigningArrayDimensions = []
-        self.saved_dims = []
-        self.saved_arrs_ids = []
+		# De aquí para abajo puede que haya cosas que no se están usando
+		self.isAssigning = False
+		self.assigningID = ""
+		self.dimensiones = []
+		self.dummyArray = []
+		self.currentDim = 0
+		self.assigningArrayDimensions = []
+		self.saved_dims = []
+		self.saved_arrs_ids = []
+		self.R = 1
+		self.suma = 0
         self.dims_for_address = []
-
 
 globals = GlobalVars()
