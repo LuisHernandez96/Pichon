@@ -117,13 +117,19 @@ def crearCuadruploUnario(validOperators):
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
 
-def dataTypeToString(dataType):
+def dataTypeToString(dataType, argument = None):
 	if dataType == constants.DATA_TYPES[constants.INT]:
 		return constants.INT.lower()
 	elif dataType == constants.DATA_TYPES[constants.FLOAT]:
 		return constants.FLOAT.lower()
 	elif dataType == constants.DATA_TYPES[constants.BOOLEAN]:
 		return constants.BOOLEAN.lower()
+	elif dataType == constants.DATA_TYPES[constants.INT_LIST]:
+		return st.getDataTypeString(st.getScopeID(st.getIDFromAddress(globals.currentScope, argument), globals.currentScope))
+	elif dataType == constants.DATA_TYPES[constants.FLOAT_LIST]:
+		return st.getDataTypeString(st.getScopeID(st.getIDFromAddress(globals.currentScope, argument), globals.currentScope))
+	elif dataType == constants.DATA_TYPES[constants.BOOLEAN_LIST]:
+		return st.getDataTypeString(st.getScopeID(st.getIDFromAddress(globals.currentScope, argument), globals.currentScope))
 
 def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
 	if len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]) > 0 and parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
@@ -192,6 +198,17 @@ def resetGlobalVars():
 	globals.currentSize = 1
 	globals.isArr = False
 	globals.dimensiones = []
+
+def checkArrayDimensions(arr, dimensions, index):
+	if len(arr) != dimensions[index]:
+		return False
+	else:
+		ret = True
+		for elem in arr:
+			if isinstance(elem, list):
+				ret = ret and checkArrayDimensions(elem, dimensions, index + 1)
+
+		return ret
 
 def getArrAddres(base_address, arrIndex, currentArrDims):
 

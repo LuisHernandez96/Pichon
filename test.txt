@@ -11,6 +11,9 @@ FUNCTIONS{
 }
 
 ENVIRONMENT{
+	int[4] a = {1, 2, 3, 4};
+	int[1] d;
+	caca();
 }
 
 MOVEMENT{

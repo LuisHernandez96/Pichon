@@ -193,13 +193,19 @@ def p_expression_list(p):
     '''
     if p[1] == True:
         p[0] = True
+    else:
+        globals.dummyArray[-1].append(globals.operandos[-1])
 
 def p_list(p):
-    '''list : L_BRACE expression_list list1 nacada R_BRACE'''
-    if globals.dimSize > 0:
-        globals.assigningArrayDimensions.append(globals.dimSize)
-    globals.dimSize = 0
+    '''list : L_BRACE push_dummy_array expression_list list1 nacada R_BRACE'''
+    if len(globals.dummyArray) > 1:
+        top = globals.dummyArray.pop()
+        globals.dummyArray[-1].append(top)
     p[0] = True
+
+def p_push_dummy_array(p):
+    '''push_dummy_array :'''
+    globals.dummyArray.append([])
 
 def p_list1(p):
     '''list1 : COMMA nacada expression_list list1
@@ -214,7 +220,6 @@ def p_nacada(p):
         virtualAddress = memory.ADD_NEW_VAR(typ, size=1)
         cuad = Cuadruplo('=', operand1=oper, result=virtualAddress, counter=globals.cuadCounter)
         st.ADD_MEMORY(globals.currentScope, typ, 1, True)
-        globals.dimSize += 1
         globals.cuadruplos.append(cuad)
         globals.cuadCounter += 1
         globals.arrayPendingAddress.append(virtualAddress)
@@ -607,9 +612,12 @@ def p_func_call2(p):
 
 def p_check_parameter(p):
     '''check_parameter :'''
+    pprint.pprint(st.SYMBOL_TABLE)
+    print(globals.tipos)
+    print(globals.operandos)
     argument = globals.operandos.pop()
     argumentDataType = globals.tipos.pop()
-    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType), globals.parameterCounter)
+    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType, argument), globals.parameterCounter)
     createParam(globals.parameterCounter, argument)
     globals.parameterCounter += 1
 
@@ -645,7 +653,8 @@ def p_func_id(p):
         createERA(globals.functionCalled)
     globals.parameterCounter = 0
     p[0] = p[1]
-
+    print(globals.tipos)
+    print(globals.operandos)
 
 def p_declaracion(p):
 	'''declaracion : tipo ID asignacion2 add_var'''
@@ -662,20 +671,11 @@ def p_inicializacion(p):
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
-        #variableDimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
-        #assigningArrayDimensions = globals.assigningArrayDimensions
-#
-        #print('Wadduppppp')
-        #print(variableDimensions)
-        #print(assigningArrayDimensions)
-        #print()
-#
-        #if len(variableDimensions) != len(assigningArrayDimensions):
-        #    sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
-        #else:
-        #    for (variableDimension, arrayDimension) in zip(variableDimensions, assigningArrayDimensions):
-        #        if variableDimension != arrayDimension:
-        #            sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
+        assignedArray = globals.dummyArray.pop()
+        dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
+
+        if not checkArrayDimensions(assignedArray, dimensions, index = 0):
+            sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -715,6 +715,8 @@ def p_inicializacion(p):
     dataType = p[1]
     virtualAddress = getIdAddress(p[2], dataType, globals.currentScope)
     globals.operandos.append(virtualAddress)
+    print('CAAAAACA')
+    print(p[1])
     globals.tipos.append(p[1])
     crearCuadruploExpresion(['='])
 
@@ -732,20 +734,7 @@ def p_asignacion(p):
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
-        #variableDimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
-        #assigningArrayDimensions = globals.assigningArrayDimensions
-#
-        #print('Wadduppppp')
-        #print(variableDimensions)
-        #print(assigningArrayDimensions)
-        #print()
-#
-        #if len(variableDimensions) != len(assigningArrayDimensions):
-        #    sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
-        #else:
-        #    for (variableDimension, arrayDimension) in zip(variableDimensions, assigningArrayDimensions):
-        #        if variableDimension != arrayDimension:
-        #            sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
+        globals.dummyArray = None
 
         globals.tipos.append(globals.lastDataType)
 
@@ -848,7 +837,7 @@ def main():
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
 
-    pprint.pprint(st.SYMBOL_TABLE[st.FUNC]['caca'])
+    #pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
     # print("\nENVIRONMENT")
     # print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])

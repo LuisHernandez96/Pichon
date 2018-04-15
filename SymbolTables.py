@@ -29,8 +29,6 @@ NONE_TYPE = 2
 
 SYMBOL_TABLE = dict()
 
-
-
 def getReturnType(scope):
     return scope[RETURN_TYPE]
 
@@ -39,6 +37,9 @@ def getReturnSize(scope):
 
 def getDimensionsID(scope):
     return scope[DIMS]
+
+def getDataTypeString(scope):
+    return scope[DATA_TYPE_STRING]
 
 def getScopeID(id, currentScope):
     scope = getScope(currentScope)
