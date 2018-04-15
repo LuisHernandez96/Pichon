@@ -374,9 +374,27 @@ def p_var_cte(p):
 	'''
 
 def p_var_cte1(p):
-    '''var_cte1 : L_BRACKET expresion R_BRACKET var_cte1
-		| empty
+    '''var_cte1 : L_BRACKET expresion save_index R_BRACKET var_cte1
+		| empty print_saved_dims
 	'''
+
+def p_save_index(p):
+    'save_index : '
+    globals.saved_dims.append((globals.operandos.pop(),globals.tipos.pop()))
+
+def p_print_saved_dims(p):
+    'print_saved_dims : '
+    print("Saved_dims",globals.saved_dims)
+    print("CurrentType", globals.currentDataType)
+    if globals.currentDataType == 4:
+        globals.tipos[-1] = 0
+    elif globals.currentDataType == 5:
+        globals.tipos[-1] = 1
+    elif globals.currentDataType == 7:
+        globals.tipos[-1] = 2
+    elif globals.currentDataType == 6:
+        globals.tipos[-1] = 3
+    print("CurrentType", globals.currentDataType)
 
 
 def p_expresion(p):
