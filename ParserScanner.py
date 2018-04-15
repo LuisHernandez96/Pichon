@@ -175,9 +175,7 @@ def p_add_param(p):
     paramDataType = getIdDataType(globals.currentId, globals.currentScope)
     paramVirtualAddress = getIdAddress(globals.currentId, paramDataType, globals.currentScope)
     st.ADD_PARAM_VIRTUAL_ADDRESS(globals.currentScope, paramVirtualAddress)
-
-
-resetGlobalVars()
+    resetGlobalVars()
 
 
 def p_params1(p):
@@ -217,7 +215,13 @@ def p_new_nacada(p):
 
 def p_nacada(p):
     'nacada : '
-    globals.size_dims.append(globals.operandos[-1])
+    typ = globals.tipos.pop()
+    oper = globals.operandos.pop()
+    virtualAddress = memory.ADD_NEW_VAR(typ, size=1)
+    cuad = Cuadruplo('=', operand1=oper, result=virtualAddress, counter=globals.cuadCounter)
+    st.ADD_MEMORY(globals.currentScope, typ, 1, True)
+    globals.cuadruplos.append(cuad)
+    globals.cuadCounter += 1
 
 
 def p_return(p):
@@ -496,11 +500,26 @@ def p_push_constant_operand_stack(p):
 
 def p_push_constant_list_operand_stack(p):
     'push_constant_list_operand_stack :'
-    globals.setArrDataType()
+    # globals.setArrDataType()
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
-    print("Lle", globals.currentDataType)
-    globals.operandos.append(globals.currentDataType)
+
+    if globals.tipos[-1] == 0:
+        globals.currentDataType = 4
+    elif globals.tipos[-1] == 1:
+        globals.currentDataType = 5
+    elif globals.tipos[-1] == 2:
+        globals.currentDataType = 7
+    elif globals.tipos[-1] == 3:
+        globals.currentDataType = 6
+
+    globals.tipos.pop()
+    globals.tipos.append(globals.currentDataType)
+
+    print("current", globals.currentDataType)
+    print("tipos", globals.tipos)
+
+    # globals.operandos.append(globals.currentDataType)
 
 
 def p_push_open_paren(p):
@@ -542,15 +561,14 @@ def p_func_call(p):
     globals.operandos.append(virtualAddress)
     globals.tipos.append(retType)
 
+    if retType != constants.DATA_TYPES[constants.VOID]:
+        # 	create cuad = func _ temp1
+        cuad = Cuadruplo('=', operand1=globals.functionCalled, result=virtualAddress, counter=globals.cuadCounter)
+        st.ADD_MEMORY(globals.currentScope, retType, 1, True)
+        globals.cuadruplos.append(cuad)
+        globals.cuadCounter += 1
 
-if retType != constants.DATA_TYPES[constants.VOID]:
-    # 	create cuad = func _ temp1
-    cuad = Cuadruplo('=', operand1=globals.functionCalled, result=virtualAddress, counter=globals.cuadCounter)
-    st.ADD_MEMORY(globals.currentScope, retType, 1, True)
-    globals.cuadruplos.append(cuad)
-    globals.cuadCounter += 1
-
-globals.parameterCounter = 0
+    globals.parameterCounter = 0
 
 
 def p_func_call1(p):
@@ -680,8 +698,8 @@ def main():
         read_data = f.read()
 
         parser.parse(read_data)
-        # for i in range(0, len(globals.cuadruplos)):
-        # 	print(globals.cuadruplos[i])
+        for cuadruplo in globals.cuadruplos:
+            print(cuadruplo)
 
         pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
@@ -696,8 +714,8 @@ def main():
     # print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
     # print(globals.operadores)
-    # print(globals.operandos)
-    # print(globals.tipos)
+    print(globals.operandos)
+    print(globals.tipos)
     # print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0
