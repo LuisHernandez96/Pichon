@@ -38,7 +38,7 @@ class Memory:
 			self.LOCAL_MEMORY["BOOLEAN_MEM"][assignedMemory] = None
 		elif data_type == constants.DATA_TYPES[constants.VOID]:
 			assignedMemory = -1
-		
+
 		return assignedMemory
 
 	def PREVIOUS_ADDRESS(self, data_type):
@@ -48,6 +48,14 @@ class Memory:
 			return self.CURRENT_TEMP_FLOAT - 1
 		elif data_type == constants.DATA_TYPES[constants.BOOLEAN]:
 			return self.CURRENT_TEMP_BOOLEAN - 1
+
+	def CURRENT_ADDRESS(self, data_type):
+		if data_type == constants.DATA_TYPES[constants.INT]:
+			return self.CURRENT_TEMP_INT
+		elif data_type == constants.DATA_TYPES[constants.FLOAT]:
+			return self.CURRENT_TEMP_FLOAT
+		elif data_type == constants.DATA_TYPES[constants.BOOLEAN]:
+			return self.CURRENT_TEMP_BOOLEAN
 
 	def CLEAR_MEMORY(self):
 		self.CURRENT_TEMP_INT = self.LOCAL_TEMP_INT_START

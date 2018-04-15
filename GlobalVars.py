@@ -7,7 +7,7 @@ class GlobalVars:
 
 	def prevTmp(self):
 		prevTemporal = "tmp" + str(self.tmpCounter - 1)
-		return prevTemporal 
+		return prevTemporal
 
 	def __init__(self):
 		self.currentVarsTable = None
@@ -27,5 +27,11 @@ class GlobalVars:
 		self.parameterCounter = 0
 		self.functionCalled = ""
 		self.functionReturns = False
-
+		self.lastDataType = -1
+		self.arrayPendingAddress = []
+		self.arrayPendingTypes = []
+		self.isAssigning = False
+		self.isInitializing = False
+		self.assigningID = ""
+		self.readList = False
 globals = GlobalVars()

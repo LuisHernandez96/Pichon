@@ -30,6 +30,10 @@ def set_sem_cube(SEM_CUBE):
                             res = dataType1[1]
                         else:
                             res = constants.SEMANTIC_ERROR
+                    elif dataType1 == 4 and dataType2 == 0:
+                        res = 4
+                    elif dataType1 == 5 and dataType2 == 1:
+                        res = 4
                     else:
                         res = constants.SEMANTIC_ERROR
                 elif operator[1] <= 12:
