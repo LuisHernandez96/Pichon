@@ -34,4 +34,8 @@ class GlobalVars:
 		self.isInitializing = False
 		self.assigningID = ""
 		self.readList = False
+		self.dimensiones = []
+		self.dimSize = 0
+		self.assigningArrayDimensions = []
+
 globals = GlobalVars()
