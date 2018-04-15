@@ -1,13 +1,13 @@
 class GlobalVars:
 
-    def nextTmp(self):
-        nextTemporal = "tmp" + str(self.tmpCounter)
-        self.tmpCounter = self.tmpCounter + 1
-        return nextTemporal
+	def nextTmp(self):
+		nextTemporal = "tmp" + str(self.tmpCounter)
+		self.tmpCounter = self.tmpCounter + 1
+		return nextTemporal
 
-    def prevTmp(self):
-        prevTemporal = "tmp" + str(self.tmpCounter - 1)
-        return prevTemporal
+	def prevTmp(self):
+		prevTemporal = "tmp" + str(self.tmpCounter - 1)
+		return prevTemporal
 
 	def __init__(self):
 		self.currentVarsTable = None
@@ -37,6 +37,6 @@ class GlobalVars:
 		self.dimensiones = []
 		self.dimSize = 0
 		self.assigningArrayDimensions = []
-        self.saved_dims = []
+		self.saved_dims = []
 
 globals = GlobalVars()
