@@ -193,13 +193,19 @@ def p_expression_list(p):
     '''
     if p[1] == True:
         p[0] = True
+    else:
+        globals.dummyArray[-1].append(globals.operandos[-1])
 
 def p_list(p):
-    '''list : L_BRACE expression_list list1 nacada R_BRACE'''
-    if globals.dimSize > 0:
-        globals.assigningArrayDimensions.append(globals.dimSize)
-    globals.dimSize = 0
+    '''list : L_BRACE push_dummy_array expression_list list1 nacada R_BRACE'''
+    if len(globals.dummyArray) > 1:
+        top = globals.dummyArray.pop()
+        globals.dummyArray[-1].append(top)
     p[0] = True
+
+def p_push_dummy_array(p):
+    '''push_dummy_array :'''
+    globals.dummyArray.append([])
 
 def p_list1(p):
     '''list1 : COMMA nacada expression_list list1
@@ -214,7 +220,6 @@ def p_nacada(p):
         virtualAddress = memory.ADD_NEW_VAR(typ, size=1)
         cuad = Cuadruplo('=', operand1=oper, result=virtualAddress, counter=globals.cuadCounter)
         st.ADD_MEMORY(globals.currentScope, typ, 1, True)
-        globals.dimSize += 1
         globals.cuadruplos.append(cuad)
         globals.cuadCounter += 1
         globals.arrayPendingAddress.append(virtualAddress)
@@ -609,20 +614,11 @@ def p_inicializacion(p):
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
-        #variableDimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
-        #assigningArrayDimensions = globals.assigningArrayDimensions
-#
-        #print('Wadduppppp')
-        #print(variableDimensions)
-        #print(assigningArrayDimensions)
-        #print()
-#
-        #if len(variableDimensions) != len(assigningArrayDimensions):
-        #    sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
-        #else:
-        #    for (variableDimension, arrayDimension) in zip(variableDimensions, assigningArrayDimensions):
-        #        if variableDimension != arrayDimension:
-        #            sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
+        assignedArray = globals.dummyArray.pop()
+        dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
+
+        if not checkArrayDimensions(assignedArray, dimensions, index = 0):
+            sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -679,21 +675,8 @@ def p_asignacion(p):
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
-        #variableDimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
-        #assigningArrayDimensions = globals.assigningArrayDimensions
-#
-        #print('Wadduppppp')
-        #print(variableDimensions)
-        #print(assigningArrayDimensions)
-        #print()
-#
-        #if len(variableDimensions) != len(assigningArrayDimensions):
-        #    sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
-        #else:
-        #    for (variableDimension, arrayDimension) in zip(variableDimensions, assigningArrayDimensions):
-        #        if variableDimension != arrayDimension:
-        #            sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
-
+        print(globals.dummyArray)
+        globals.dummyArray = None
         globals.tipos.append(globals.lastDataType)
 
         if globals.tipos[-1] == 0:

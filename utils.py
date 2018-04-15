@@ -192,3 +192,14 @@ def resetGlobalVars():
 	globals.currentSize = 1
 	globals.isArr = False
 	globals.dimensiones = []
+
+def checkArrayDimensions(arr, dimensions, index):
+	if len(arr) != dimensions[index]:
+		return False
+	else:
+		ret = True
+		for elem in arr:
+			if isinstance(elem, list):
+				ret = ret and checkArrayDimensions(elem, dimensions, index + 1)
+
+		return ret

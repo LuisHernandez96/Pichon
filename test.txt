@@ -1,10 +1,7 @@
 FUNCTIONS{
 
   function void caca(int a, int[4][3] kaka){
-  	int[2][3] kek2 = {{1, 2, 3}};
-  	int[2][2] kek;
-  	int d;
-  	kek = {{1, 2}, {3 + 1 + 1, 4}};
+  	int[2][3] kek2 = {{1, 2, 3}, {4, 5, 6}};
   }
 }
 

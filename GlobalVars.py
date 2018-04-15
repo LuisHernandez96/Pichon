@@ -30,12 +30,12 @@ class GlobalVars:
 		self.lastDataType = -1
 		self.arrayPendingAddress = []
 		self.arrayPendingTypes = []
+
+		# De aquí para abajo puede que haya cosas que no se están usando
 		self.isAssigning = False
-		self.isInitializing = False
 		self.assigningID = ""
-		self.readList = False
 		self.dimensiones = []
-		self.dimSize = 0
-		self.assigningArrayDimensions = []
+		self.dummyArray = []
+		self.currentDim = 0
 
 globals = GlobalVars()
