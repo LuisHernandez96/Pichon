@@ -39,6 +39,7 @@ class GlobalVars:
         self.assigningArrayDimensions = []
         self.saved_dims = []
         self.saved_arrs_ids = []
+        self.dims_for_address = []
 
 
 globals = GlobalVars()

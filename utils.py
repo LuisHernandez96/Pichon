@@ -192,3 +192,12 @@ def resetGlobalVars():
 	globals.currentSize = 1
 	globals.isArr = False
 	globals.dimensiones = []
+
+def getArrAddres(base_address, arrIndex, currentArrDims):
+
+	address =  int(base_address)
+
+	for index,arrDim in zip(arrIndex,currentArrDims):
+		address += int(index)*int(arrDim)
+
+	return address

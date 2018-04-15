@@ -242,3 +242,4 @@ def getIDFromAddress(currentScope, address):
             return var
 
     sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
+

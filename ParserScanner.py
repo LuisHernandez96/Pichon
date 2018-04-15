@@ -373,27 +373,62 @@ def p_var_cte(p):
 	'''
 
 def p_var_cte1(p):
-    '''var_cte1 : L_BRACKET expresion save_index R_BRACKET var_cte1
-		| empty print_saved_dims
+    '''var_cte1 : L_BRACKET save_index expresion R_BRACKET var_cte1
+		| empty save_index print_saved_dims
 	'''
 
 def p_save_index(p):
     'save_index : '
-    globals.saved_dims.append((globals.operandos.pop(),globals.tipos.pop()))
+    print("Opers_1",globals.operandos)
+    print("Saved_dims_2", globals.saved_dims)
+
+    if len(globals.operandos)>0:
+        globals.saved_dims.append(globals.operandos.pop())
+        globals.tipos.pop()
+
+    print("Opers_3", globals.operandos)
+    print("Saved_dims_4", globals.saved_dims)
 
 def p_print_saved_dims(p):
     'print_saved_dims : '
     print("Saved_dims",globals.saved_dims)
+    print("Current id",globals.currentId)
+
+    if len(globals.saved_dims) > 0:
+        currentArrDims = st.getDims( globals.currentScope,st.getIDFromAddress ( globals.currentScope ,globals.saved_dims[0] ) )
+
+        if len(globals.saved_dims)-1 != len(currentArrDims):
+            sys.exit("Error, different dimensions found {} != {}".format(len(globals.saved_dims)-1,len(currentArrDims)))
+        else:
+            print("..",globals.saved_dims)
+            print(".-",currentArrDims)
+            globals.dims_for_address = []
+
+            print(globals.operandos)
+
+            for x in range(0, len(currentArrDims)):
+                cuad = Cuadruplo('VERIFICA', operand1=globals.saved_dims[x+1], operand2= 0, result=currentArrDims[x], counter=globals.cuadCounter)
+                globals.cuadruplos.append(cuad)
+                globals.cuadCounter += 1
+
+            for x in range(1,len(globals.saved_dims)):
+                globals.dims_for_address.append(globals.saved_dims[x])
+
+            print("dimsAddress",globals.dims_for_address)
+            # print("Address",st.getArrAddres(globals.saved_dims[0],globals.dims_for_address,currentArrDims))
+            globals.saved_dims = []
+
     print("CurrentType", globals.currentDataType)
-    if globals.currentDataType == 4:
-        globals.tipos[-1] = 0
-    elif globals.currentDataType == 5:
-        globals.tipos[-1] = 1
-    elif globals.currentDataType == 7:
-        globals.tipos[-1] = 2
-    elif globals.currentDataType == 6:
-        globals.tipos[-1] = 3
-    print("CurrentType", globals.currentDataType)
+
+    # if globals.currentDataType == 4:
+    #     globals.tipos[-1] = 0
+    # elif globals.currentDataType == 5:
+    #     globals.tipos[-1] = 1
+    # elif globals.currentDataType == 7:
+    #     globals.tipos[-1] = 2
+    # elif globals.currentDataType == 6:
+    #     globals.tipos[-1] = 3
+    # print("CurrentType", globals.currentDataType)
 
 
 def p_expresion(p):
