@@ -177,4 +177,10 @@ def checkUpdateFunctionType(currentScope, functionCalled):
 		elif currentFunctionType == st.ENV_TYPE and functionCalledType == st.MOVEMENT_TYPE:
 			sys.exit('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
 
+def resetGlobalVars():
+	globals.currentDataTypeString = ""
+	globals.currentId = ''
+	globals.currentDataType = -1
+	globals.currentSize = 1
+	globals.isArr = False
 	

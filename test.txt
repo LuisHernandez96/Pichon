@@ -1,21 +1,7 @@
 FUNCTIONS{
 
   function void caca(int a, int b){
-  	int d = 2;
-  	int c = a + b;
-  	int e = d + c;
-  	int f = 2 + 2;
-  	down();
-  }
-
-  function int caca2(int a, int b){
-  	int d = 2;
-  	int c = a + b;
-  	int e = d + c;
-  	int f = 2 + 2;
-  	turnLeft();
-  	caca(d, c);
-  	return a;
+  	int[5] benis = {1,2,3,1+3,6-1};
   }
 }
 
@@ -23,7 +9,4 @@ ENVIRONMENT{
 }
 
 MOVEMENT{
-caca2(2, 2);
-up();
-	down();
 }
