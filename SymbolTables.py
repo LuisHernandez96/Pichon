@@ -13,6 +13,7 @@ VARS = "vars"
 DATA_TYPE = "data_type"
 DATA_TYPE_STRING = "data_type_string"
 VALUE = "value"
+DIMS = "dimensions"
 SIZE = "size"
 LIST = "list"
 PARAMS = "parameters"
@@ -33,6 +34,14 @@ def getReturnType(scope):
 
 def getReturnSize(scope):
     return scope[RETURN_SIZE]
+
+def getDimensionsID(scope):
+    return scope[DIMS]
+
+def getScopeID(id, currentScope):
+    scope = getScope(currentScope)
+    scope = scope[VARS][id]
+    return scope
 
 def getScope(scope):
     if scope in SYMBOL_TABLE[FUNC].keys():
@@ -202,7 +211,7 @@ def VARS_INIT():
     VARS_TABLE = dict()
     return VARS_TABLE
 
-def ADD_VAR(currentScope, id, data_type, data_type_string, size = None):
+def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = []):
 
     scope = getScope(currentScope)
 
@@ -213,3 +222,4 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None):
         scope[VARS][id][DATA_TYPE] = data_type
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
         scope[VARS][id][SIZE] = size
+        scope[VARS][id][DIMS] = dims

@@ -78,10 +78,7 @@ def getIdAddress(id, dataType, scope):
 def crearCuadruploExpresion(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
-			print(globals.operadores)
-			print(globals.operandos)
-			print(globals.tipos)
-			print()
+
 			operando_der = globals.operandos.pop()
 			operando_izq = globals.operandos.pop()
 			tipo_der = globals.tipos.pop()
@@ -194,3 +191,4 @@ def resetGlobalVars():
 	globals.currentDataType = -1
 	globals.currentSize = 1
 	globals.isArr = False
+	globals.dimensiones = []

@@ -145,9 +145,8 @@ def p_return_int(p):
     'return_int : '
     globals.currentDataTypeString += ('[' + str(p[-1]) + ']')
     globals.currentSize *= p[-1]
-    #print("CurrentDT", globals.currentDataType)
     globals.isArr = True
-    # globals.dimensiones.append(p[-1])
+    globals.dimensiones.append(int(p[-1]))
     p[0] = p[-1]
 
 
@@ -157,19 +156,15 @@ def p_params(p):
 
 def p_add_var(p):
     'add_var :'
-    #print("CurrDT2", globals.currentDataType)
-    # if globals.isArr:
-    #     globals.setArrDataType()
-    #print("CurrDT2", globals.currentDataType)
     st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString,
-               size=globals.currentSize)
+               size=globals.currentSize, dims = globals.dimensiones)
     resetGlobalVars()
 
 
 def p_add_param(p):
     'add_param :'
     st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString,
-               size=globals.currentSize)
+               size=globals.currentSize, dims = globals.dimensiones)
     st.ADD_PARAM_FUNCTION(globals.currentScope, globals.currentDataTypeString)
     paramDataType = getIdDataType(globals.currentId, globals.currentScope)
     paramVirtualAddress = getIdAddress(globals.currentId, paramDataType, globals.currentScope)
@@ -201,6 +196,9 @@ def p_expression_list(p):
 
 def p_list(p):
     '''list : L_BRACE expression_list list1 nacada R_BRACE'''
+    if globals.dimSize > 0:
+        globals.assigningArrayDimensions.append(globals.dimSize)
+    globals.dimSize = 0
     p[0] = True
 
 def p_list1(p):
@@ -216,6 +214,7 @@ def p_nacada(p):
         virtualAddress = memory.ADD_NEW_VAR(typ, size=1)
         cuad = Cuadruplo('=', operand1=oper, result=virtualAddress, counter=globals.cuadCounter)
         st.ADD_MEMORY(globals.currentScope, typ, 1, True)
+        globals.dimSize += 1
         globals.cuadruplos.append(cuad)
         globals.cuadCounter += 1
         globals.arrayPendingAddress.append(virtualAddress)
@@ -626,7 +625,22 @@ def p_inicializacion(p):
     if p[8] == True:
 
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit('Error at line {}: All elements of an array must be of the same type.')
+            sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
+
+        #variableDimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
+        #assigningArrayDimensions = globals.assigningArrayDimensions
+#
+        #print('Wadduppppp')
+        #print(variableDimensions)
+        #print(assigningArrayDimensions)
+        #print()
+#
+        #if len(variableDimensions) != len(assigningArrayDimensions):
+        #    sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
+        #else:
+        #    for (variableDimension, arrayDimension) in zip(variableDimensions, assigningArrayDimensions):
+        #        if variableDimension != arrayDimension:
+        #            sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -654,6 +668,7 @@ def p_inicializacion(p):
             globals.cuadruplos.append(cuad)
             k += 1
 
+        globals.assigningArrayDimensions = []
         globals.arrayPendingAddress = []
         globals.arrayPendingTypes = []
 
@@ -680,7 +695,22 @@ def p_asignacion(p):
     if p[5] == True:
 
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit('Error at line {}: All elements of an array must be of the same type.')
+            sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
+
+        #variableDimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
+        #assigningArrayDimensions = globals.assigningArrayDimensions
+#
+        #print('Wadduppppp')
+        #print(variableDimensions)
+        #print(assigningArrayDimensions)
+        #print()
+#
+        #if len(variableDimensions) != len(assigningArrayDimensions):
+        #    sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
+        #else:
+        #    for (variableDimension, arrayDimension) in zip(variableDimensions, assigningArrayDimensions):
+        #        if variableDimension != arrayDimension:
+        #            sys.exit('Error at line {}: Dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -712,6 +742,7 @@ def p_asignacion(p):
             globals.cuadruplos.append(cuad)
             k += 1
 
+        globals.assigningArrayDimensions = []
         globals.arrayPendingAddress = []
         globals.arrayPendingTypes = []
 
@@ -791,8 +822,8 @@ def main():
     # print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
     # print(globals.operadores)
-    print(globals.operandos)
-    print(globals.tipos)
+    # print(globals.operandos)
+    # print(globals.tipos)
     # print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0
