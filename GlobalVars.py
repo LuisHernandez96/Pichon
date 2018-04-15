@@ -40,6 +40,7 @@ class GlobalVars:
 		self.assigningArrayDimensions = []
 		self.saved_dims = []
 		self.saved_arrs_ids = []
-
+		self.R = 1
+		self.suma = 0
 
 globals = GlobalVars()

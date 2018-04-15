@@ -200,7 +200,7 @@ def resetGlobalVars():
 	globals.dimensiones = []
 
 def checkArrayDimensions(arr, dimensions, index):
-	if len(arr) != dimensions[index]:
+	if len(arr) != dimensions[index]['sup']:
 		return False
 	else:
 		ret = True
