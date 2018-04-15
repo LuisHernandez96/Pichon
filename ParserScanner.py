@@ -30,10 +30,10 @@ def p_func_sec1(p):
 
 
 def p_functions(p):
-	'''functions : FUNCTION tipo function_header_id create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
-	st.ADD_SCOPE_MEMORY(globals.currentScope)
-	globals.functionReturns = False
-	createEndProc()
+    '''functions : FUNCTION tipo function_header_id create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
+    st.ADD_SCOPE_MEMORY(globals.currentScope)
+    globals.functionReturns = False
+    createEndProc()
 
 
 def p_function_header_id(p):
@@ -67,24 +67,23 @@ def p_function_header_id(p):
 
 
 def p_create_function_vars_table(p):
-	'''create_function_vars_table :'''
-	globals.currentVarsTable = st.VARS_INIT()
-	memory.CLEAR_MEMORY()
-	globals.currentScope = p[-1]
-	if globals.currentScope not in st.SYMBOL_TABLE.keys():
-		st.ADD_FUNC(p[-1], p[-2])
-	else:
-		st.ADD_SCOPE_VARS_TABLE(globals.currentScope)
+    '''create_function_vars_table :'''
+    globals.currentVarsTable = st.VARS_INIT()
+    memory.CLEAR_MEMORY()
+    globals.currentScope = p[-1]
+    if globals.currentScope not in st.SYMBOL_TABLE.keys():
+        st.ADD_FUNC(p[-1], p[-2])
+    else:
+        st.ADD_SCOPE_VARS_TABLE(globals.currentScope)
 
+    if globals.currentScope in st.SYMBOL_TABLE[st.FUNC]:
+        if globals.currentDataTypeString != "void":
+            st.ADD_RETURN_SIZE(globals.currentScope, globals.currentSize)
+        else:
+            st.ADD_RETURN_SIZE(globals.currentScope, size=0)
 
-	if globals.currentScope in st.SYMBOL_TABLE[st.FUNC]:
-		if globals.currentDataTypeString != "void":
-			st.ADD_RETURN_SIZE(globals.currentScope, globals.currentSize)
-		else:
-			st.ADD_RETURN_SIZE(globals.currentScope, size = 0)
-
-	globals.currentSize = 1
-	globals.currentDataTypeString = ""
+    globals.currentSize = 1
+    globals.currentDataTypeString = ""
 
 
 def p_set_start_cuad(p):
@@ -100,8 +99,9 @@ def p_functions1(p):
 def p_fucntions2(p):
     '''functions2 : return
 				   | empty'''
-	if not globals.functionReturns and st.getReturnType(st.getScope(globals.currentScope)) != constants.DATA_TYPES[constants.VOID]:
-		sys.exit('Error at line {}: Missing return statement.'.format(globals.lineNumber + 1))
+    if not globals.functionReturns and st.getReturnType(st.getScope(globals.currentScope)) != constants.DATA_TYPES[
+        constants.VOID]:
+        sys.exit('Error at line {}: Missing return statement.'.format(globals.lineNumber + 1))
 
 
 def p_env_sec(p):
@@ -146,7 +146,7 @@ def p_return_int(p):
     'return_int : '
     globals.currentDataTypeString += ('[' + str(p[-1]) + ']')
     globals.currentSize *= p[-1]
-    print("CurrentDT",globals.currentDataType)
+    print("CurrentDT", globals.currentDataType)
     globals.isArr = True
     # globals.dimensiones.append(p[-1])
     p[0] = p[-1]
@@ -161,20 +161,23 @@ def p_add_var(p):
     print("CurrDT2", globals.currentDataType)
     # if globals.isArr:
     #     globals.setArrDataType()
-    print("CurrDT2",globals.currentDataType)
+    print("CurrDT2", globals.currentDataType)
     st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString,
                size=globals.currentSize)
     resetGlobalVars()
 
 
 def p_add_param(p):
-	'add_param :'
-	st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString, size = globals.currentSize)
-	st.ADD_PARAM_FUNCTION(globals.currentScope, globals.currentDataTypeString)
-	paramDataType = getIdDataType(globals.currentId, globals.currentScope)
-	paramVirtualAddress = getIdAddress(globals.currentId, paramDataType, globals.currentScope)
-	st.ADD_PARAM_VIRTUAL_ADDRESS(globals.currentScope, paramVirtualAddress)
-    resetGlobalVars()
+    'add_param :'
+    st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString,
+               size=globals.currentSize)
+    st.ADD_PARAM_FUNCTION(globals.currentScope, globals.currentDataTypeString)
+    paramDataType = getIdDataType(globals.currentId, globals.currentScope)
+    paramVirtualAddress = getIdAddress(globals.currentId, paramDataType, globals.currentScope)
+    st.ADD_PARAM_VIRTUAL_ADDRESS(globals.currentScope, paramVirtualAddress)
+
+
+resetGlobalVars()
 
 
 def p_params1(p):
@@ -201,21 +204,25 @@ def p_list1(p):
     '''list1 : COMMA expresion nacada list1
 			  | empty'''
 
+
 def p_print_nacada(p):
     'print_nacada : '
     print(globals.size_dims)
+
 
 def p_new_nacada(p):
     'new_nacada : '
     globals.size_dims = []
 
+
 def p_nacada(p):
     'nacada : '
     globals.size_dims.append(globals.operandos[-1])
 
+
 def p_return(p):
-	'''return : RETURN expresion SEMICOLON push_return'''
-	globals.functionReturns = True
+    '''return : RETURN expresion SEMICOLON push_return'''
+    globals.functionReturns = True
 
 
 def p_push_return(p):
@@ -291,13 +298,13 @@ def p_while_loop(p):
 
 
 def p_push_expression_tmp(p):
-	'''push_expression_tmp :'''
-	expressionDataType = constants.DATA_TYPES[constants.BOOLEAN]
-	virtualAddress = memory.ADD_NEW_VAR(expressionDataType, size = 1)
-	cuad = Cuadruplo('=', operand1 = globals.operandos.pop(), result = virtualAddress, counter = globals.cuadCounter)
-	st.ADD_MEMORY(globals.currentScope, expressionDataType, 1, True)
-	globals.cuadruplos.append(cuad)
-	globals.cuadCounter += 1
+    '''push_expression_tmp :'''
+    expressionDataType = constants.DATA_TYPES[constants.BOOLEAN]
+    virtualAddress = memory.ADD_NEW_VAR(expressionDataType, size=1)
+    cuad = Cuadruplo('=', operand1=globals.operandos.pop(), result=virtualAddress, counter=globals.cuadCounter)
+    st.ADD_MEMORY(globals.currentScope, expressionDataType, 1, True)
+    globals.cuadruplos.append(cuad)
+    globals.cuadCounter += 1
 
 
 def p_push_gotofalse(p):
@@ -486,13 +493,15 @@ def p_push_constant_operand_stack(p):
         globals.tipos.append(constants.DATA_TYPES[constants.INT])
     globals.operandos.append('%' + str(p[-1]))
 
+
 def p_push_constant_list_operand_stack(p):
     'push_constant_list_operand_stack :'
     globals.setArrDataType()
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
-    print("Lle",globals.currentDataType)
+    print("Lle", globals.currentDataType)
     globals.operandos.append(globals.currentDataType)
+
 
 def p_push_open_paren(p):
     '''push_open_paren :'''
@@ -520,27 +529,28 @@ def p_xyz(p):
 
 
 def p_func_call(p):
-	'''func_call : func_id L_PAREN func_call1 R_PAREN'''
-	checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
-	checkUpdateFunctionType(globals.currentScope, globals.functionCalled)
+    '''func_call : func_id L_PAREN func_call1 R_PAREN'''
+    checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
+    checkUpdateFunctionType(globals.currentScope, globals.functionCalled)
 
-	createGoSub(globals.functionCalled)
+    createGoSub(globals.functionCalled)
 
-	retType = st.getReturnType(st.getScope(globals.functionCalled))
-	retSize = st.getReturnSize(st.getScope(globals.functionCalled))
-	virtualAddress = memory.ADD_NEW_VAR(retType, retSize)
-	globals.operadores.pop()
-	globals.operandos.append(virtualAddress)
-	globals.tipos.append(retType)
+    retType = st.getReturnType(st.getScope(globals.functionCalled))
+    retSize = st.getReturnSize(st.getScope(globals.functionCalled))
+    virtualAddress = memory.ADD_NEW_VAR(retType, retSize)
+    globals.operadores.pop()
+    globals.operandos.append(virtualAddress)
+    globals.tipos.append(retType)
 
-    if retType != constants.DATA_TYPES[constants.VOID]:
-        # 	create cuad = func _ temp1
-        cuad = Cuadruplo('=', operand1=globals.functionCalled, result=virtualAddress, counter=globals.cuadCounter)
-        st.ADD_MEMORY(globals.currentScope, retType, 1, True)
-        globals.cuadruplos.append(cuad)
-        globals.cuadCounter += 1
 
-    globals.parameterCounter = 0
+if retType != constants.DATA_TYPES[constants.VOID]:
+    # 	create cuad = func _ temp1
+    cuad = Cuadruplo('=', operand1=globals.functionCalled, result=virtualAddress, counter=globals.cuadCounter)
+    st.ADD_MEMORY(globals.currentScope, retType, 1, True)
+    globals.cuadruplos.append(cuad)
+    globals.cuadCounter += 1
+
+globals.parameterCounter = 0
 
 
 def p_func_call1(p):
@@ -554,12 +564,12 @@ def p_func_call2(p):
 
 
 def p_check_parameter(p):
-	'''check_parameter :'''
-	argumentDataType = globals.tipos.pop()
-	argument = globals.operandos.pop()
-	checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType), globals.parameterCounter)
-	createParam(globals.parameterCounter, argument)
-	globals.parameterCounter += 1
+    '''check_parameter :'''
+    argumentDataType = globals.tipos.pop()
+    argument = globals.operandos.pop()
+    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType), globals.parameterCounter)
+    createParam(globals.parameterCounter, argument)
+    globals.parameterCounter += 1
 
 
 def p_func_id(p):
@@ -586,22 +596,23 @@ def p_func_id(p):
 				| LENGTH
 				| ID
 				'''
-	st.CHECK_FUNCTION_DEFINED(p[1])
-	globals.operadores.append('PENDING FUNCTION')
-	globals.functionCalled = p[1]
-	if p[1] not in reserved:
-		createERA(globals.functionCalled)
-	globals.parameterCounter = 0
-	p[0] = p[1]
+    st.CHECK_FUNCTION_DEFINED(p[1])
+    globals.operadores.append('PENDING FUNCTION')
+    globals.functionCalled = p[1]
+    if p[1] not in reserved:
+        createERA(globals.functionCalled)
+    globals.parameterCounter = 0
+    p[0] = p[1]
 
 
 def p_declaracion(p):
-	'''declaracion : tipo ID asignacion2 assign_declaration_memory add_var'''
+    '''declaracion : tipo ID asignacion2 assign_declaration_memory add_var'''
+
 
 def p_assign_declaration_memory(p):
-	'''assign_declaration_memory :'''
-	dataType = p[-3]
-	virtualAddress = memory.ADD_NEW_VAR(dataType, size = globals.currentSize)
+    '''assign_declaration_memory :'''
+    dataType = p[-3]
+    virtualAddress = memory.ADD_NEW_VAR(dataType, size=globals.currentSize)
 
 
 def p_inicializacion(p):
@@ -668,11 +679,11 @@ def main():
     with open('test.txt') as f:
         read_data = f.read()
 
-	parser.parse(read_data)
-	#for i in range(0, len(globals.cuadruplos)):
-	# 	print(globals.cuadruplos[i])
+        parser.parse(read_data)
+        # for i in range(0, len(globals.cuadruplos)):
+        # 	print(globals.cuadruplos[i])
 
-	pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
+        pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
     # print("FUNCTIONS")
     # for func in st.SYMBOL_TABLE[st.FUNC].keys():
