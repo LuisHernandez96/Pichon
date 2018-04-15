@@ -8,6 +8,7 @@ FUNC = "FUNCTIONS"
 ENV = "ENVIRONMENT"
 MOV = "MOVEMENT"
 RETURN_TYPE = "returnType"
+RETURN_SIZE = "returnSize"
 VARS = "vars"
 DATA_TYPE = "data_type"
 DATA_TYPE_STRING = "data_type_string"
@@ -15,6 +16,7 @@ VALUE = "value"
 SIZE = "size"
 LIST = "list"
 PARAMS = "parameters"
+PARAMS_ADDRESS = "parameters_address"
 NEEDS = "needs"
 PROC_START = "proc_start"
 ADDRESS = "address"
@@ -29,6 +31,9 @@ SYMBOL_TABLE = dict()
 def getReturnType(scope):
     return scope[RETURN_TYPE]
 
+def getReturnSize(scope):
+    return scope[RETURN_SIZE]
+
 def getScope(scope):
     if scope in SYMBOL_TABLE[FUNC].keys():
         return SYMBOL_TABLE[FUNC][scope]
@@ -40,74 +45,86 @@ def ADD_PREDEFINED_FUNCTIONS():
         "down" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "up" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "forward" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "turnLeft" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "turnRight" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingNorth" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingEast" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingWest" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingSouth" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "canMoveForward" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "envSize" : {
             PARAMS : ['int', 'int', 'int'],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
         },
         "setMovementSpeed" : {
             PARAMS : ['float'],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
             RESERVED : True,
-            FUNCTION_TYPE : NONE_TYPE
+            FUNCTION_TYPE : MOVEMENT_TYPE
         }
     }
 
@@ -130,6 +147,7 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][RETURN_TYPE] = returnType
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
         SYMBOL_TABLE[FUNC][id][PARAMS] = []
+        SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
         SYMBOL_TABLE[FUNC][id][FUNCTION_TYPE] = NONE_TYPE
         if(debug):
@@ -162,6 +180,9 @@ def ADD_SCOPE_MEMORY(currentScope):
 def ADD_PARAM_FUNCTION(functionID, dataType):
     SYMBOL_TABLE[FUNC][functionID][PARAMS].append(dataType)
 
+def ADD_PARAM_VIRTUAL_ADDRESS(functionID, virtualAddress):
+    SYMBOL_TABLE[FUNC][functionID][PARAMS_ADDRESS].append(virtualAddress)
+
 def ADD_SCOPE_VARS_TABLE(currentScope):
     SYMBOL_TABLE[currentScope][VARS] = dict()
     SYMBOL_TABLE[currentScope][NEEDS] = n.NeededSize()
@@ -169,6 +190,9 @@ def ADD_SCOPE_VARS_TABLE(currentScope):
 def SET_START_CUAD(currentScope, start):
     scope = getScope(currentScope)
     scope[PROC_START] = start
+
+def ADD_RETURN_SIZE(functionID, size):
+    SYMBOL_TABLE[FUNC][functionID][RETURN_SIZE] = size
 
 def CHECK_FUNCTION_DEFINED(functionID):
     if functionID not in SYMBOL_TABLE[FUNC]:

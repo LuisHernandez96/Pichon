@@ -26,5 +26,6 @@ class GlobalVars:
 		self.currentDataTypeString = ""
 		self.parameterCounter = 0
 		self.functionCalled = ""
+		self.functionReturns = False
 
 globals = GlobalVars()
