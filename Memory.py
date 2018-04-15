@@ -23,18 +23,16 @@ class Memory:
 		self.CURRENT_TEMP_FLOAT = 50000
 		self.CURRENT_TEMP_BOOLEAN = 60000
 
-	def ADD_NEW_VAR(self, data_type, size=1):
+	def ADD_NEW_VAR(self, data_type, size = 1):
 		if data_type == constants.DATA_TYPES[constants.INT] or data_type == constants.DATA_TYPES[constants.INT_LIST]:
 			assignedMemory = self.CURRENT_TEMP_INT
 			self.CURRENT_TEMP_INT += size
 			self.LOCAL_MEMORY["INT_MEM"][assignedMemory] = None
-		elif data_type == constants.DATA_TYPES[constants.FLOAT] or data_type == constants.DATA_TYPES[
-			constants.FLOAT_LIST]:
+		elif data_type == constants.DATA_TYPES[constants.FLOAT] or data_type == constants.DATA_TYPES[constants.FLOAT_LIST]:
 			assignedMemory = self.CURRENT_TEMP_FLOAT
 			self.CURRENT_TEMP_FLOAT += size
 			self.LOCAL_MEMORY["FLOAT_MEM"][assignedMemory] = None
-		elif data_type == constants.DATA_TYPES[constants.BOOLEAN] or data_type == constants.DATA_TYPES[
-			constants.BOOLEAN_LIST]:
+		elif data_type == constants.DATA_TYPES[constants.BOOLEAN] or data_type == constants.DATA_TYPES[constants.BOOLEAN_LIST]:
 			assignedMemory = self.CURRENT_TEMP_BOOLEAN
 			self.CURRENT_TEMP_BOOLEAN += size
 			self.LOCAL_MEMORY["BOOLEAN_MEM"][assignedMemory] = None

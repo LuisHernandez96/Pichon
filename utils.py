@@ -61,21 +61,27 @@ def getIdDataType(id, scope):
 def getIdAddress(id, dataType, scope):
 	# We're in a function
 	if scope in st.SYMBOL_TABLE[st.FUNC].keys():
+		size = st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.SIZE]
 		if st.ADDRESS in st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id]:
 			return st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.ADDRESS]
 		else:
-			st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.ADDRESS] = memory.ADD_NEW_VAR(dataType)
+			st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.ADDRESS] = memory.ADD_NEW_VAR(dataType, size)
 			return st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.ADDRESS]
 	else:
+		size = st.SYMBOL_TABLE[scope][st.VARS][id][st.SIZE]
 		if st.ADDRESS in st.SYMBOL_TABLE[scope][st.VARS][id]:
 			return st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS]
 		else:
-			st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS] = memory.ADD_NEW_VAR(dataType)
+			st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS] = memory.ADD_NEW_VAR(dataType, size)
 			return st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS]
 
 def crearCuadruploExpresion(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
+			print(globals.operadores)
+			print(globals.operandos)
+			print(globals.tipos)
+			print()
 			operando_der = globals.operandos.pop()
 			operando_izq = globals.operandos.pop()
 			tipo_der = globals.tipos.pop()
@@ -87,7 +93,7 @@ def crearCuadruploExpresion(validOperators):
 			if operador == '=':
 				cuad = Cuadruplo(operador, operand1 = operando_izq, result = operando_der, counter = globals.cuadCounter)
 			else:
-				result = memory.ADD_NEW_VAR(resultType)
+				result = memory.ADD_NEW_VAR(resultType, size = 1)
 				st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
 				cuad = Cuadruplo(operador, operando_izq, operando_der, result = result, counter = globals.cuadCounter)
 				globals.tipos.append(resultType)
@@ -105,7 +111,7 @@ def crearCuadruploUnario(validOperators):
 
 			resultType = isValidResult(operador, tipo)
 
-			virtualAddress = memory.ADD_NEW_VAR("TEMP", resultType)
+			virtualAddress = memory.ADD_NEW_VAR(resultType, size = 1)
 			st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
 			cuad = Cuadruplo(operador, operand1 = operando, result = result, counter = globals.cuadCounter)
 
@@ -149,10 +155,15 @@ def createParam(paramCounter, operand):
 	globals.cuadruplos.append(cuad)
 
 def createGoSub(functionCalled):
-	initialAddress = st.SYMBOL_TABLE[st.FUNC][functionCalled][st.PROC_START]
+	initialAddress = None
+	if st.PROC_START in st.SYMBOL_TABLE[st.FUNC][functionCalled]:
+		initialAddress = st.SYMBOL_TABLE[st.FUNC][functionCalled][st.PROC_START]
 	cuad = Cuadruplo('GOSUB', functionCalled, result = initialAddress, counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
+
+def amountParameters(functionID):
+	return len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS])
 
 def getFunctionType(functionID):
 	return st.SYMBOL_TABLE[st.FUNC][functionID][st.FUNCTION_TYPE]
