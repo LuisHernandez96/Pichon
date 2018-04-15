@@ -501,12 +501,13 @@ def p_func_id(p):
 	p[0] = p[1]
 
 def p_declaracion(p):
-	'''declaracion : tipo ID asignacion2 assign_declaration_memory add_var'''
+	'''declaracion : tipo ID asignacion2 add_var assign_declaration_memory'''
 
 def p_assign_declaration_memory(p):
 	'''assign_declaration_memory :'''
-	dataType = p[-3]
-	virtualAddress = memory.ADD_NEW_VAR(dataType, size = globals.currentSize)
+	dataType = p[-4]
+	id = p[-3]
+	virtualAddress = getIdAddress(id, dataType, globals.currentScope)
 
 def p_inicializacion(p):
 	'''inicializacion : tipo ID asignacion2 add_var ASSIGN push_operator_stack expresion'''
@@ -568,7 +569,7 @@ def main():
 	for i in range(0, len(globals.cuadruplos)):
 	 	print(globals.cuadruplos[i])
 
-	#pprint.pprint(st.SYMBOL_TABLE)
+	pprint.pprint(st.SYMBOL_TABLE)
 
 	#print("FUNCTIONS")
 	#for func in st.SYMBOL_TABLE[st.FUNC].keys():
