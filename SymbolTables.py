@@ -38,6 +38,9 @@ def getReturnSize(scope):
 def getDimensionsID(scope):
     return scope[DIMS]
 
+def getDataTypeString(scope):
+    return scope[DATA_TYPE_STRING]
+
 def getScopeID(id, currentScope):
     scope = getScope(currentScope)
     scope = scope[VARS][id]
@@ -223,3 +226,20 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
         scope[VARS][id][SIZE] = size
         scope[VARS][id][DIMS] = dims
+
+def getDims(currentScope, id):
+    scope = getScope(currentScope)
+
+    if id not in scope[VARS]:
+        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
+    else:
+        return scope[VARS][id][DIMS]
+
+def getIDFromAddress(currentScope, address):
+    scope = getScope(currentScope)
+
+    for var in scope[VARS]:
+        if scope[VARS][var][ADDRESS] == address:
+            return var
+
+    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))

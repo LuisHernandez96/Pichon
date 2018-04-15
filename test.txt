@@ -1,11 +1,13 @@
 FUNCTIONS{
 
-  function void caca(int a, int[4][3] kaka){
-  	int[2][3] kek2 = {{1, 2, 3}, {4, 5, 6}};
+  function void caca(float kaka){
   }
 }
 
 ENVIRONMENT{
+	int[4] a = {1, 2, 3, 4};
+	int[1] d;
+	caca(5.5);
 }
 
 MOVEMENT{

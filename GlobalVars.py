@@ -37,5 +37,9 @@ class GlobalVars:
 		self.dimensiones = []
 		self.dummyArray = []
 		self.currentDim = 0
+		self.assigningArrayDimensions = []
+		self.saved_dims = []
+		self.saved_arrs_ids = []
+
 
 globals = GlobalVars()

@@ -378,9 +378,27 @@ def p_var_cte(p):
 	'''
 
 def p_var_cte1(p):
-    '''var_cte1 : L_BRACKET expresion R_BRACKET var_cte1
-		| empty
+    '''var_cte1 : L_BRACKET expresion save_index R_BRACKET var_cte1
+		| empty print_saved_dims
 	'''
+
+def p_save_index(p):
+    'save_index : '
+    globals.saved_dims.append((globals.operandos.pop(),globals.tipos.pop()))
+
+def p_print_saved_dims(p):
+    'print_saved_dims : '
+    #print("Saved_dims",globals.saved_dims)
+    #print("CurrentType", globals.currentDataType)
+    if globals.currentDataType == 4:
+        globals.tipos[-1] = 0
+    elif globals.currentDataType == 5:
+        globals.tipos[-1] = 1
+    elif globals.currentDataType == 7:
+        globals.tipos[-1] = 2
+    elif globals.currentDataType == 6:
+        globals.tipos[-1] = 3
+    #print("CurrentType", globals.currentDataType)
 
 
 def p_expresion(p):
@@ -559,9 +577,12 @@ def p_func_call2(p):
 
 def p_check_parameter(p):
     '''check_parameter :'''
+    pprint.pprint(st.SYMBOL_TABLE)
+    print(globals.tipos)
+    print(globals.operandos)
     argument = globals.operandos.pop()
     argumentDataType = globals.tipos.pop()
-    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType), globals.parameterCounter)
+    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType, argument), globals.parameterCounter)
     createParam(globals.parameterCounter, argument)
     globals.parameterCounter += 1
 
@@ -597,7 +618,8 @@ def p_func_id(p):
         createERA(globals.functionCalled)
     globals.parameterCounter = 0
     p[0] = p[1]
-
+    print(globals.tipos)
+    print(globals.operandos)
 
 def p_declaracion(p):
 	'''declaracion : tipo ID asignacion2 add_var'''
@@ -658,6 +680,8 @@ def p_inicializacion(p):
     dataType = p[1]
     virtualAddress = getIdAddress(p[2], dataType, globals.currentScope)
     globals.operandos.append(virtualAddress)
+    print('CAAAAACA')
+    print(p[1])
     globals.tipos.append(p[1])
     crearCuadruploExpresion(['='])
 
@@ -675,8 +699,8 @@ def p_asignacion(p):
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
-        print(globals.dummyArray)
         globals.dummyArray = None
+
         globals.tipos.append(globals.lastDataType)
 
         if globals.tipos[-1] == 0:
@@ -778,7 +802,7 @@ def main():
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
 
-    pprint.pprint(st.SYMBOL_TABLE[st.FUNC]['caca'])
+    #pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
     # print("\nENVIRONMENT")
     # print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
