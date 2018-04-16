@@ -25,7 +25,7 @@ class GlobalVars:
 		self.lineNumber = 0
 		self.currentDataTypeString = ""
 		self.parameterCounter = 0
-		self.functionCalled = ""
+		self.functionCalled = []
 		self.functionReturns = False
 		self.lastDataType = -1
 		self.arrayPendingAddress = []

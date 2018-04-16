@@ -554,13 +554,14 @@ def p_xyz(p):
 
 def p_func_call(p):
     '''func_call : func_id L_PAREN func_call1 R_PAREN'''
-    checkIncompleteParameters(globals.functionCalled, globals.parameterCounter)
-    checkUpdateFunctionType(globals.currentScope, globals.functionCalled)
+    checkIncompleteParameters(globals.functionCalled[-1], globals.parameterCounter)
+    checkUpdateFunctionType(globals.currentScope, globals.functionCalled[-1])
 
-    createGoSub(globals.functionCalled)
+    print('GoSUB', globals.functionCalled[-1], p[1])
+    createGoSub(globals.functionCalled[-1])
 
-    retType = st.getReturnType(st.getScope(globals.functionCalled))
-    retSize = st.getReturnSize(st.getScope(globals.functionCalled))
+    retType = st.getReturnType(st.getScope(globals.functionCalled[-1]))
+    retSize = st.getReturnSize(st.getScope(globals.functionCalled[-1]))
     virtualAddress = memory.ADD_NEW_VAR(retType, retSize)
     globals.operadores.pop()
     globals.operandos.append(virtualAddress)
@@ -568,11 +569,12 @@ def p_func_call(p):
 
     if retType != constants.DATA_TYPES[constants.VOID]:
         # 	create cuad = func _ temp1
-        cuad = Cuadruplo('=', operand1=globals.functionCalled, result=virtualAddress, counter=globals.cuadCounter)
+        cuad = Cuadruplo('=', operand1=globals.functionCalled[-1], result=virtualAddress, counter=globals.cuadCounter)
         st.ADD_MEMORY(globals.currentScope, retType, 1, True)
         globals.cuadruplos.append(cuad)
         globals.cuadCounter += 1
 
+    globals.functionCalled.pop()
     globals.parameterCounter = 0
 
 
@@ -588,12 +590,9 @@ def p_func_call2(p):
 
 def p_check_parameter(p):
     '''check_parameter :'''
-    pprint.pprint(st.SYMBOL_TABLE)
-    print(globals.tipos)
-    print(globals.operandos)
     argument = globals.operandos.pop()
     argumentDataType = globals.tipos.pop()
-    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType, argument), globals.parameterCounter)
+    checkFunctionParameter(globals.functionCalled[-1], dataTypeToString(argumentDataType, argument), globals.parameterCounter)
     createParam(globals.parameterCounter, argument)
     globals.parameterCounter += 1
 
@@ -624,9 +623,10 @@ def p_func_id(p):
 				'''
     st.CHECK_FUNCTION_DEFINED(p[1])
     globals.operadores.append('PENDING FUNCTION')
-    globals.functionCalled = p[1]
+    globals.functionCalled.append(p[1])
+    print("func_id", globals.functionCalled[-1])
     if p[1] not in reserved:
-        createERA(globals.functionCalled)
+        createERA(globals.functionCalled[-1])
     globals.parameterCounter = 0
     p[0] = p[1]
     print(globals.tipos)
@@ -696,8 +696,6 @@ def p_inicializacion(p):
     dataType = p[1]
     virtualAddress = getIdAddress(p[2], dataType, globals.currentScope)
     globals.operandos.append(virtualAddress)
-    print('CAAAAACA')
-    print(p[1])
     globals.tipos.append(p[1])
     crearCuadruploExpresion(['='])
 
@@ -827,7 +825,7 @@ def main():
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
 
-    #pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
+    #pprint.pprint(st.SYMBOL_TABLE)
 
     # print("\nENVIRONMENT")
     # print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
