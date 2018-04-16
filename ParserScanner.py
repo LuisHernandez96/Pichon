@@ -156,7 +156,7 @@ def p_return_int(p):
     globals.currentDataTypeString += ('[' + str(p[-1]) + ']')
     globals.currentSize *= p[-1]
     globals.isArr = True
-    globals.dimensiones.append({'inf' : 0, 'sup' : int(p[-1]), 'm' : None})
+    globals.dimensiones.append({'inf': 0, 'sup': int(p[-1]), 'm': None})
     globals.R = (globals.dimensiones[-1]['sup'] - globals.dimensiones[-1]['inf'] + 1) * globals.R
     p[0] = p[-1]
 
@@ -168,14 +168,14 @@ def p_params(p):
 def p_add_var(p):
     'add_var :'
     st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString,
-               size=globals.currentSize, dims = globals.dimensiones)
+               size=globals.currentSize, dims=globals.dimensiones)
     resetGlobalVars()
 
 
 def p_add_param(p):
     'add_param :'
     st.ADD_VAR(globals.currentScope, globals.currentId, globals.currentDataType, globals.currentDataTypeString,
-               size=globals.currentSize, dims = globals.dimensiones)
+               size=globals.currentSize, dims=globals.dimensiones)
     st.ADD_PARAM_FUNCTION(globals.currentScope, globals.currentDataTypeString)
     paramDataType = getIdDataType(globals.currentId, globals.currentScope)
     paramVirtualAddress = getIdAddress(globals.currentId, paramDataType, globals.currentScope)
@@ -198,6 +198,7 @@ def p_vars(p):
 		| inicializacion SEMICOLON vars
 		| empty'''
 
+
 def p_expression_list(p):
     '''expression_list : expresion
                          | list
@@ -208,6 +209,7 @@ def p_expression_list(p):
         if len(globals.dummyArray) > 0:
             globals.dummyArray[-1].append(globals.operandos[-1])
 
+
 def p_list(p):
     '''list : L_BRACE push_dummy_array expression_list list1 nacada R_BRACE'''
     if len(globals.dummyArray) > 1:
@@ -215,9 +217,11 @@ def p_list(p):
         globals.dummyArray[-1].append(top)
     p[0] = True
 
+
 def p_push_dummy_array(p):
     '''push_dummy_array :'''
     globals.dummyArray.append([])
+
 
 def p_list1(p):
     '''list1 : COMMA nacada expression_list list1
@@ -237,6 +241,7 @@ def p_nacada(p):
         globals.arrayPendingAddress.append(virtualAddress)
         globals.arrayPendingTypes.append(typ)
         globals.lastDataType = typ
+
 
 def p_return(p):
     '''return : RETURN expresion SEMICOLON push_return'''
@@ -378,7 +383,7 @@ def p_cuads_true_false(p):
 
 
 def p_var_cte(p):
-    '''var_cte : ID push_operand_stack var_cte1
+    '''var_cte : ID push_operand_stack var_cte1 print_saved_dims
 		| func_call var_cte1
 		| coord var_cte1
 		| CTE_I push_constant_operand_stack
@@ -389,50 +394,59 @@ def p_var_cte(p):
 		| SPHERE
 	'''
 
+
 def p_var_cte1(p):
     '''var_cte1 : L_BRACKET save_index expresion R_BRACKET var_cte1
-		| empty save_index print_saved_dims
+		| empty save_index
 	'''
+
 
 def p_save_index(p):
     'save_index : '
-    print("Opers_1",globals.operandos)
+    print("Opers_1", globals.operandos)
     print("Saved_dims_2", globals.saved_dims)
 
-    if len(globals.operandos)>0:
+    if len(globals.operandos) > 0 and globals.operandos[-1] not in globals.dims_for_address and globals.operandos[-1] != globals.arrBase:
         globals.saved_dims.append(globals.operandos[-1])
         # globals.tipos.pop()
 
     print("Opers_3", globals.operandos)
     print("Saved_dims_4", globals.saved_dims)
 
+
 def p_print_saved_dims(p):
     'print_saved_dims : '
-    print("Saved_dims",globals.saved_dims)
-    print("Current id",globals.currentId)
+    print("Saved_dims", globals.saved_dims)
+    print("Current id", globals.currentId)
 
     if len(globals.saved_dims) > 0:
-        currentArrDims = st.getDims( globals.currentScope,st.getIDFromAddress ( globals.currentScope ,globals.saved_dims[0] ) )
+        currentArrDims = st.getDims(globals.currentScope,
+                                    st.getIDFromAddress(globals.currentScope, globals.saved_dims[0]))
 
-        if len(globals.saved_dims)-1 != len(currentArrDims):
-            sys.exit("Error, different dimensions found {} != {}".format(len(globals.saved_dims)-1,len(currentArrDims)))
+        if len(globals.saved_dims) - 1 != len(currentArrDims):
+            sys.exit(
+                "Error, different dimensions found {} != {}".format(len(globals.saved_dims) - 1, len(currentArrDims)))
         else:
-            print("..",globals.saved_dims)
-            print(".-",currentArrDims)
+            print("..", globals.saved_dims)
+            print(".-", currentArrDims)
             globals.dims_for_address = []
 
             print(globals.operandos)
 
             for x in range(0, len(currentArrDims)):
-                cuad = Cuadruplo('VERIFICA', operand1=globals.saved_dims[x+1], operand2= 0, result=currentArrDims[x], counter=globals.cuadCounter)
+                cuad = Cuadruplo('VERIFICA', operand1=globals.saved_dims[x + 1], operand2=0, result=currentArrDims[x],
+                                 counter=globals.cuadCounter)
                 globals.cuadruplos.append(cuad)
                 globals.cuadCounter += 1
+                globals.operandos.pop()
 
-            for x in range(1,len(globals.saved_dims)):
+            for x in range(1, len(globals.saved_dims)):
                 globals.dims_for_address.append(globals.saved_dims[x])
 
-            print("dimsAddress",globals.dims_for_address)
-            # print("Address",st.getArrAddres(globals.saved_dims[0],globals.dims_for_address,currentArrDims))
+            globals.arrBase = globals.operandos.pop()
+
+            print("dimsAddress", globals.dims_for_address)
+            # print("Address",st.getArrAddress(globals.saved_dims[0],globals.dims_for_address,currentArrDims))
             globals.saved_dims = []
 
     print("CurrentType", globals.currentDataType)
@@ -450,6 +464,7 @@ def p_print_saved_dims(p):
 
 def p_expresion(p):
     '''expresion : push_open_paren logical_or pending_or expresion2'''
+
 
 def p_pending_or(p):
     '''pending_or :'''
@@ -628,7 +643,8 @@ def p_check_parameter(p):
     print(globals.operandos)
     argument = globals.operandos.pop()
     argumentDataType = globals.tipos.pop()
-    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType, argument), globals.parameterCounter)
+    checkFunctionParameter(globals.functionCalled, dataTypeToString(argumentDataType, argument),
+                           globals.parameterCounter)
     createParam(globals.parameterCounter, argument)
     globals.parameterCounter += 1
 
@@ -667,11 +683,12 @@ def p_func_id(p):
     print(globals.tipos)
     print(globals.operandos)
 
+
 def p_declaracion(p):
-	'''declaracion : tipo ID asignacion2 add_var'''
-	dataType = p[1]
-	id = p[2]
-	virtualAddress = getIdAddress(id, dataType, globals.currentScope)
+    '''declaracion : tipo ID asignacion2 add_var'''
+    dataType = p[1]
+    id = p[2]
+    virtualAddress = getIdAddress(id, dataType, globals.currentScope)
 
 
 def p_inicializacion(p):
@@ -680,7 +697,8 @@ def p_inicializacion(p):
     if p[8] == True:
 
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
+            sys.exit(
+                'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
@@ -688,7 +706,7 @@ def p_inicializacion(p):
         print('Assigned array', assignedArray)
         print('Dimensions', dimensions)
 
-        if not checkArrayDimensions(assignedArray, dimensions, index = 0):
+        if not checkArrayDimensions(assignedArray, dimensions, index=0):
             sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
@@ -705,13 +723,13 @@ def p_inicializacion(p):
         globals.tipos.pop()
         globals.tipos.append(globals.currentDataType)
 
-        firstAddress = memory.CURRENT_ADDRESS(globals.arrayPendingTypes[0]) # First address of explicit array
+        firstAddress = memory.CURRENT_ADDRESS(globals.arrayPendingTypes[0])  # First address of explicit array
         firstPendingAddress = globals.arrayPendingAddress[0]
         k = 0
         for (address, typ) in zip(globals.arrayPendingAddress, globals.arrayPendingTypes):
             result = getIdAddress(globals.assigningID, typ, globals.currentScope) + k
 
-            cuad = Cuadruplo('=', address, result = result, counter = globals.cuadCounter)
+            cuad = Cuadruplo('=', address, result=result, counter=globals.cuadCounter)
             st.ADD_MEMORY(globals.currentScope, typ, 1, True)
             globals.cuadCounter += 1
             globals.cuadruplos.append(cuad)
@@ -737,10 +755,10 @@ def p_inicializacion(p):
     crearCuadruploExpresion(['='])
 
 
-
 def p_is_initializing(p):
     '''is_initializing : '''
     globals.assigningID = p[-2]
+
 
 def p_asignacion(p):
     '''asignacion : ID asignacion1 ASSIGN push_operator_stack expression_list'''
@@ -748,7 +766,8 @@ def p_asignacion(p):
     if p[5] == True:
         print(p[1])
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit('Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
+            sys.exit(
+                'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
@@ -756,7 +775,7 @@ def p_asignacion(p):
         print('Assigned array', assignedArray)
         print('Dimensions', dimensions)
 
-        if not checkArrayDimensions(assignedArray, dimensions, index = 0):
+        if not checkArrayDimensions(assignedArray, dimensions, index=0):
             sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
@@ -773,7 +792,7 @@ def p_asignacion(p):
         globals.tipos.pop()
         globals.tipos.append(globals.currentDataType)
 
-        firstAddress = memory.CURRENT_ADDRESS(globals.arrayPendingTypes[0]) # First address of explicit array
+        firstAddress = memory.CURRENT_ADDRESS(globals.arrayPendingTypes[0])  # First address of explicit array
         firstPendingAddress = globals.arrayPendingAddress[0]
         k = 0
         for (address, typ) in zip(globals.arrayPendingAddress, globals.arrayPendingTypes):
@@ -783,7 +802,7 @@ def p_asignacion(p):
             else:
                 result = getIdAddress(globals.assigningID, None, globals.currentScope) + k
 
-            cuad = Cuadruplo('=', address, result = result, counter = globals.cuadCounter)
+            cuad = Cuadruplo('=', address, result=result, counter=globals.cuadCounter)
             st.ADD_MEMORY(globals.currentScope, typ, 1, True)
             globals.cuadCounter += 1
             globals.cuadruplos.append(cuad)
@@ -858,11 +877,11 @@ def main():
         read_data = f.read()
 
         parser.parse(read_data)
-    
+
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
 
-    #pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
+    # pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
     # print("\nENVIRONMENT")
     # print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
@@ -871,8 +890,8 @@ def main():
     # print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
     # print(globals.operadores)
-    # print(globals.operandos)
-    # print(globals.tipos)
+    print(globals.operandos)
+    print(globals.tipos)
     # print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0

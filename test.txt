@@ -5,15 +5,12 @@ FUNCTIONS{
     int k = 5;
   	int[3] kek2 = {3, 4+1, 5};
   	int[2][2] kek;
-  	kek = {{1, 2}, {3, 4}};
-  	d = kek[0][k];
+  	kek = {{10, 2}, {3, 4}};
+  	d = kek[5][k];
   }
 }
 
 ENVIRONMENT{
-	int[4] a = {1, 2, 3, 4};
-	int[1] d;
-	caca();
 }
 
 MOVEMENT{
