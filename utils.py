@@ -209,3 +209,12 @@ def checkArrayDimensions(arr, dimensions, index):
 				ret = ret and checkArrayDimensions(elem, dimensions, index + 1)
 
 		return ret
+
+def getArrAddres(base_address, arrIndex, currentArrDims):
+
+	address =  int(base_address)
+
+	for index,arrDim in zip(arrIndex,currentArrDims):
+		address += int(index)*int(arrDim)
+
+	return address

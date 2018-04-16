@@ -1,24 +1,11 @@
 FUNCTIONS{
-
-  function void vvv(int a){
-  	a = 5;
-  }
-
-  function int caca1(int a){
-  	return a;
-  }
-
-  function int caca2(int b){
-  	return b;
-  }
-
-  function int caca3(int b){
-  	return b;
+  function int caca(int a){
+  	return a + 1 + 1;
   }
 }
 
 ENVIRONMENT{
-	int b = caca1(caca2(caca3(6)));
+	int b = 5;
 }
 
 MOVEMENT{
