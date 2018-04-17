@@ -419,6 +419,9 @@ def p_var_cte2(p):
     '''var_cte2 : L_BRACKET next_dim expresion check_dims R_BRACKET var_cte2
         | empty
     '''
+    if len(p) == 7:
+        globals.saved_dims.pop()
+        globals.tipos.pop()
 
 def p_next_dim(p):
     '''next_dim :'''
@@ -428,8 +431,8 @@ def p_next_dim(p):
 
 def p_push_fondo_falso(p):
     '''push_fondo_falso :'''
-    print("push fondo false", globals.operandos)
     address = globals.operandos.pop()
+    type = globals.tipos.pop()
     if not st.checkIfArray(globals.currentScope, address):
         id = getIDFromAddress(globals.currentScope, address)
         sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
@@ -440,7 +443,6 @@ def p_push_fondo_falso(p):
 
 def p_check_dims(p):
     '''check_dims :'''
-    print('Check dims', globals.operandos)
     address = globals.operandos[-1]
     (arr_address, arr_dim) = globals.saved_dims[-1]
     dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
@@ -466,70 +468,6 @@ def p_check_dims(p):
         globals.cuadCounter += 1
         globals.cuadruplos.append(cuad)
         globals.operandos.append(res)
-
-def p_save_index(p):
-    'save_index : '
-    print("Opers_1", globals.operandos)
-    print("Saved_dims_2", globals.saved_dims)
-
-    if len(globals.operandos) > 0 and globals.operandos[-1] not in globals.dims_for_address and globals.operandos[-1] != globals.arrBase:
-        globals.saved_dims.append(globals.operandos[-1])
-        # globals.tipos.pop()
-
-    print("Opers_3", globals.operandos)
-    print("Saved_dims_4", globals.saved_dims)
-
-
-def p_print_saved_dims(p):
-    'print_saved_dims : '
-    print("Saved_dims", globals.saved_dims)
-    print("Current id", globals.currentId)
-
-    if len(globals.saved_dims) > 0:
-        currentArrDims = st.getDims(globals.currentScope,
-                                    st.getIDFromAddress(globals.currentScope, globals.saved_dims[0]))
-
-        print("currentArrDims", currentArrDims)
-        if len(globals.saved_dims) != len(currentArrDims):
-            sys.exit(
-                "Error, different dimensions found {} != {}".format(len(globals.saved_dims), len(currentArrDims)))
-        else:
-            print("..", globals.saved_dims)
-            print(".-", currentArrDims)
-            globals.dims_for_address = []
-
-            print(globals.operandos)
-
-            for x in range(0, len(currentArrDims)):
-                cuad = Cuadruplo('VERIFICA', operand1=globals.operandos[-1], operand2=0, result=currentArrDims[x],
-                                 counter=globals.cuadCounter)
-                globals.cuadruplos.append(cuad)
-                globals.cuadCounter += 1
-                globals.operandos.pop()
-
-            for cuadruplo in globals.cuadruplos:
-                print(cuadruplo)
-
-            for x in range(1, len(globals.saved_dims)):
-                globals.dims_for_address.append(globals.saved_dims[x])
-
-            globals.arrBase = globals.operandos.pop()
-
-            print("dimsAddress", globals.dims_for_address)
-            # print("Address",st.getArrAddress(globals.saved_dims[0],globals.dims_for_address,currentArrDims))
-            globals.saved_dims = []
-
-    print("CurrentType", globals.currentDataType)
-
-    # if globals.currentDataType == 4:
-    #     globals.tipos[-1] = 0
-    # elif globals.currentDataType == 5:
-    #     globals.tipos[-1] = 1
-    # elif globals.currentDataType == 7:
-    #     globals.tipos[-1] = 2
-    # elif globals.currentDataType == 6:
-    #     globals.tipos[-1] = 3
-    # print("CurrentType", globals.currentDataType)
 
 
 def p_expresion(p):
@@ -634,7 +572,6 @@ def p_push_operand_stack(p):
     virtualAddress = getIdAddress(id=p[-1], dataType=dataType, scope=globals.currentScope)
     globals.tipos.append(dataType)
     globals.operandos.append(virtualAddress)
-    print('end push_operand_stack', globals.operandos)
 
 
 def p_push_constant_operand_stack(p):
@@ -678,7 +615,6 @@ def p_func_call(p):
     checkIncompleteParameters(globals.functionCalled[-1], globals.parameterCounter)
     checkUpdateFunctionType(globals.currentScope, globals.functionCalled[-1])
 
-    print('GoSUB', globals.functionCalled[-1], p[1])
     createGoSub(globals.functionCalled[-1])
 
     retType = st.getReturnType(st.getScope(globals.functionCalled[-1]))
@@ -745,13 +681,10 @@ def p_func_id(p):
     st.CHECK_FUNCTION_DEFINED(p[1])
     globals.operadores.append('PENDING FUNCTION')
     globals.functionCalled.append(p[1])
-    print("func_id", globals.functionCalled[-1])
     if p[1] not in reserved:
         createERA(globals.functionCalled[-1])
     globals.parameterCounter = 0
     p[0] = p[1]
-    print(globals.tipos)
-    print(globals.operandos)
 
 
 def p_declaracion(p):
@@ -773,8 +706,8 @@ def p_inicializacion(p):
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
-        print('Assigned array', assignedArray)
-        print('Dimensions', dimensions)
+        #print('Assigned array', assignedArray)
+        #print('Dimensions', dimensions)
 
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
             sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
@@ -840,8 +773,8 @@ def p_asignacion(p):
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
-        print('Assigned array', assignedArray)
-        print('Dimensions', dimensions)
+        # print('Assigned array', assignedArray)
+        # print('Dimensions', dimensions)
 
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
             sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
@@ -959,9 +892,9 @@ def main():
     # print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
     # print(globals.operadores)
-    print(globals.operandos)
-    print(globals.tipos)
-    print(globals.saved_dims)
+    # print(globals.operandos)
+    # print(globals.tipos)
+    # print(globals.saved_dims)
     # print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0

@@ -79,10 +79,6 @@ def crearCuadruploExpresion(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
 
-			print(globals.operandos)
-			print(globals.tipos)
-			print(globals.operadores)
-
 			operando_der = globals.operandos.pop()
 			operando_izq = globals.operandos.pop()
 			tipo_der = globals.tipos.pop()
