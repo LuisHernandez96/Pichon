@@ -1,15 +1,12 @@
 FUNCTIONS{
-	function int caca(int a){
-		int b = a + 1 + 2;
-		return b;
-	}
+
 }
 
 ENVIRONMENT{
-	int[3][3][3] c = {1, 2, 3};
-	int a = c[1][2][3];
-	a = c[2];
-	a = 5 + 5 + 5;
+	int[2][2] a = {{1, 2}, {1, 2}};
+	int[2][2] c = a;
+	a = {{1, 2}, {1, 2}};
+	c = a;
 }
 
 MOVEMENT{

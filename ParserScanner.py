@@ -402,6 +402,10 @@ def p_var_cte1(p):
     if len(p) == 7:
         (arr_address, arr_dim) = globals.saved_dims[-1]
         dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
+
+        if globals.currentDim != len(dimensions) - 1:
+            sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+
         aux1 = globals.operandos.pop()
         res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
         cuad = Cuadruplo('+', aux1, dimensions[arr_dim]['m'], res, counter = globals.cuadCounter)
@@ -443,9 +447,17 @@ def p_push_fondo_falso(p):
 
 def p_check_dims(p):
     '''check_dims :'''
+    
+    if globals.tipos[-1] != constants.DATA_TYPES[constants.INT]:
+        sys.exit('Error at line {}: Array indexes must be integers.'.format(globals.lineNumber + 1))
+
     address = globals.operandos[-1]
     (arr_address, arr_dim) = globals.saved_dims[-1]
     dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
+
+    if globals.currentDim >= len(dimensions):
+        sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+
     inferior = dimensions[arr_dim]['inf']
     superior = dimensions[arr_dim]['sup']
     cuad = Cuadruplo('VER', address, inferior, superior, counter = globals.cuadCounter)
@@ -751,9 +763,39 @@ def p_inicializacion(p):
 
     dataType = p[1]
     virtualAddress = getIdAddress(p[2], dataType, globals.currentScope)
-    globals.operandos.append(virtualAddress)
-    globals.tipos.append(p[1])
-    crearCuadruploExpresion(['='])
+
+    # Assigning an array variable to another array variable
+    # Ex.
+    #      int[3] a = {1, 2, 3};
+    #   => int[3] c = a;
+    if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[8]:
+        asigningVirtualAddress = globals.operandos[-1]
+        asigningDataType = globals.tipos[-1]
+        asigningScope = st.getScopeID(st.getIDFromAddress(globals.currentScope, asigningVirtualAddress), globals.currentScope)
+        asigneeScope = st.getScopeID(p[2], globals.currentScope)
+        asigningDataTypeString = st.getDataTypeString(asigningScope)
+        asigneeDataTypeString = st.getDataTypeString(asigneeScope)
+        
+        if asigningDataTypeString != asigneeDataTypeString:
+            sys.exit('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+        else:
+            asigningSize = st.getSize(asigningScope)
+            asigneeSize = st.getSize(asigneeScope)
+
+            assert asigningSize == asigneeSize
+
+            globals.operandos.pop()
+            globals.tipos.pop()
+            globals.operadores.pop()
+            for k in range(0, asigningSize):
+                cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
+                globals.cuadCounter += 1
+                globals.cuadruplos.append(cuad)
+
+    else:
+        globals.operandos.append(virtualAddress)
+        globals.tipos.append(dataType)
+        crearCuadruploExpresion(['='])
 
 
 def p_is_initializing(p):
@@ -822,18 +864,70 @@ def p_asignacion(p):
 
     dataType = getIdDataType(p[1], globals.currentScope)
     virtualAddress = getIdAddress(p[1], dataType, globals.currentScope)
-    globals.operandos.append(virtualAddress)
-    globals.tipos.append(dataType)
+
+    # Assigning to an index of the variable
+    #if p[2] == True:
+    #    if dataType == 4:
+    #        dataType = 0
+    #    elif dataType == 5:
+    #        dataType = 1
+    #    elif dataType == 7:
+    #        dataType = 2
+    #    elif dataType == 6:
+    #        dataType = 3;
+
+    # Assigning an array variable to another array variable
+    # Ex.
+    #      int[3] a = {1, 2, 3};
+    #   => int[3] c = a;
+    if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[5]:
+        asigningVirtualAddress = globals.operandos[-1]
+        asigningDataType = globals.tipos[-1]
+        asigningScope = st.getScopeID(st.getIDFromAddress(globals.currentScope, asigningVirtualAddress), globals.currentScope)
+        asigneeScope = st.getScopeID(p[1], globals.currentScope)
+        asigningDataTypeString = st.getDataTypeString(asigningScope)
+        asigneeDataTypeString = st.getDataTypeString(asigneeScope)
+        
+        if asigningDataTypeString != asigneeDataTypeString:
+            sys.exit('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+        else:
+            asigningSize = st.getSize(asigningScope)
+            asigneeSize = st.getSize(asigneeScope)
+
+            assert asigningSize == asigneeSize
+
+            globals.operandos.pop()
+            globals.tipos.pop()
+            globals.operadores.pop()
+            for k in range(0, asigningSize):
+                cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
+                globals.cuadCounter += 1
+                globals.cuadruplos.append(cuad)
+
+    else:
+        globals.operandos.append(virtualAddress)
+        globals.tipos.append(dataType)
+        crearCuadruploExpresion(['='])
+
     globals.isAssigning = False
     globals.assigningID = ""
-    crearCuadruploExpresion(['='])
 
 
 def p_asignacion1(p):
-    '''asignacion1 : L_BRACKET expresion R_BRACKET
+    '''asignacion1 : L_BRACKET expresion R_BRACKET asignacion3
 					| empty'''
     globals.isAssigning = True
     globals.assigningID = p[-1]
+
+    # Is assigning to an index of the variable
+    if len(p) == 5:
+        print('Assigning to an indexxxx')
+        p[0] = True
+
+
+def p_asignacion3(p):
+    '''asignacion3 : L_BRACKET expresion R_BRACKET asignacion3
+                    | empty'''
 
 
 def p_asignacion2(p):
@@ -882,7 +976,7 @@ def main():
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
 
-    pprint.pprint(st.SYMBOL_TABLE)
+    pprint.pprint(st.SYMBOL_TABLE[st.ENV])
     # pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
     # print("\nENVIRONMENT")
@@ -891,11 +985,11 @@ def main():
     # print("\nMOVEMENT")
     # print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
-    # print(globals.operadores)
-    # print(globals.operandos)
-    # print(globals.tipos)
-    # print(globals.saved_dims)
-    # print(globals.saltos)
+    print(globals.operadores)
+    print(globals.operandos)
+    print(globals.tipos)
+    print(globals.saved_dims)
+    print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0
     assert len(globals.tipos) == 0

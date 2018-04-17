@@ -41,6 +41,9 @@ def getDimensionsID(scope):
 def getDataTypeString(scope):
     return scope[DATA_TYPE_STRING]
 
+def getSize(scope):
+    return scope[SIZE]
+
 def getScopeID(id, currentScope):
     scope = getScope(currentScope)
     scope = scope[VARS][id]
