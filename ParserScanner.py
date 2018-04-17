@@ -125,7 +125,7 @@ def p_tipo(p):
 
     globals.suma = 0
     for desc in globals.dimensiones:
-        desc['m'] = int(globals.R / (desc['sup'] - desc['inf'] + 1))
+        desc['m'] = int(globals.R / (desc['sup'] - desc['inf']))
         globals.R = desc['m']
         globals.suma += (desc['inf'] * desc['m'])
 
@@ -157,7 +157,7 @@ def p_return_int(p):
     globals.currentSize *= p[-1]
     globals.isArr = True
     globals.dimensiones.append({'inf': 0, 'sup': int(p[-1]), 'm': None})
-    globals.R = (globals.dimensiones[-1]['sup'] - globals.dimensiones[-1]['inf'] + 1) * globals.R
+    globals.R = (globals.dimensiones[-1]['sup'] - globals.dimensiones[-1]['inf']) * globals.R
     p[0] = p[-1]
 
 
@@ -383,7 +383,7 @@ def p_cuads_true_false(p):
 
 
 def p_var_cte(p):
-    '''var_cte : ID push_operand_stack var_cte1 print_saved_dims
+    '''var_cte : ID push_operand_stack var_cte1
 		| func_call var_cte1
 		| coord var_cte1
 		| CTE_I push_constant_operand_stack
@@ -396,10 +396,76 @@ def p_var_cte(p):
 
 
 def p_var_cte1(p):
-    '''var_cte1 : L_BRACKET save_index expresion R_BRACKET var_cte1
+    '''var_cte1 : L_BRACKET push_fondo_falso expresion check_dims R_BRACKET var_cte2
 		| empty
 	'''
+    if len(p) == 7:
+        (arr_address, arr_dim) = globals.saved_dims[-1]
+        dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
+        aux1 = globals.operandos.pop()
+        res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
+        cuad = Cuadruplo('+', aux1, dimensions[arr_dim]['m'], res, counter = globals.cuadCounter)
+        globals.cuadCounter += 1
+        globals.cuadruplos.append(cuad)
+        cuad = Cuadruplo('+', res, '%' + str(arr_address), res, counter = globals.cuadCounter)
+        globals.cuadCounter += 1
+        globals.cuadruplos.append(cuad)
+        globals.operandos.append('(' + str(res) + ')')
+        print('ARRAY ADDRESS', res)
+        globals.operadores.pop()
+        globals.saved_dims.pop()
 
+def p_var_cte2(p):
+    '''var_cte2 : L_BRACKET next_dim expresion check_dims R_BRACKET var_cte2
+        | empty
+    '''
+
+def p_next_dim(p):
+    '''next_dim :'''
+    (arr_address, arr_dim) = globals.saved_dims[-1]
+    globals.currentDim += 1
+    globals.saved_dims.append((arr_address, globals.currentDim))
+
+def p_push_fondo_falso(p):
+    '''push_fondo_falso :'''
+    print("push fondo false", globals.operandos)
+    address = globals.operandos.pop()
+    if not st.checkIfArray(globals.currentScope, address):
+        id = getIDFromAddress(globals.currentScope, address)
+        sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
+
+    globals.currentDim = 0
+    globals.saved_dims.append((address, globals.currentDim))
+    globals.operadores.append('[')
+
+def p_check_dims(p):
+    '''check_dims :'''
+    print('Check dims', globals.operandos)
+    address = globals.operandos[-1]
+    (arr_address, arr_dim) = globals.saved_dims[-1]
+    dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
+    inferior = dimensions[arr_dim]['inf']
+    superior = dimensions[arr_dim]['sup']
+    cuad = Cuadruplo('VER', address, inferior, superior, counter = globals.cuadCounter)
+    globals.cuadCounter += 1
+    globals.cuadruplos.append(cuad)
+
+    if arr_dim < len(dimensions) - 1:
+        aux = globals.operandos.pop()
+        res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
+        cuad = Cuadruplo('*', aux, '%' + str(dimensions[arr_dim]['m']), res, counter = globals.cuadCounter)
+        globals.cuadCounter += 1
+        globals.cuadruplos.append(cuad)
+        globals.operandos.append(res)
+
+    if arr_dim > 0:
+        aux2 = globals.operandos.pop()
+        aux1 = globals.operandos.pop()
+        res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
+        cuad = Cuadruplo('+', aux1, aux2, res, counter = globals.cuadCounter)
+        globals.cuadCounter += 1
+        globals.cuadruplos.append(cuad)
+        globals.operandos.append(res)
 
 def p_save_index(p):
     'save_index : '
@@ -423,9 +489,10 @@ def p_print_saved_dims(p):
         currentArrDims = st.getDims(globals.currentScope,
                                     st.getIDFromAddress(globals.currentScope, globals.saved_dims[0]))
 
-        if len(globals.saved_dims) - 1 != len(currentArrDims):
+        print("currentArrDims", currentArrDims)
+        if len(globals.saved_dims) != len(currentArrDims):
             sys.exit(
-                "Error, different dimensions found {} != {}".format(len(globals.saved_dims) - 1, len(currentArrDims)))
+                "Error, different dimensions found {} != {}".format(len(globals.saved_dims), len(currentArrDims)))
         else:
             print("..", globals.saved_dims)
             print(".-", currentArrDims)
@@ -434,11 +501,14 @@ def p_print_saved_dims(p):
             print(globals.operandos)
 
             for x in range(0, len(currentArrDims)):
-                cuad = Cuadruplo('VERIFICA', operand1=globals.saved_dims[x + 1], operand2=0, result=currentArrDims[x],
+                cuad = Cuadruplo('VERIFICA', operand1=globals.operandos[-1], operand2=0, result=currentArrDims[x],
                                  counter=globals.cuadCounter)
                 globals.cuadruplos.append(cuad)
                 globals.cuadCounter += 1
                 globals.operandos.pop()
+
+            for cuadruplo in globals.cuadruplos:
+                print(cuadruplo)
 
             for x in range(1, len(globals.saved_dims)):
                 globals.dims_for_address.append(globals.saved_dims[x])
@@ -564,6 +634,7 @@ def p_push_operand_stack(p):
     virtualAddress = getIdAddress(id=p[-1], dataType=dataType, scope=globals.currentScope)
     globals.tipos.append(dataType)
     globals.operandos.append(virtualAddress)
+    print('end push_operand_stack', globals.operandos)
 
 
 def p_push_constant_operand_stack(p):
@@ -878,7 +949,7 @@ def main():
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
 
-    #pprint.pprint(st.SYMBOL_TABLE)
+    pprint.pprint(st.SYMBOL_TABLE)
     # pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
     # print("\nENVIRONMENT")
@@ -890,12 +961,12 @@ def main():
     # print(globals.operadores)
     print(globals.operandos)
     print(globals.tipos)
+    print(globals.saved_dims)
     # print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0
     assert len(globals.tipos) == 0
     assert len(globals.saltos) == 0
-
 
 if __name__ == '__main__':
     main()

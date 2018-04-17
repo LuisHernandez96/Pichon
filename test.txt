@@ -1,11 +1,10 @@
 FUNCTIONS{
-  function int caca(int a){
-  	return a + 1 + 1;
-  }
 }
 
 ENVIRONMENT{
-	int b = 5;
+	int[3] a;
+	int[3] b;
+	int c = a[b[2]+1];
 }
 
 MOVEMENT{

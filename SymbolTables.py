@@ -237,10 +237,13 @@ def getDims(currentScope, id):
 
 def getIDFromAddress(currentScope, address):
     scope = getScope(currentScope)
-
     for var in scope[VARS]:
         if scope[VARS][var][ADDRESS] == address:
             return var
 
     sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
 
+def checkIfArray(currentScope, address):
+    id = getIDFromAddress(currentScope, address)
+    dims = getDims(currentScope, id)
+    return len(dims) > 0
