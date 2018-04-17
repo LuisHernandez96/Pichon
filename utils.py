@@ -207,6 +207,8 @@ def checkArrayDimensions(arr, dimensions, index):
 		for elem in arr:
 			if isinstance(elem, list):
 				ret = ret and checkArrayDimensions(elem, dimensions, index + 1)
+			elif not isinstance(elem, list) and index + 1 < len(dimensions):
+				return False
 
 		return ret
 
