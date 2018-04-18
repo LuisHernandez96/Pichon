@@ -390,8 +390,8 @@ def p_var_cte(p):
 		| CTE_F push_constant_operand_stack
 		| TRUE push_constant_operand_stack
 		| FALSE push_constant_operand_stack
-		| CUBE
-		| SPHERE
+		| CUBE push_constant_operand_stack
+		| SPHERE push_constant_operand_stack
 	'''
 
 
@@ -408,16 +408,16 @@ def p_var_cte1(p):
 
         aux1 = globals.operandos.pop()
         res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
-        cuad = Cuadruplo('+', aux1, dimensions[arr_dim]['m'], res, counter = globals.cuadCounter)
+        cuad = Cuadruplo('+', aux1, '%' + str(dimensions[-1]['m']), res, counter = globals.cuadCounter)
         globals.cuadCounter += 1
         globals.cuadruplos.append(cuad)
         cuad = Cuadruplo('+', res, '%' + str(arr_address), res, counter = globals.cuadCounter)
         globals.cuadCounter += 1
         globals.cuadruplos.append(cuad)
         globals.operandos.append('(' + str(res) + ')')
-        print('ARRAY ADDRESS', res)
         globals.operadores.pop()
         globals.saved_dims.pop()
+
 
 def p_var_cte2(p):
     '''var_cte2 : L_BRACKET next_dim expresion check_dims R_BRACKET var_cte2
@@ -427,19 +427,33 @@ def p_var_cte2(p):
         globals.saved_dims.pop()
         globals.tipos.pop()
 
+
 def p_next_dim(p):
     '''next_dim :'''
     (arr_address, arr_dim) = globals.saved_dims[-1]
     globals.currentDim += 1
     globals.saved_dims.append((arr_address, globals.currentDim))
 
+
 def p_push_fondo_falso(p):
     '''push_fondo_falso :'''
     address = globals.operandos.pop()
     type = globals.tipos.pop()
     if not st.checkIfArray(globals.currentScope, address):
-        id = getIDFromAddress(globals.currentScope, address)
+        id = st.getIDFromAddress(globals.currentScope, address)
         sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
+
+    globals.currentDim = 0
+    globals.saved_dims.append((address, globals.currentDim))
+    globals.operadores.append('[')
+
+
+def p_push_fondo_falso_asignacion(p):
+    '''push_fondo_falso_asignacion :'''
+    type = getIdDataType(globals.assigningID, globals.currentScope)
+    address = getIdAddress(globals.assigningID, type, globals.currentScope)
+    if not st.checkIfArray(globals.currentScope, address):
+        sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, globals.assigningID))
 
     globals.currentDim = 0
     globals.saved_dims.append((address, globals.currentDim))
@@ -582,20 +596,34 @@ def p_push_operand_stack(p):
     '''push_operand_stack :'''
     dataType = getIdDataType(id=p[-1], scope=globals.currentScope)
     virtualAddress = getIdAddress(id=p[-1], dataType=dataType, scope=globals.currentScope)
+    print('push_operand_stack', dataType)
     globals.tipos.append(dataType)
     globals.operandos.append(virtualAddress)
 
 
 def p_push_constant_operand_stack(p):
     'push_constant_operand_stack :'
+    print(globals.tipos)
     if regex_boolean.match(str(p[-1])):
+        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.BOOLEAN])
+        print('push_constant_operand_stack operando', str(p[-1]))
         globals.tipos.append(constants.DATA_TYPES[constants.BOOLEAN])
+        globals.operandos.append('%' + str(p[-1]))
     elif regex_float.match(str(p[-1])):
+        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.FLOAT])
+        print('push_constant_operand_stack operando', str(p[-1]))
         globals.tipos.append(constants.DATA_TYPES[constants.FLOAT])
+        globals.operandos.append('%' + str(p[-1]))
     elif regex_int.match(str(p[-1])):
+        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.INT])
+        print('push_constant_operand_stack operando', str(p[-1]))
         globals.tipos.append(constants.DATA_TYPES[constants.INT])
-    globals.operandos.append('%' + str(p[-1]))
-
+        globals.operandos.append('%' + str(p[-1]))
+    elif regex_object.match(str(p[-1])):
+        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.OBJECT])
+        print('push_constant_operand_stack operando', str(p[-1]))
+        globals.tipos.append(constants.DATA_TYPES[constants.OBJECT])
+        globals.operandos.append(str(p[-1]))
 
 def p_push_open_paren(p):
     '''push_open_paren :'''
@@ -634,6 +662,7 @@ def p_func_call(p):
     virtualAddress = memory.ADD_NEW_VAR(retType, retSize)
     globals.operadores.pop()
     globals.operandos.append(virtualAddress)
+    print('func_call', retType)
     globals.tipos.append(retType)
 
     if retType != constants.DATA_TYPES[constants.VOID]:
@@ -660,9 +689,11 @@ def p_func_call2(p):
 def p_check_parameter(p):
     '''check_parameter :'''
     argument = globals.operandos.pop()
+    print(argument)
     argumentDataType = globals.tipos.pop()
+    argumentSize = st.getArgumentSize(argument, globals.currentScope)
     checkFunctionParameter(globals.functionCalled[-1], dataTypeToString(argumentDataType, argument), globals.parameterCounter)
-    createParam(globals.parameterCounter, argument)
+    createParam(globals.parameterCounter, argument, argumentSize)
     globals.parameterCounter += 1
 
 
@@ -804,9 +835,8 @@ def p_is_initializing(p):
 
 
 def p_asignacion(p):
-    '''asignacion : ID asignacion1 ASSIGN push_operator_stack expression_list'''
-
-    if p[5] == True:
+    '''asignacion : ID save_assigning_id asignacion1 ASSIGN push_operator_stack expression_list'''
+    if p[6] == True:
         print(p[1])
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit(
@@ -866,21 +896,23 @@ def p_asignacion(p):
     virtualAddress = getIdAddress(p[1], dataType, globals.currentScope)
 
     # Assigning to an index of the variable
-    #if p[2] == True:
-    #    if dataType == 4:
-    #        dataType = 0
-    #    elif dataType == 5:
-    #        dataType = 1
-    #    elif dataType == 7:
-    #        dataType = 2
-    #    elif dataType == 6:
-    #        dataType = 3;
+    if p[3] == True:
+        print('before', dataType)
+        if dataType == 4:
+            dataType = 0
+        elif dataType == 5:
+            dataType = 1
+        elif dataType == 7:
+            dataType = 2
+        elif dataType == 6:
+            dataType = 3;
+        print('after', dataType)
 
     # Assigning an array variable to another array variable
     # Ex.
     #      int[3] a = {1, 2, 3};
     #   => int[3] c = a;
-    if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[5]:
+    if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[6]:
         asigningVirtualAddress = globals.operandos[-1]
         asigningDataType = globals.tipos[-1]
         asigningScope = st.getScopeID(st.getIDFromAddress(globals.currentScope, asigningVirtualAddress), globals.currentScope)
@@ -905,30 +937,66 @@ def p_asignacion(p):
                 globals.cuadruplos.append(cuad)
 
     else:
-        globals.operandos.append(virtualAddress)
-        globals.tipos.append(dataType)
-        crearCuadruploExpresion(['='])
+        if p[3] == True:
+            # When assigning to an array index, operand and data type are already in the stack for some reason
+            print('ASIGNANDO PERRO')
+            print(globals.operandos)
+            print(globals.tipos)
+            operando_der = globals.operandos.pop()
+            operando_izq = globals.operandos.pop()
+            tipo_der = globals.tipos.pop()
+            tipo_izq = globals.tipos.pop()
+            tipo_izq = dataType
+            operador = globals.operadores.pop()
+            resultType = isValidResult(operador, tipo_izq, tipo_der)
+            cuad = Cuadruplo(operador, operand1 = operando_der, result = operando_izq, counter = globals.cuadCounter)
+            globals.cuadCounter = globals.cuadCounter + 1
+            globals.cuadruplos.append(cuad)
+        else:
+            globals.operandos.append(virtualAddress)
+            globals.tipos.append(dataType)
+            crearCuadruploExpresion(['='])
 
     globals.isAssigning = False
     globals.assigningID = ""
 
-
-def p_asignacion1(p):
-    '''asignacion1 : L_BRACKET expresion R_BRACKET asignacion3
-					| empty'''
+def p_save_assigning_id(p):
+    '''save_assigning_id :'''
     globals.isAssigning = True
     globals.assigningID = p[-1]
 
+def p_asignacion1(p):
+    '''asignacion1 : L_BRACKET push_fondo_falso_asignacion expresion check_dims R_BRACKET asignacion3
+					| empty'''
+
     # Is assigning to an index of the variable
-    if len(p) == 5:
-        print('Assigning to an indexxxx')
+    if len(p) == 7:
         p[0] = True
+        (arr_address, arr_dim) = globals.saved_dims[-1]
+        dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
+
+        if globals.currentDim != len(dimensions) - 1:
+            sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+
+        aux1 = globals.operandos.pop()
+        res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
+        cuad = Cuadruplo('+', aux1, '%' + str(dimensions[-1]['m']), res, counter = globals.cuadCounter)
+        globals.cuadCounter += 1
+        globals.cuadruplos.append(cuad)
+        cuad = Cuadruplo('+', res, '%' + str(arr_address), res, counter = globals.cuadCounter)
+        globals.cuadCounter += 1
+        globals.cuadruplos.append(cuad)
+        globals.operandos.append('(' + str(res) + ')')
+        globals.operadores.pop()
+        globals.saved_dims.pop()
 
 
 def p_asignacion3(p):
-    '''asignacion3 : L_BRACKET expresion R_BRACKET asignacion3
+    '''asignacion3 : L_BRACKET next_dim expresion check_dims R_BRACKET asignacion3
                     | empty'''
-
+    if len(p) == 7:
+        globals.saved_dims.pop()
+        globals.tipos.pop()
 
 def p_asignacion2(p):
     '''asignacion2 : L_BRACKET CTE_I R_BRACKET
@@ -976,7 +1044,7 @@ def main():
     for cuadruplo in globals.cuadruplos:
         print(cuadruplo)
 
-    pprint.pprint(st.SYMBOL_TABLE[st.ENV])
+    pprint.pprint(st.SYMBOL_TABLE)
     # pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
 
     # print("\nENVIRONMENT")

@@ -1,6 +1,7 @@
 import constants as constants
 import re
 import sys
+import pprint
 import SymbolTables as st
 from Memory import memory
 from GlobalVars import globals
@@ -15,6 +16,9 @@ regex_int = re.compile(REGEX_INT)
 
 REGEX_FLOAT = r'[0-9]*[\.][0-9]+'
 regex_float = re.compile(REGEX_FLOAT)
+
+REGEX_OBJECT = r'cube|sphere'
+regex_object = re.compile(REGEX_OBJECT)
 
 def setDataType(p):
 	if (len(p) == 3 and p[2] is None) or len(p) != 3:
@@ -78,7 +82,9 @@ def getIdAddress(id, dataType, scope):
 def crearCuadruploExpresion(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
-
+			print('EXPRESION')
+			print(globals.operandos)
+			print(globals.tipos)
 			operando_der = globals.operandos.pop()
 			operando_izq = globals.operandos.pop()
 			tipo_der = globals.tipos.pop()
@@ -102,6 +108,9 @@ def crearCuadruploExpresion(validOperators):
 def crearCuadruploUnario(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
+			print('UNARIO')
+			print(globals.operandos)
+			print(globals.tipos)
 			operando = globals.operandos.pop()
 			tipo = globals.tipos.pop()
 			operador = globals.operadores.pop()
@@ -124,6 +133,8 @@ def dataTypeToString(dataType, argument = None):
 		return constants.FLOAT.lower()
 	elif dataType == constants.DATA_TYPES[constants.BOOLEAN]:
 		return constants.BOOLEAN.lower()
+	elif dataType == constants.DATA_TYPES[constants.OBJECT]:
+		return str(argument)
 	elif dataType == constants.DATA_TYPES[constants.INT_LIST]:
 		return st.getDataTypeString(st.getScopeID(st.getIDFromAddress(globals.currentScope, argument), globals.currentScope))
 	elif dataType == constants.DATA_TYPES[constants.FLOAT_LIST]:
@@ -133,8 +144,12 @@ def dataTypeToString(dataType, argument = None):
 
 def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
 	if len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]) > 0 and parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
-		if argumentDataType != st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter]:
-			sys.exit("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))
+		if isinstance(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], type(regex_object)):
+			if not st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].match(argumentDataType):
+				sys.exit("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].pattern, argumentDataType))
+		else:
+			if argumentDataType != st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter]:
+				sys.exit("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))
 	elif parameterCounter >= len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		sys.exit("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
@@ -152,8 +167,8 @@ def createERA(functionCalled):
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 
-def createParam(paramCounter, operand):
-	cuad = Cuadruplo('PARAMETER', operand, result = 'PARAM{}'.format(paramCounter), counter = globals.cuadCounter)
+def createParam(paramCounter, operand, size):
+	cuad = Cuadruplo('PARAMETER', operand, result = 'PARAM{}{}'.format(paramCounter, '' if size == 0 else '(' + str(size) + ')'), counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 

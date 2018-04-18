@@ -2,6 +2,7 @@ import pprint
 import sys
 import constants
 import NeededSize as n
+import re
 from GlobalVars import globals
 
 FUNC = "FUNCTIONS"
@@ -48,6 +49,20 @@ def getScopeID(id, currentScope):
     scope = getScope(currentScope)
     scope = scope[VARS][id]
     return scope
+
+def getArgumentSize(argument, currentScope):
+    scope = getScope(currentScope)
+
+    # Constant
+    if str(argument)[0] == '%':
+        return 0
+
+    for var in scope[VARS]:
+        pprint.pprint(scope[VARS][var])
+        if ADDRESS in scope[VARS][var] and scope[VARS][var][ADDRESS] == argument:
+            return scope[VARS][var][SIZE]
+
+    return 0
 
 def getScope(scope):
     if scope in SYMBOL_TABLE[FUNC].keys():
@@ -140,7 +155,63 @@ def ADD_PREDEFINED_FUNCTIONS():
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
-        }
+        },
+        "goal" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "start" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "outOfBounds" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isBlocked" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isCollectible" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "pickUp" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "position" : {
+            PARAMS : [''],
+            RETURN_TYPE: constants.DATA_TYPES[constants.FLOAT_LIST],
+            RETURN_SIZE : 3,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "spawnObject" : {
+            PARAMS : [re.compile('cube|sphere'), 'float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : ENV_TYPE
+        },
     }
 
     SYMBOL_TABLE[FUNC].update(predefined_functions)
