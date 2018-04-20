@@ -269,7 +269,7 @@ class VMachine:
             if self.INT_MEME[memDirection % 40000] == None:
                 pass
             else:
-                return int(self.INT_MEME[memDirection % 40000])
+                return self.INT_MEME[memDirection % 40000]
         elif memDirection > 59999:
             if self.BOOL_MEME[memDirection % 60000] == None:
                 pass
