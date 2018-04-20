@@ -1,25 +1,68 @@
 import pprint
 import sys
+import constants
 import NeededSize as n
+import re
+from GlobalVars import globals
 
 FUNC = "FUNCTIONS"
 ENV = "ENVIRONMENT"
 MOV = "MOVEMENT"
 RETURN_TYPE = "returnType"
+RETURN_SIZE = "returnSize"
 VARS = "vars"
 DATA_TYPE = "data_type"
 DATA_TYPE_STRING = "data_type_string"
 VALUE = "value"
+DIMS = "dimensions"
 SIZE = "size"
 LIST = "list"
 PARAMS = "parameters"
+PARAMS_ADDRESS = "parameters_address"
 NEEDS = "needs"
 PROC_START = "proc_start"
+ADDRESS = "address"
+RESERVED = "reserved"
+FUNCTION_TYPE = "function_type"
+MOVEMENT_TYPE = 0
+ENV_TYPE = 1
+NONE_TYPE = 2
 
 SYMBOL_TABLE = dict()
 
 def getReturnType(scope):
     return scope[RETURN_TYPE]
+
+def getReturnSize(scope):
+    return scope[RETURN_SIZE]
+
+def getDimensionsID(scope):
+    return scope[DIMS]
+
+def getDataTypeString(scope):
+    return scope[DATA_TYPE_STRING]
+
+def getSize(scope):
+    return scope[SIZE]
+
+def getScopeID(id, currentScope):
+    scope = getScope(currentScope)
+    scope = scope[VARS][id]
+    return scope
+
+def getArgumentSize(argument, currentScope):
+    scope = getScope(currentScope)
+
+    # Constant
+    if str(argument)[0] == '%':
+        return 0
+
+    for var in scope[VARS]:
+        pprint.pprint(scope[VARS][var])
+        if ADDRESS in scope[VARS][var] and scope[VARS][var][ADDRESS] == argument:
+            return scope[VARS][var][SIZE]
+
+    return 0
 
 def getScope(scope):
     if scope in SYMBOL_TABLE[FUNC].keys():
@@ -27,10 +70,179 @@ def getScope(scope):
 
     return SYMBOL_TABLE[scope]
 
+def getDims(currentScope, id):
+    scope = getScope(currentScope)
+
+    if id not in scope[VARS]:
+        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
+    else:
+        return scope[VARS][id][DIMS]
+
+def getIDFromAddress(currentScope, address):
+    scope = getScope(currentScope)
+    for var in scope[VARS]:
+        if scope[VARS][var][ADDRESS] == address:
+            return var
+
+    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
+
+def checkIfArray(currentScope, address):
+    id = getIDFromAddress(currentScope, address)
+    dims = getDims(currentScope, id)
+    return len(dims) > 0
+
+def ADD_PREDEFINED_FUNCTIONS():
+    predefined_functions = {
+        "down" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "up" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "forward" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "turnLeft" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "turnRight" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isFacingNorth" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isFacingEast" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isFacingWest" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isFacingSouth" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "canMoveForward" : {
+            PARAMS : [],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "envSize" : {
+            PARAMS : ['int', 'int', 'int'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : ENV_TYPE
+        },
+        "setMovementSpeed" : {
+            PARAMS : ['float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "goal" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "start" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "outOfBounds" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isBlocked" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isCollectible" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "pickUp" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "position" : {
+            PARAMS : [''],
+            RETURN_TYPE: constants.DATA_TYPES[constants.FLOAT_LIST],
+            RETURN_SIZE : 3,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "spawnObject" : {
+            PARAMS : [re.compile('cube|sphere'), 'float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : ENV_TYPE
+        },
+    }
+
+    SYMBOL_TABLE[FUNC].update(predefined_functions)
+
 def SYMBOL_INIT(debug):
     SYMBOL_TABLE[FUNC] = dict()
     SYMBOL_TABLE[ENV] = dict()
     SYMBOL_TABLE[MOV] = dict()
+
+    ADD_PREDEFINED_FUNCTIONS()
 
     if(debug):
         pprint.pprint(SYMBOL_TABLE)
@@ -42,7 +254,10 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][RETURN_TYPE] = returnType
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
         SYMBOL_TABLE[FUNC][id][PARAMS] = []
+        SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
+        SYMBOL_TABLE[FUNC][id][FUNCTION_TYPE] = NONE_TYPE
+        SYMBOL_TABLE[FUNC][id][RESERVED] = False
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
@@ -73,6 +288,9 @@ def ADD_SCOPE_MEMORY(currentScope):
 def ADD_PARAM_FUNCTION(functionID, dataType):
     SYMBOL_TABLE[FUNC][functionID][PARAMS].append(dataType)
 
+def ADD_PARAM_VIRTUAL_ADDRESS(functionID, virtualAddress):
+    SYMBOL_TABLE[FUNC][functionID][PARAMS_ADDRESS].append(virtualAddress)
+
 def ADD_SCOPE_VARS_TABLE(currentScope):
     SYMBOL_TABLE[currentScope][VARS] = dict()
     SYMBOL_TABLE[currentScope][NEEDS] = n.NeededSize()
@@ -80,6 +298,9 @@ def ADD_SCOPE_VARS_TABLE(currentScope):
 def SET_START_CUAD(currentScope, start):
     scope = getScope(currentScope)
     scope[PROC_START] = start
+
+def ADD_RETURN_SIZE(functionID, size):
+    SYMBOL_TABLE[FUNC][functionID][RETURN_SIZE] = size
 
 def CHECK_FUNCTION_DEFINED(functionID):
     if functionID not in SYMBOL_TABLE[FUNC]:
@@ -89,7 +310,7 @@ def VARS_INIT():
     VARS_TABLE = dict()
     return VARS_TABLE
 
-def ADD_VAR(currentScope, id, data_type, data_type_string, size = None):
+def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = []):
 
     scope = getScope(currentScope)
 
@@ -100,3 +321,4 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None):
         scope[VARS][id][DATA_TYPE] = data_type
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
         scope[VARS][id][SIZE] = size
+        scope[VARS][id][DIMS] = dims

@@ -1,26 +1,20 @@
 FUNCTIONS{
-  function void getForwardCoord(int a, float b){
-  	a = 2;
-  }
 
-  function void caca(boolean b){
-  	b = true;
-  }
+	function void doShit(){
+		float[2][3] caca;
+		int a = 5;
+		int b;
+		a = b;
+		a = 6;
+		caca[0][1] = 1.2 + caca[0][0] + 3.5;
+		caca[0][0] = 3.5;
+		caca = {{1.1, 1.1, 1.1}, {1.1, 1.1, 1.1}};
+	}
+
 }
 
 ENVIRONMENT{
-	int a;
-	boolean b = true && false;
-	if(true){
-		a = 1;
-	};
-
-	if(b){
-		a = 2;
-	};
 }
 
 MOVEMENT{
-	boolean b = false;
-	caca(b);
 }
