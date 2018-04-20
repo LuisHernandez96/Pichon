@@ -3,11 +3,12 @@ FUNCTIONS{
 }
 
 ENVIRONMENT{
-	int[2][2] a = {{1, 2}, {1, 2}};
-	int[2][2] c = a;
-	a = {{1, 2}, {1, 2}};
-	c = a;
+	int kek;
+    kek = 1 + 1;
+    kek = kek + 2;
+    kek = kek -3;
 }
 
 MOVEMENT{
+
 }
