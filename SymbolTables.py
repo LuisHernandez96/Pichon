@@ -2,6 +2,7 @@ import pprint
 import sys
 import constants
 import NeededSize as n
+import re
 from GlobalVars import globals
 
 FUNC = "FUNCTIONS"
@@ -49,11 +50,46 @@ def getScopeID(id, currentScope):
     scope = scope[VARS][id]
     return scope
 
+def getArgumentSize(argument, currentScope):
+    scope = getScope(currentScope)
+
+    # Constant
+    if str(argument)[0] == '%':
+        return 0
+
+    for var in scope[VARS]:
+        pprint.pprint(scope[VARS][var])
+        if ADDRESS in scope[VARS][var] and scope[VARS][var][ADDRESS] == argument:
+            return scope[VARS][var][SIZE]
+
+    return 0
+
 def getScope(scope):
     if scope in SYMBOL_TABLE[FUNC].keys():
         return SYMBOL_TABLE[FUNC][scope]
 
     return SYMBOL_TABLE[scope]
+
+def getDims(currentScope, id):
+    scope = getScope(currentScope)
+
+    if id not in scope[VARS]:
+        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
+    else:
+        return scope[VARS][id][DIMS]
+
+def getIDFromAddress(currentScope, address):
+    scope = getScope(currentScope)
+    for var in scope[VARS]:
+        if scope[VARS][var][ADDRESS] == address:
+            return var
+
+    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
+
+def checkIfArray(currentScope, address):
+    id = getIDFromAddress(currentScope, address)
+    dims = getDims(currentScope, id)
+    return len(dims) > 0
 
 def ADD_PREDEFINED_FUNCTIONS():
     predefined_functions = {
@@ -140,7 +176,63 @@ def ADD_PREDEFINED_FUNCTIONS():
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
-        }
+        },
+        "goal" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "start" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "outOfBounds" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isBlocked" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "isCollectible" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "pickUp" : {
+            PARAMS : ['float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "position" : {
+            PARAMS : [''],
+            RETURN_TYPE: constants.DATA_TYPES[constants.FLOAT_LIST],
+            RETURN_SIZE : 3,
+            RESERVED : True,
+            FUNCTION_TYPE : MOVEMENT_TYPE
+        },
+        "spawnObject" : {
+            PARAMS : [re.compile('cube|sphere'), 'float', 'float', 'float'],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : ENV_TYPE
+        },
     }
 
     SYMBOL_TABLE[FUNC].update(predefined_functions)
@@ -165,6 +257,7 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
         SYMBOL_TABLE[FUNC][id][FUNCTION_TYPE] = NONE_TYPE
+        SYMBOL_TABLE[FUNC][id][RESERVED] = False
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
@@ -229,24 +322,3 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
         scope[VARS][id][SIZE] = size
         scope[VARS][id][DIMS] = dims
-
-def getDims(currentScope, id):
-    scope = getScope(currentScope)
-
-    if id not in scope[VARS]:
-        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
-    else:
-        return scope[VARS][id][DIMS]
-
-def getIDFromAddress(currentScope, address):
-    scope = getScope(currentScope)
-    for var in scope[VARS]:
-        if scope[VARS][var][ADDRESS] == address:
-            return var
-
-    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
-
-def checkIfArray(currentScope, address):
-    id = getIDFromAddress(currentScope, address)
-    dims = getDims(currentScope, id)
-    return len(dims) > 0
