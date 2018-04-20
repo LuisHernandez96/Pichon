@@ -20,6 +20,7 @@ regex_float = re.compile(REGEX_FLOAT)
 REGEX_OBJECT = r'cube|sphere'
 regex_object = re.compile(REGEX_OBJECT)
 
+# Set the current data type
 def setDataType(p):
 	if (len(p) == 3 and p[2] is None) or len(p) != 3:
 		if p[1] == 'int':
@@ -42,12 +43,14 @@ def setDataType(p):
 		elif p[1] == 'float':
 			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT_LIST]
 
+# Check in the semantic cube if the given operator can be used with the two given data types
 def isValidResult(operador, tipo_izq, tipo_der = None):
 	returnDataType = SEMANTIC_CUBE[tipo_izq][tipo_der if tipo_der != None else constants.DATA_TYPES[constants.VOID]][constants.OPERATORS[operador]]
 	if returnDataType == constants.SEMANTIC_ERROR:
 		sys.exit('Error at line {}: Type mismatch. Can not do {} with {} and {}'.format(globals.lineNumber + 1, operador, tipo_izq, tipo_der))
 	return returnDataType
 
+# Get the data type of an ID in a given scope
 def getIdDataType(id, scope):
 	# We're in a function
 	if scope in st.SYMBOL_TABLE[st.FUNC].keys():
@@ -62,6 +65,7 @@ def getIdDataType(id, scope):
 			sys.exit('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
 	return resultType
 
+# Get the address of an ID in a given scope. If it hasn't been assigned yet, it is assigned and returned.
 def getIdAddress(id, dataType, scope):
 	# We're in a function
 	if scope in st.SYMBOL_TABLE[st.FUNC].keys():
@@ -79,12 +83,10 @@ def getIdAddress(id, dataType, scope):
 			st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS] = memory.ADD_NEW_VAR(dataType, size)
 			return st.SYMBOL_TABLE[scope][st.VARS][id][st.ADDRESS]
 
+# Create a quadruple for binary operations
 def crearCuadruploExpresion(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
-			print('EXPRESION')
-			print(globals.operandos)
-			print(globals.tipos)
 			operando_der = globals.operandos.pop()
 			operando_izq = globals.operandos.pop()
 			tipo_der = globals.tipos.pop()
@@ -105,12 +107,10 @@ def crearCuadruploExpresion(validOperators):
 			globals.cuadCounter = globals.cuadCounter + 1
 			globals.cuadruplos.append(cuad)
 
+# Create a quadruplo for unary operations
 def crearCuadruploUnario(validOperators):
 	if(len(globals.operadores) > 0):
 		if globals.operadores[-1] in validOperators:
-			print('UNARIO')
-			print(globals.operandos)
-			print(globals.tipos)
 			operando = globals.operandos.pop()
 			tipo = globals.tipos.pop()
 			operador = globals.operadores.pop()
@@ -126,6 +126,7 @@ def crearCuadruploUnario(validOperators):
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
 
+# Return a data type representation as a string
 def dataTypeToString(dataType, argument = None):
 	if dataType == constants.DATA_TYPES[constants.INT]:
 		return constants.INT.lower()
@@ -142,6 +143,7 @@ def dataTypeToString(dataType, argument = None):
 	elif dataType == constants.DATA_TYPES[constants.BOOLEAN_LIST]:
 		return st.getDataTypeString(st.getScopeID(st.getIDFromAddress(globals.currentScope, argument), globals.currentScope))
 
+# Check that the data type of an argument matches the data type defined in the function
 def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
 	if len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]) > 0 and parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		if isinstance(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], type(regex_object)):
@@ -153,25 +155,30 @@ def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
 	elif parameterCounter >= len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		sys.exit("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
+# Check if a function is called with less arguments than the amount needed
 def checkIncompleteParameters(functionID, parameterCounter):
 	if parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		sys.exit("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
+# Create an END PROCEDURE quadruple
 def createEndProc():
 	cuad = Cuadruplo('ENDPROC', counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 
+# Create and ERA quadruple (expand activation record)
 def createERA(functionCalled):
 	cuad = Cuadruplo('ERA', operand1 = st.SYMBOL_TABLE[st.FUNC][functionCalled][st.NEEDS], counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 
+# Create a PARAMETER quadruple
 def createParam(paramCounter, operand, size):
 	cuad = Cuadruplo('PARAMETER', operand, result = 'PARAM{}{}'.format(paramCounter, '' if size == 0 else '(' + str(size) + ')'), counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 
+# Create a GO SUBROUTINE quadruple
 def createGoSub(functionCalled):
 	initialAddress = None
 	if st.PROC_START in st.SYMBOL_TABLE[st.FUNC][functionCalled]:
@@ -180,15 +187,19 @@ def createGoSub(functionCalled):
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 
+# Get the amount of a parameters a function needs
 def amountParameters(functionID):
 	return len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS])
 
+# Get the type (None, Environment, Movement) of a function
 def getFunctionType(functionID):
 	return st.SYMBOL_TABLE[st.FUNC][functionID][st.FUNCTION_TYPE]
 
+# Set the type (None, Environment, Movement) of a function
 def setFunctionType(functionID, functionType):
 	st.SYMBOL_TABLE[st.FUNC][functionID][st.FUNCTION_TYPE] = functionType
 
+# Check that a function type is consisent
 def checkUpdateFunctionType(currentScope, functionCalled):
 	functionCalledType = getFunctionType(functionCalled)
 	if currentScope == "ENVIRONMENT":
@@ -206,6 +217,7 @@ def checkUpdateFunctionType(currentScope, functionCalled):
 		elif currentFunctionType == st.ENV_TYPE and functionCalledType == st.MOVEMENT_TYPE:
 			sys.exit('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
 
+# Reset some global helper variables
 def resetGlobalVars():
 	globals.currentDataTypeString = ""
 	globals.currentId = ''
@@ -214,6 +226,7 @@ def resetGlobalVars():
 	globals.isArr = False
 	globals.dimensiones = []
 
+# Check if the dimensions of a Python array matches the dimensions defined for an n-dimensional array
 def checkArrayDimensions(arr, dimensions, index):
 	if len(arr) != dimensions[index]['sup']:
 		return False
@@ -229,12 +242,3 @@ def checkArrayDimensions(arr, dimensions, index):
 				return False
 
 		return ret
-
-def getArrAddres(base_address, arrIndex, currentArrDims):
-
-	address =  int(base_address)
-
-	for index,arrDim in zip(arrIndex,currentArrDims):
-		address += int(index)*int(arrDim)
-
-	return address

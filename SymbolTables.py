@@ -70,6 +70,27 @@ def getScope(scope):
 
     return SYMBOL_TABLE[scope]
 
+def getDims(currentScope, id):
+    scope = getScope(currentScope)
+
+    if id not in scope[VARS]:
+        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
+    else:
+        return scope[VARS][id][DIMS]
+
+def getIDFromAddress(currentScope, address):
+    scope = getScope(currentScope)
+    for var in scope[VARS]:
+        if scope[VARS][var][ADDRESS] == address:
+            return var
+
+    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
+
+def checkIfArray(currentScope, address):
+    id = getIDFromAddress(currentScope, address)
+    dims = getDims(currentScope, id)
+    return len(dims) > 0
+
 def ADD_PREDEFINED_FUNCTIONS():
     predefined_functions = {
         "down" : {
@@ -236,6 +257,7 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
         SYMBOL_TABLE[FUNC][id][FUNCTION_TYPE] = NONE_TYPE
+        SYMBOL_TABLE[FUNC][id][RESERVED] = False
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
@@ -300,24 +322,3 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
         scope[VARS][id][SIZE] = size
         scope[VARS][id][DIMS] = dims
-
-def getDims(currentScope, id):
-    scope = getScope(currentScope)
-
-    if id not in scope[VARS]:
-        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
-    else:
-        return scope[VARS][id][DIMS]
-
-def getIDFromAddress(currentScope, address):
-    scope = getScope(currentScope)
-    for var in scope[VARS]:
-        if scope[VARS][var][ADDRESS] == address:
-            return var
-
-    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
-
-def checkIfArray(currentScope, address):
-    id = getIDFromAddress(currentScope, address)
-    dims = getDims(currentScope, id)
-    return len(dims) > 0

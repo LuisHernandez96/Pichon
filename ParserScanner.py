@@ -14,7 +14,6 @@ precedence = (
     ('right', 'NOT')
 )
 
-
 def p_start(p):
     '''start : push_goto func_sec env_sec mov_sec'''
     print("Finished!")
@@ -596,32 +595,22 @@ def p_push_operand_stack(p):
     '''push_operand_stack :'''
     dataType = getIdDataType(id=p[-1], scope=globals.currentScope)
     virtualAddress = getIdAddress(id=p[-1], dataType=dataType, scope=globals.currentScope)
-    print('push_operand_stack', dataType)
     globals.tipos.append(dataType)
     globals.operandos.append(virtualAddress)
 
 
 def p_push_constant_operand_stack(p):
     'push_constant_operand_stack :'
-    print(globals.tipos)
     if regex_boolean.match(str(p[-1])):
-        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.BOOLEAN])
-        print('push_constant_operand_stack operando', str(p[-1]))
         globals.tipos.append(constants.DATA_TYPES[constants.BOOLEAN])
         globals.operandos.append('%' + str(p[-1]))
     elif regex_float.match(str(p[-1])):
-        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.FLOAT])
-        print('push_constant_operand_stack operando', str(p[-1]))
         globals.tipos.append(constants.DATA_TYPES[constants.FLOAT])
         globals.operandos.append('%' + str(p[-1]))
     elif regex_int.match(str(p[-1])):
-        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.INT])
-        print('push_constant_operand_stack operando', str(p[-1]))
         globals.tipos.append(constants.DATA_TYPES[constants.INT])
         globals.operandos.append('%' + str(p[-1]))
     elif regex_object.match(str(p[-1])):
-        print('push_constant_operand_stack tipo', constants.DATA_TYPES[constants.OBJECT])
-        print('push_constant_operand_stack operando', str(p[-1]))
         globals.tipos.append(constants.DATA_TYPES[constants.OBJECT])
         globals.operandos.append(str(p[-1]))
 
@@ -662,7 +651,6 @@ def p_func_call(p):
     virtualAddress = memory.ADD_NEW_VAR(retType, retSize)
     globals.operadores.pop()
     globals.operandos.append(virtualAddress)
-    print('func_call', retType)
     globals.tipos.append(retType)
 
     if retType != constants.DATA_TYPES[constants.VOID]:
@@ -689,7 +677,6 @@ def p_func_call2(p):
 def p_check_parameter(p):
     '''check_parameter :'''
     argument = globals.operandos.pop()
-    print(argument)
     argumentDataType = globals.tipos.pop()
     argumentSize = st.getArgumentSize(argument, globals.currentScope)
     checkFunctionParameter(globals.functionCalled[-1], dataTypeToString(argumentDataType, argument), globals.parameterCounter)
@@ -749,9 +736,6 @@ def p_inicializacion(p):
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
-        #print('Assigned array', assignedArray)
-        #print('Dimensions', dimensions)
-
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
             sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
@@ -781,7 +765,6 @@ def p_inicializacion(p):
             globals.cuadruplos.append(cuad)
             k += 1
 
-        globals.assigningArrayDimensions = []
         globals.arrayPendingAddress = []
         globals.arrayPendingTypes = []
 
@@ -837,16 +820,12 @@ def p_is_initializing(p):
 def p_asignacion(p):
     '''asignacion : ID save_assigning_id asignacion1 ASSIGN push_operator_stack expression_list'''
     if p[6] == True:
-        print(p[1])
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             sys.exit(
                 'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
-
-        # print('Assigned array', assignedArray)
-        # print('Dimensions', dimensions)
 
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
             sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
@@ -881,7 +860,6 @@ def p_asignacion(p):
             globals.cuadruplos.append(cuad)
             k += 1
 
-        globals.assigningArrayDimensions = []
         globals.arrayPendingAddress = []
         globals.arrayPendingTypes = []
 
@@ -897,7 +875,6 @@ def p_asignacion(p):
 
     # Assigning to an index of the variable
     if p[3] == True:
-        print('before', dataType)
         if dataType == 4:
             dataType = 0
         elif dataType == 5:
@@ -905,8 +882,7 @@ def p_asignacion(p):
         elif dataType == 7:
             dataType = 2
         elif dataType == 6:
-            dataType = 3;
-        print('after', dataType)
+            dataType = 3
 
     # Assigning an array variable to another array variable
     # Ex.
@@ -939,9 +915,6 @@ def p_asignacion(p):
     else:
         if p[3] == True:
             # When assigning to an array index, operand and data type are already in the stack for some reason
-            print('ASIGNANDO PERRO')
-            print(globals.operandos)
-            print(globals.tipos)
             operando_der = globals.operandos.pop()
             operando_izq = globals.operandos.pop()
             tipo_der = globals.tipos.pop()
@@ -960,10 +933,12 @@ def p_asignacion(p):
     globals.isAssigning = False
     globals.assigningID = ""
 
+
 def p_save_assigning_id(p):
     '''save_assigning_id :'''
     globals.isAssigning = True
     globals.assigningID = p[-1]
+
 
 def p_asignacion1(p):
     '''asignacion1 : L_BRACKET push_fondo_falso_asignacion expresion check_dims R_BRACKET asignacion3
@@ -998,6 +973,7 @@ def p_asignacion3(p):
         globals.saved_dims.pop()
         globals.tipos.pop()
 
+
 def p_asignacion2(p):
     '''asignacion2 : L_BRACKET CTE_I R_BRACKET
 					| empty'''
@@ -1013,7 +989,6 @@ def p_estatutos(p):
 
 def p_top_kek(p):
     'top_kek : '
-    #  print("kek")
     globals.operandos.pop()
     globals.tipos.pop()
 
@@ -1045,13 +1020,6 @@ def main():
         print(cuadruplo)
 
     pprint.pprint(st.SYMBOL_TABLE)
-    # pprint.pprint(st.SYMBOL_TABLE[st.FUNC])
-
-    # print("\nENVIRONMENT")
-    # print(st.SYMBOL_TABLE[st.ENV][st.NEEDS])
-
-    # print("\nMOVEMENT")
-    # print(st.SYMBOL_TABLE[st.MOV][st.NEEDS])
 
     print(globals.operadores)
     print(globals.operandos)
