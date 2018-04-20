@@ -38,6 +38,23 @@ class VMachine:
 
         if cuadruplo.operator == GOTO:
             self.currentCuad = cuadruplo.result
+
+        if cuadruplo.operator == GOTOF:
+            oper1 = self._getValue(cuadruplo.operand1)
+
+            if not oper1:
+                self.currentCuad = cuadruplo.result
+            else:
+                self.currentCuad = self.currentCuad+1
+
+        if cuadruplo.operator == GOTOT:
+            oper1 = self._getValue(cuadruplo.operand1)
+
+            if oper1:
+                self.currentCuad = cuadruplo.result
+            else:
+                self.currentCuad = self.currentCuad + 1
+
         elif cuadruplo.operator == PLUS:
             oper1 = self._getValue(cuadruplo.operand1)
             oper2 = self._getValue(cuadruplo.operand2)
