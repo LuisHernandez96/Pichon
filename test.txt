@@ -4,9 +4,31 @@ FUNCTIONS{
 
 ENVIRONMENT{
 	int kek;
+	boolean tr;
+	boolean fl;
+	boolean kok;
     kek = 1 + 1;
     kek = kek + 2;
     kek = kek -3;
+    kek = kek * 5;
+    kek = kek / 2;
+    tr = true;
+    fl = false;
+    kok = tr && tr;
+    kok = tr || fl;
+    kok = tr && fl;
+    kok = 2 > 1;
+    kok = 2 < 1;
+    kok = 2 <= 2;
+    kok = 2 <= 1;
+    kok = 2 >= 5;
+    kok = 5 == 3;
+    kok = 5 == 5;
+    kok = 5 != 5;
+    kok = 5 != 3;
+    kok = !kok;
+    kek = 15;
+    kek = ~kek;
 }
 
 MOVEMENT{
