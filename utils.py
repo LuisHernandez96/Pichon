@@ -119,10 +119,10 @@ def crearCuadruploUnario(validOperators):
 
 			virtualAddress = memory.ADD_NEW_VAR(resultType, size = 1)
 			st.ADD_MEMORY(globals.currentScope, resultType, 1, True)
-			cuad = Cuadruplo(operador, operand1 = operando, result = result, counter = globals.cuadCounter)
+			cuad = Cuadruplo(operador, operand1 = operando, result = virtualAddress, counter = globals.cuadCounter)
 
 			globals.cuadCounter = globals.cuadCounter + 1
-			globals.operandos.append(result)
+			globals.operandos.append(virtualAddress)
 			globals.tipos.append(resultType)
 			globals.cuadruplos.append(cuad)
 

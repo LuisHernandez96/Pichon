@@ -6,6 +6,7 @@ import pprint
 from GlobalVars import globals
 from lexer import *
 from utils import *
+import VMachine as vm
 
 # Precedence rules for the arithmetic operators
 precedence = (
@@ -1030,6 +1031,9 @@ def main():
     assert len(globals.operandos) == 0
     assert len(globals.tipos) == 0
     assert len(globals.saltos) == 0
+
+    virtualMachine = vm.VMachine(globals.cuadruplos)
+    virtualMachine.runVM()
 
 if __name__ == '__main__':
     main()

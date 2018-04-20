@@ -1,20 +1,36 @@
 FUNCTIONS{
 
-	function void doShit(){
-		float[2][3] caca;
-		int a = 5;
-		int b;
-		a = b;
-		a = 6;
-		caca[0][1] = 1.2 + caca[0][0] + 3.5;
-		caca[0][0] = 3.5;
-		caca = {{1.1, 1.1, 1.1}, {1.1, 1.1, 1.1}};
-	}
-
 }
 
 ENVIRONMENT{
+	int kek;
+	boolean tr;
+	boolean fl;
+	boolean kok;
+    kek = 1 + 1;
+    kek = kek + 2;
+    kek = kek -3;
+    kek = kek * 5;
+    kek = kek / 2;
+    tr = true;
+    fl = false;
+    kok = tr && tr;
+    kok = tr || fl;
+    kok = tr && fl;
+    kok = 2 > 1;
+    kok = 2 < 1;
+    kok = 2 <= 2;
+    kok = 2 <= 1;
+    kok = 2 >= 5;
+    kok = 5 == 3;
+    kok = 5 == 5;
+    kok = 5 != 5;
+    kok = 5 != 3;
+    kok = !kok;
+    kek = 15;
+    kek = ~kek;
 }
 
 MOVEMENT{
+
 }
