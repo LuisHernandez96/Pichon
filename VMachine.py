@@ -17,43 +17,46 @@ EQL = "=="
 DIF = "!="
 NOT = "!"
 NEG = "~"
+ERA = "ERA"
+END_PROC = "ENDPROC"
+PARAM = "PARAM"
+GO_SUB = "GOSUB"
 
-
+import Memory as Mem
 
 class VMachine:
     def __init__(self, cuadruplos = None):
         self.cuadruplos = cuadruplos
-        self.currentCuad = 0
-        self.INT_MEME = [None] * 10000
-        self.FLOAT_MEME = [None] * 10000
-        self.BOOL_MEME = [None] * 10000
+        self.currentCuad = [0]
+        self.memory = Mem.Memory()
+        self.memoryStack = []
 
     def runVM(self):
-        while self.currentCuad < len(self.cuadruplos):
-            self.processCuad(self.cuadruplos[self.currentCuad])
+        while self.currentCuad[-1] < len(self.cuadruplos):
+            self.processCuad(self.cuadruplos[self.currentCuad[-1]])
 
 
     def processCuad(self, cuadruplo):
         print("PC\tCuad= ",str(cuadruplo))
 
         if cuadruplo.operator == GOTO:
-            self.currentCuad = cuadruplo.result
+            self.currentCuad[-1] = cuadruplo.result
 
         if cuadruplo.operator == GOTOF:
             oper1 = self._getValue(cuadruplo.operand1)
 
             if not oper1:
-                self.currentCuad = cuadruplo.result
+                self.currentCuad[-1] = cuadruplo.result
             else:
-                self.currentCuad = self.currentCuad+1
+                self.currentCuad[-1] = self.currentCuad[-1]+1
 
         if cuadruplo.operator == GOTOT:
             oper1 = self._getValue(cuadruplo.operand1)
 
             if oper1:
-                self.currentCuad = cuadruplo.result
+                self.currentCuad[-1] = cuadruplo.result
             else:
-                self.currentCuad = self.currentCuad + 1
+                self.currentCuad[-1] = self.currentCuad[-1] + 1
 
         elif cuadruplo.operator == PLUS:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -62,7 +65,7 @@ class VMachine:
             result = oper1 + oper2
 
             if self._saveResult(result,cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result PLUS")
 
@@ -73,7 +76,7 @@ class VMachine:
             result = oper1 - oper2
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result MINUS")
 
@@ -84,7 +87,7 @@ class VMachine:
             result = oper1 * oper2
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result MULT")
 
@@ -95,7 +98,7 @@ class VMachine:
             result = oper1 / oper2
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result DIV")
 
@@ -103,7 +106,7 @@ class VMachine:
             oper1 = self._getValue(cuadruplo.operand1)
 
             if self._saveResult(oper1, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result EQUAL")
 
@@ -117,7 +120,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result OR")
 
@@ -131,7 +134,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result AND")
 
@@ -145,7 +148,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result LESS_THAN")
 
@@ -159,7 +162,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result GREAT_THAN")
 
@@ -173,7 +176,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result EQL_LESS_THAN")
 
@@ -187,7 +190,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result EQL_GREAT_THAN")
 
@@ -201,7 +204,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result EQL")
 
@@ -215,7 +218,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result DIF")
 
@@ -228,7 +231,7 @@ class VMachine:
                 result = False
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result NOT")
 
@@ -238,9 +241,25 @@ class VMachine:
             result = oper1 * -1
 
             if self._saveResult(result, cuadruplo.result):
-                self.currentCuad += 1
+                self.currentCuad[-1] += 1
             else:
                 sys.exit("Error in save result NEG")
+
+        elif cuadruplo.operator == ERA:
+            self.memoryStack.append(Mem.Memory())
+
+        elif cuadruplo.operator == PARAM:
+            oper1 = self._getValue(cuadruplo.operand1)
+
+            self.memoryStack[-1].PARAMS.append(oper1)
+
+        elif cuadruplo.operator == GO_SUB:
+            self.currentCuad.append(cuadruplo.result)
+
+
+
+        elif cuadruplo.operator == END_PROC:
+            pass
 
         print("")
 
@@ -271,11 +290,11 @@ class VMachine:
         else:
             try:
                 if memDirection < 50000:
-                    self.INT_MEME[memDirection % 40000] = value
+                    self.memory.INT_MEME[memDirection % 40000] = value
                 elif memDirection > 59999:
-                    self.BOOL_MEME[memDirection % 60000] = value
+                    self.memory.BOOL_MEME[memDirection % 60000] = value
                 else:
-                    self.FLOAT_MEME[memDirection % 50000] = value
+                    self.memory.FLOAT_MEME[memDirection % 50000] = value
 
                 return True
             except:
@@ -283,18 +302,18 @@ class VMachine:
 
     def _retrieveFromMemory(self,memDirection):
         if memDirection < 50000:
-            if self.INT_MEME[memDirection % 40000] == None:
+            if self.memory.INT_MEME[memDirection % 40000] == None:
                 pass
             else:
-                return self.INT_MEME[memDirection % 40000]
+                return self.memory.INT_MEME[memDirection % 40000]
         elif memDirection > 59999:
-            if self.BOOL_MEME[memDirection % 60000] == None:
+            if self.memory.BOOL_MEME[memDirection % 60000] == None:
                 pass
             else:
-                return self.BOOL_MEME[memDirection % 60000]
+                return self.memory.BOOL_MEME[memDirection % 60000]
         else:
-            if self.FLOAT_MEME[memDirection % 50000] == None:
+            if self.memory.FLOAT_MEME[memDirection % 50000] == None:
                 pass
             else:
-                return self.FLOAT_MEME[memDirection % 50000]
+                return self.memory.FLOAT_MEME[memDirection % 50000]
 

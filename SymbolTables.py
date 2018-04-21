@@ -322,3 +322,6 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
         scope[VARS][id][SIZE] = size
         scope[VARS][id][DIMS] = dims
+
+def GET_DIMS(id):
+    return SYMBOL_TABLE[FUNC][id][DIMS]

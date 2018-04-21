@@ -1,20 +1,29 @@
 import constants
+import SymbolTables as st
+import pprint
 
 class Memory:
 
 	LOCAL_MEMORY = {
-        "INT_MEM" : {
+		"INT_MEM" : {
 
-        },
-        "FLOAT_MEM" : {
+		},
+		"FLOAT_MEM" : {
 
-        },
-        "BOOLEAN_MEM" : {
+		},
+		"BOOLEAN_MEM" : {
 
-        }
+		}
 	}
 
 	def __init__(self):
+
+		self.INT_MEME = [None] * 10000
+		self.FLOAT_MEME = [None] * 10000
+		self.BOOL_MEME = [None] * 10000
+
+		self.PARAMS = []
+
 		self.LOCAL_TEMP_INT_START = 40000
 		self.LOCAL_TEMP_FLOAT_START = 50000
 		self.LOCAL_TEMP_BOOLEAN_START = 60000
@@ -64,5 +73,9 @@ class Memory:
 
 		for key in self.LOCAL_MEMORY:
 				self.LOCAL_MEMORY[key].clear()
+
+	def PROCESS_PARAMS(self, subName):
+		pprint.print(self.PARAMS)
+		pprint.print(st.GET_DIMS(subName))
 
 memory = Memory()
