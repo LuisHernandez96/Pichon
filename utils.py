@@ -175,7 +175,7 @@ def createERA(functionCalled):
 
 # Create a PARAMETER quadruple
 def createParam(paramCounter, operand, size):
-	cuad = Cuadruplo('PARAMETER', operand, result = 'PARAM{}{}'.format(paramCounter, '' if size == 0 else '(' + str(size) + ')'), counter = globals.cuadCounter)
+	cuad = Cuadruplo('PARAMETER', operand, result = '{}{}'.format(paramCounter, '' if size == 0 else '(' + str(size) + ')'), counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 
