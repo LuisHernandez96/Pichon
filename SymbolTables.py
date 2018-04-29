@@ -24,6 +24,7 @@ PROC_START = "proc_start"
 ADDRESS = "address"
 RESERVED = "reserved"
 FUNCTION_TYPE = "function_type"
+RETURNS = "returns"
 MOVEMENT_TYPE = 0
 ENV_TYPE = 1
 NONE_TYPE = 2
@@ -255,6 +256,7 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
         SYMBOL_TABLE[FUNC][id][PARAMS] = []
         SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS] = []
+        SYMBOL_TABLE[FUNC][id][RETURNS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
         SYMBOL_TABLE[FUNC][id][FUNCTION_TYPE] = NONE_TYPE
         SYMBOL_TABLE[FUNC][id][RESERVED] = False
@@ -323,5 +325,11 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
         scope[VARS][id][SIZE] = size
         scope[VARS][id][DIMS] = dims
 
-def GET_DIMS(id):
-    return SYMBOL_TABLE[FUNC][id][DIMS]
+def GET_PARAMS(id):
+    return (SYMBOL_TABLE[FUNC][id][PARAMS])
+
+def GET_PARAMS_ADDRESS(id):
+    return (SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS])
+
+def ADD_RETURN_VALUES(id,value):
+    SYMBOL_TABLE[FUNC][id][RETURNS].append(value)

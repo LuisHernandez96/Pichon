@@ -22,7 +22,8 @@ class Memory:
 		self.FLOAT_MEME = [None] * 10000
 		self.BOOL_MEME = [None] * 10000
 
-		self.PARAMS = []
+		self.SEND_PARAMS = []
+		self.RECEIVE_PARAMS = []
 
 		self.LOCAL_TEMP_INT_START = 40000
 		self.LOCAL_TEMP_FLOAT_START = 50000
@@ -31,6 +32,8 @@ class Memory:
 		self.CURRENT_TEMP_INT = 40000
 		self.CURRENT_TEMP_FLOAT = 50000
 		self.CURRENT_TEMP_BOOLEAN = 60000
+
+		self.currentFunc = None
 
 	def ADD_NEW_VAR(self, data_type, size = 1):
 		if data_type == constants.DATA_TYPES[constants.INT] or data_type == constants.DATA_TYPES[constants.INT_LIST]:
@@ -75,7 +78,71 @@ class Memory:
 				self.LOCAL_MEMORY[key].clear()
 
 	def PROCESS_PARAMS(self, subName):
-		pprint.print(self.PARAMS)
-		pprint.print(st.GET_DIMS(subName))
+		# pprint.pprint(self.PARAMS)
+		# pprint.pprint(st.GET_PARAMS(subName))
+		# pprint.pprint(st.GET_PARAMS_ADDRESS(subName))
+
+		self.currentFunc = subName
+		for param, pType, pAddress in zip(self.RECEIVE_PARAMS,st.GET_PARAMS(subName), st.GET_PARAMS_ADDRESS(subName)):
+			print(param,pType,pAddress)
+			self.saveResult(param,pAddress)
+
+	def getValue(self, operand):
+		try:
+			if operand[0] == "%":
+				operand = operand.replace("%", "")
+				try:
+					return int(operand)
+				except:
+					if operand == "true":
+						return True
+					elif operand == "false":
+						return False
+					else:
+						return "KEK_ERROR"
+
+			elif operand[0] == "(":
+				operand = operand.replace("(", "")
+				operand = operand.replace(")", "")
+		except:
+			return self.retrieveFromMemory(int(operand))
+
+	def saveResult(self, value, memDirection):
+		print("SR\tVal= ", value, "\tMemDir=", memDirection)
+		if memDirection < 40000:
+			return False
+		else:
+			try:
+				if memDirection < 50000:
+					self.INT_MEME[memDirection % 40000] = value
+				elif memDirection > 59999:
+					self.BOOL_MEME[memDirection % 60000] = value
+				else:
+					self.FLOAT_MEME[memDirection % 50000] = value
+
+				return True
+			except:
+				return False
+
+	def retrieveFromMemory(self, memDirection):
+		if memDirection < 50000:
+			if self.INT_MEME[memDirection % 40000] == None:
+				pass
+			else:
+				return self.INT_MEME[memDirection % 40000]
+		elif memDirection > 59999:
+			if self.BOOL_MEME[memDirection % 60000] == None:
+				pass
+			else:
+				return self.BOOL_MEME[memDirection % 60000]
+		else:
+			if self.FLOAT_MEME[memDirection % 50000] == None:
+				pass
+			else:
+				return self.FLOAT_MEME[memDirection % 50000]
+
+	def setReturn(self,value):
+		st.ADD_RETURN_VALUES(self.currentFunc,value)
+		self.SEND_PARAMS.append(value)
 
 memory = Memory()
