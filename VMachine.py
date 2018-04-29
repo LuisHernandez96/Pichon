@@ -18,8 +18,6 @@ DIF = "!="
 NOT = "!"
 NEG = "~"
 
-
-
 class VMachine:
     def __init__(self, cuadruplos = None):
         self.cuadruplos = cuadruplos
@@ -64,7 +62,7 @@ class VMachine:
             if self._saveResult(result,cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result PLUS")
+                raiseError("Error in save result PLUS")
 
         elif cuadruplo.operator == MINUS:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -75,7 +73,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result MINUS")
+                raiseError("Error in save result MINUS")
 
         elif cuadruplo.operator == MULT:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -86,7 +84,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result MULT")
+                raiseError("Error in save result MULT")
 
         elif cuadruplo.operator == DIV:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -97,7 +95,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result DIV")
+                raiseError("Error in save result DIV")
 
         elif cuadruplo.operator == ASSIGN:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -105,7 +103,7 @@ class VMachine:
             if self._saveResult(oper1, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result EQUAL")
+                raiseError("Error in save result EQUAL")
 
         elif cuadruplo.operator == OR:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -119,7 +117,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result OR")
+                raiseError("Error in save result OR")
 
         elif cuadruplo.operator == AND:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -133,7 +131,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result AND")
+                raiseError("Error in save result AND")
 
         elif cuadruplo.operator == LESS_THAN:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -147,7 +145,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result LESS_THAN")
+                raiseError("Error in save result LESS_THAN")
 
         elif cuadruplo.operator == GREAT_THAN:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -161,7 +159,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result GREAT_THAN")
+                raiseError("Error in save result GREAT_THAN")
 
         elif cuadruplo.operator == EQL_LESS_THAN:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -175,7 +173,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result EQL_LESS_THAN")
+                raiseError("Error in save result EQL_LESS_THAN")
 
         elif cuadruplo.operator == EQL_GREAT_THAN:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -189,7 +187,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result EQL_GREAT_THAN")
+                raiseError("Error in save result EQL_GREAT_THAN")
 
         elif cuadruplo.operator == EQL:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -203,7 +201,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result EQL")
+                raiseError("Error in save result EQL")
 
         elif cuadruplo.operator == DIF:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -217,7 +215,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result DIF")
+                raiseError("Error in save result DIF")
 
         elif cuadruplo.operator == NOT:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -230,7 +228,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result NOT")
+                raiseError("Error in save result NOT")
 
         elif cuadruplo.operator == NEG:
             oper1 = self._getValue(cuadruplo.operand1)
@@ -240,7 +238,7 @@ class VMachine:
             if self._saveResult(result, cuadruplo.result):
                 self.currentCuad += 1
             else:
-                sys.exit("Error in save result NEG")
+                raiseError("Error in save result NEG")
 
         print("")
 

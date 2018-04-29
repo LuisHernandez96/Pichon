@@ -7,6 +7,7 @@ from GlobalVars import globals
 from lexer import *
 from utils import *
 import VMachine as vm
+import argparse
 
 # Precedence rules for the arithmetic operators
 precedence = (
@@ -61,7 +62,7 @@ def p_function_header_id(p):
 				| ID
 				'''
     if p[1] in reserved:
-        sys.exit(
+        raiseError(
             'Error at line {}: {} is a reserved function and cannot be redefined.'.format(globals.lineNumber + 1, p[1]))
     p[0] = p[1]
 
@@ -101,7 +102,7 @@ def p_fucntions2(p):
 				   | empty'''
     if not globals.functionReturns and st.getReturnType(st.getScope(globals.currentScope)) != constants.DATA_TYPES[
         constants.VOID]:
-        sys.exit('Error at line {}: Missing return statement.'.format(globals.lineNumber + 1))
+        raiseError('Error at line {}: Missing return statement.'.format(globals.lineNumber + 1))
 
 
 def p_env_sec(p):
@@ -255,7 +256,7 @@ def p_push_return(p):
     retType = st.getReturnType(st.getScope(globals.currentScope))
 
     if (retType != typ):
-        sys.exit(
+        raiseError(
             "Error at line {}: return {} does not match declared function type {}".format(globals.lineNumber + 1, typ,
                                                                                           retType))
     else:
@@ -288,7 +289,7 @@ def p_cond_remove_lid(p):
 def p_cond_check_bool(p):
     '''cond_check_bool : '''
     if globals.tipos.pop() != constants.DATA_TYPES[constants.BOOLEAN]:
-        sys.exit('Error at line {}: Type mismatch. Expression has to be boolean'.format(globals.lineNumber + 1))
+        raiseError('Error at line {}: Type mismatch. Expression has to be boolean'.format(globals.lineNumber + 1))
 
 
 def p_cond_replace_none_1(p):
@@ -404,7 +405,7 @@ def p_var_cte1(p):
         dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
 
         if globals.currentDim != len(dimensions) - 1:
-            sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+            raiseError('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
 
         aux1 = globals.operandos.pop()
         res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
@@ -441,7 +442,7 @@ def p_push_fondo_falso(p):
     type = globals.tipos.pop()
     if not st.checkIfArray(globals.currentScope, address):
         id = st.getIDFromAddress(globals.currentScope, address)
-        sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
 
     globals.currentDim = 0
     globals.saved_dims.append((address, globals.currentDim))
@@ -453,7 +454,7 @@ def p_push_fondo_falso_asignacion(p):
     type = getIdDataType(globals.assigningID, globals.currentScope)
     address = getIdAddress(globals.assigningID, type, globals.currentScope)
     if not st.checkIfArray(globals.currentScope, address):
-        sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, globals.assigningID))
+        raiseError('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, globals.assigningID))
 
     globals.currentDim = 0
     globals.saved_dims.append((address, globals.currentDim))
@@ -463,14 +464,14 @@ def p_check_dims(p):
     '''check_dims :'''
     
     if globals.tipos[-1] != constants.DATA_TYPES[constants.INT]:
-        sys.exit('Error at line {}: Array indexes must be integers.'.format(globals.lineNumber + 1))
+        raiseError('Error at line {}: Array indexes must be integers.'.format(globals.lineNumber + 1))
 
     address = globals.operandos[-1]
     (arr_address, arr_dim) = globals.saved_dims[-1]
     dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
 
     if globals.currentDim >= len(dimensions):
-        sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+        raiseError('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
 
     inferior = dimensions[arr_dim]['inf']
     superior = dimensions[arr_dim]['sup']
@@ -731,14 +732,14 @@ def p_inicializacion(p):
     if p[8] == True:
 
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit(
+            raiseError(
                 'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
-            sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
+            raiseError('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -792,7 +793,7 @@ def p_inicializacion(p):
         asigneeDataTypeString = st.getDataTypeString(asigneeScope)
         
         if asigningDataTypeString != asigneeDataTypeString:
-            sys.exit('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+            raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
         else:
             asigningSize = st.getSize(asigningScope)
             asigneeSize = st.getSize(asigneeScope)
@@ -822,14 +823,14 @@ def p_asignacion(p):
     '''asignacion : ID save_assigning_id asignacion1 ASSIGN push_operator_stack expression_list'''
     if p[6] == True:
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit(
+            raiseError(
                 'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
-            sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
+            raiseError('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -898,7 +899,7 @@ def p_asignacion(p):
         asigneeDataTypeString = st.getDataTypeString(asigneeScope)
         
         if asigningDataTypeString != asigneeDataTypeString:
-            sys.exit('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+            raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
         else:
             asigningSize = st.getSize(asigningScope)
             asigneeSize = st.getSize(asigneeScope)
@@ -952,7 +953,7 @@ def p_asignacion1(p):
         dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
 
         if globals.currentDim != len(dimensions) - 1:
-            sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+            raiseError('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
 
         aux1 = globals.operandos.pop()
         res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
@@ -996,8 +997,7 @@ def p_top_kek(p):
 
 def p_error(p):
     if p is not None:
-        print("Syntax error at '%s'" % p)
-        sys.exit(1)
+        raiseError("Syntax error at '%s'" % p)
 
 
 def p_empty(p):
@@ -1005,28 +1005,33 @@ def p_empty(p):
     pass
 
 
-def main():
+def main(program):
+
     st.SYMBOL_INIT(False)
 
     # Build the lexer
     lex.lex()
     parser = yacc.yacc(start='start')
 
+    '''
     with open('test.txt') as f:
         read_data = f.read()
 
         parser.parse(read_data)
+    '''
 
-    for cuadruplo in globals.cuadruplos:
-        print(cuadruplo)
+    parser.parse(program)
 
-    pprint.pprint(st.SYMBOL_TABLE)
+    '''for cuadruplo in globals.cuadruplos:
+                    print(cuadruplo)'''
 
-    print(globals.operadores)
-    print(globals.operandos)
-    print(globals.tipos)
-    print(globals.saved_dims)
-    print(globals.saltos)
+    # pprint.pprint(st.SYMBOL_TABLE)
+
+    # print(globals.operadores)
+    # print(globals.operandos)
+    # print(globals.tipos)
+    # print(globals.saved_dims)
+    # print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0
     assert len(globals.tipos) == 0
@@ -1036,4 +1041,7 @@ def main():
     virtualMachine.runVM()
 
 if __name__ == '__main__':
-    main()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('program')
+    args = argparser.parse_args()
+    main(args.program)
