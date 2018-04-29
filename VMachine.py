@@ -38,6 +38,44 @@ class VMachine:
         while self.currentCuad[-1] < len(self.cuadruplos):
             self.processCuad(self.cuadruplos[self.currentCuad[-1]])
 
+    def processReservedFunction(self, function, parameters):
+            if function == "down":
+                self.gm.player.pos = self.gm.player.pos - self.gm.player.up
+                time.sleep(1)
+            elif function == "up":
+                self.gm.player.pos = self.gm.player.pos + self.gm.player.up
+                time.sleep(1)
+            elif function == "forward":
+                self.gm.player.pos = self.gm.player.pos + self.gm.player.axis
+                time.sleep(1)
+            elif function == "turnLeft":
+                self.gm.player.rotate(radians(90), vec(0, 1, 0))
+                time.sleep(1)
+            elif function == "turnRight":
+                self.gm.player.rotate(radians(-90), vec(0, 1, 0))
+                time.sleep(1)
+            elif function == "spawnObject":
+                obj = parameters[0]
+                if obj == "sphere":
+                    sphere(pos = vector(parameters[1], parameters[2], parameters[3]))
+                elif obj == "cube":
+                    box(pos = vector(parameters[1], parameters[2], parameters[3]))
+            elif function == "isFacingNorth":
+                res = self.gm.player.axis.x == 1.0
+                st[st.FUNC][function][st.RESULT].append(res)
+            elif function == "isFacingSouth":
+                res = self.gm.player.axis.x == -1.0
+                st[st.FUNC][function][st.RESULT].append(res)
+            elif function == "isFacingEast":
+                res = self.gm.player.axis.z == 1.0
+                st[st.FUNC][function][st.RESULT].append(res)
+            elif function == "isFacingWest":
+                res = self.gm.player.axis.z == -1.0
+                st[st.FUNC][function][st.RESULT].append(res)
+            elif function == "start":
+                self.gm.startPosition = (parameters[0], parameters[1], parameters[2])
+            elif function == "goal":
+                self.gm.goalPosition = (parameters[0], parameters[1], parameters[2])
 
     def processCuad(self, cuadruplo):
         print("PC\tCuad= ",str(cuadruplo))
@@ -265,12 +303,16 @@ class VMachine:
             self.currentCuad[-1] += 1
 
         elif cuadruplo.operator == GO_SUB:
-            self.currentCuad.append(cuadruplo.result)
-            self.memoryStack.append(Mem.Memory())
-            self.subMem.append(cuadruplo.operand1)
-            self.memoryStack[-1].RECEIVE_PARAMS = self.memoryStack[-2].SEND_PARAMS
-            self.memoryStack[-2].SEND_PARAMS = []
-            self.memoryStack[-1].PROCESS_PARAMS(str(cuadruplo.operand1))
+            if cuadruplo.result == None:
+                self.processReservedFunction(cuadruplo.operand1, None)
+                self.currentCuad += 1
+            else:
+                self.currentCuad.append(cuadruplo.result)
+                self.memoryStack.append(Mem.Memory())
+                self.subMem.append(cuadruplo.operand1)
+                self.memoryStack[-1].RECEIVE_PARAMS = self.memoryStack[-2].SEND_PARAMS
+                self.memoryStack[-2].SEND_PARAMS = []
+                self.memoryStack[-1].PROCESS_PARAMS(str(cuadruplo.operand1))
 
         elif cuadruplo.operator == RETURN:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.result)
