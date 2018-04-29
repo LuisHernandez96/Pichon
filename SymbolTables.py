@@ -75,7 +75,7 @@ def getDims(currentScope, id):
     scope = getScope(currentScope)
 
     if id not in scope[VARS]:
-        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
     else:
         return scope[VARS][id][DIMS]
 
@@ -85,7 +85,7 @@ def getIDFromAddress(currentScope, address):
         if scope[VARS][var][ADDRESS] == address:
             return var
 
-    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
+    raiseError('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
 
 def checkIfArray(currentScope, address):
     id = getIDFromAddress(currentScope, address)
@@ -183,14 +183,14 @@ def ADD_PREDEFINED_FUNCTIONS():
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
-            FUNCTION_TYPE : MOVEMENT_TYPE
+            FUNCTION_TYPE : ENV_TYPE
         },
         "start" : {
             PARAMS : ['float', 'float', 'float'],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
-            FUNCTION_TYPE : MOVEMENT_TYPE
+            FUNCTION_TYPE : ENV_TYPE
         },
         "outOfBounds" : {
             PARAMS : ['float', 'float', 'float'],
@@ -263,7 +263,7 @@ def ADD_FUNC(id, returnType, debug = False):
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
-        sys.exit('Error at line {}: Function {} already defined!'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: Function {} already defined!'.format(globals.lineNumber + 1, id))
 
 def ADD_MEMORY(currentScope, dataType, amount, temp):
 
@@ -306,7 +306,7 @@ def ADD_RETURN_SIZE(functionID, size):
 
 def CHECK_FUNCTION_DEFINED(functionID):
     if functionID not in SYMBOL_TABLE[FUNC]:
-        sys.exit("Error at line {}: Function {} not defined.".format(globals.lineNumber + 1, functionID))
+        raiseError("Error at line {}: Function {} not defined.".format(globals.lineNumber + 1, functionID))
 
 def VARS_INIT():
     VARS_TABLE = dict()
@@ -317,7 +317,7 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
     scope = getScope(currentScope)
 
     if id in scope[VARS]:
-        sys.exit('Error at line {}: Variable {} already defined!'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: Variable {} already defined!'.format(globals.lineNumber + 1, id))
     else:
         scope[VARS][id] = dict()
         scope[VARS][id][DATA_TYPE] = data_type

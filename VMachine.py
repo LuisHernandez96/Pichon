@@ -1,3 +1,5 @@
+import Memory as Mem
+
 GOTO = "GOTO"
 GOTOF = "GOTO_FALSE"
 GOTOT = "GOTO_TRUE"
@@ -22,8 +24,6 @@ END_PROC = "ENDPROC"
 PARAM = "PARAMETER"
 GO_SUB = "GOSUB"
 RETURN = "RETURN"
-
-import Memory as Mem
 
 class VMachine:
     def __init__(self, cuadruplos = None):
@@ -70,7 +70,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result,cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result PLUS")
+                raiseError("Error in save result PLUS")
 
         elif cuadruplo.operator == MINUS:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -81,7 +81,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result MINUS")
+                raiseError("Error in save result MINUS")
 
         elif cuadruplo.operator == MULT:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -92,7 +92,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result MULT")
+                raiseError("Error in save result MULT")
 
         elif cuadruplo.operator == DIV:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -103,7 +103,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result DIV")
+                raiseError("Error in save result DIV")
 
         elif cuadruplo.operator == ASSIGN:
             if len(self.subMem)!=0 and self.subMem[-1] == cuadruplo.operand1:
@@ -118,7 +118,7 @@ class VMachine:
                 if self.memoryStack[-1].saveResult(oper1, cuadruplo.result):
                     self.currentCuad[-1] += 1
                 else:
-                    sys.exit("Error in save result EQUAL")
+                    raiseError("Error in save result EQUAL")
 
         elif cuadruplo.operator == OR:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -132,7 +132,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result OR")
+                raiseError("Error in save result OR")
 
         elif cuadruplo.operator == AND:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -146,7 +146,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result AND")
+                raiseError("Error in save result AND")
 
         elif cuadruplo.operator == LESS_THAN:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -160,7 +160,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result LESS_THAN")
+                raiseError("Error in save result LESS_THAN")
 
         elif cuadruplo.operator == GREAT_THAN:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -174,7 +174,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result GREAT_THAN")
+                raiseError("Error in save result GREAT_THAN")
 
         elif cuadruplo.operator == EQL_LESS_THAN:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -188,7 +188,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result EQL_LESS_THAN")
+                raiseError("Error in save result EQL_LESS_THAN")
 
         elif cuadruplo.operator == EQL_GREAT_THAN:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -202,7 +202,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result EQL_GREAT_THAN")
+                raiseError("Error in save result EQL_GREAT_THAN")
 
         elif cuadruplo.operator == EQL:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -216,7 +216,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result EQL")
+                raiseError("Error in save result EQL")
 
         elif cuadruplo.operator == DIF:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -230,7 +230,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result DIF")
+                raiseError("Error in save result DIF")
 
         elif cuadruplo.operator == NOT:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -243,7 +243,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result NOT")
+                raiseError("Error in save result NOT")
 
         elif cuadruplo.operator == NEG:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -253,7 +253,7 @@ class VMachine:
             if self.memoryStack[-1].saveResult(result, cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
-                sys.exit("Error in save result NEG")
+                raiseError("Error in save result NEG")
 
         elif cuadruplo.operator == ERA:
             # self.memoryStack.append(Mem.Memory())
