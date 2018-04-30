@@ -81,39 +81,56 @@ class Memory:
 		# pprint.pprint(self.PARAMS)
 		# pprint.pprint(st.GET_PARAMS(subName))
 		# pprint.pprint(st.GET_PARAMS_ADDRESS(subName))
-
 		self.currentFunc = subName
 		for param, pType, pAddress in zip(self.RECEIVE_PARAMS,st.GET_PARAMS(subName), st.GET_PARAMS_ADDRESS(subName)):
-			print(param,pType,pAddress)
+			# print(param,pType,pAddress)
 			self.saveResult(param,pAddress)
 
 	def getValue(self, operand):
 		try:
 			if operand[0] == "%":
 				operand = operand.replace("%", "")
-				try:
+				
+				if constants.regex_float.match(operand):
+					return float(operand)
+				elif constants.regex_int.match(operand):
 					return int(operand)
-				except:
+				elif constants.regex_boolean.match(operand):
 					if operand == "true":
 						return True
 					elif operand == "false":
 						return False
-					else:
-						return "KEK_ERROR"
 
 			elif operand[0] == "(":
 				operand = operand.replace("(", "")
 				operand = operand.replace(")", "")
+				targetDir = self.getValue(operand)
+				return self.getValue(targetDir)
+			else:
+				return self.retrieveFromMemory(int(operand))
 		except:
 			return self.retrieveFromMemory(int(operand))
 
+	def getAddress(self, address):
+		try:
+			if address[0] == '(':
+				address = address.replace("(", "")
+				address = address.replace(")", "")
+				address = str(self.retrieveFromMemory(int(address)))
+				return self.getAddress(address)
+			else:
+				return address
+		except:
+			return address
+
 	def saveResult(self, value, memDirection):
-		print("SR\tVal= ", value, "\tMemDir=", memDirection)
+		#print("SR\tVal= ", value, "\tMemDir=", memDirection)
 		if memDirection < 40000:
 			return False
 		else:
 			try:
 				if memDirection < 50000:
+					#print('SAVING ', memDirection, ' = ', value)
 					self.INT_MEME[memDirection % 40000] = value
 				elif memDirection > 59999:
 					self.BOOL_MEME[memDirection % 60000] = value

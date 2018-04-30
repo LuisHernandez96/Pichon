@@ -18,29 +18,27 @@ reserved = {
 	'for' : 'FOR',
 	'true' : 'TRUE',
 	'false' : 'FALSE',
-	'cube' : 'CUBE',
-	'sphere' : 'SPHERE',
-	'down' : 'DOWN',
-	'up' : 'UP',
-	'forward' : 'FORWARD',
-	'turnLeft' : 'TURN_LEFT',
-	'turnRight' : 'TURN_RIGHT',
-	'isFacingNorth' : 'IS_FACING_NORTH',
-	'isFacingSouth' : 'IS_FACING_SOUTH',
-	'isFacingEast' : 'IS_FACING_EAST',
-	'isFacingWest' : 'IS_FACING_WEST',
-	'goal' : 'GOAL',
-	'start' : 'START',
-	'outOfBounds' : 'OUT_OF_BOUNDS',
+	'cube' : 'CUBE', # YA
+	'sphere' : 'SPHERE', # YA
+	'down' : 'DOWN', # YA
+	'up' : 'UP', # YA
+	'forward' : 'FORWARD', # YA
+	'turnLeft' : 'TURN_LEFT', # YA
+	'turnRight' : 'TURN_RIGHT', # YA
+	'isFacingNorth' : 'IS_FACING_NORTH', # YA
+	'isFacingSouth' : 'IS_FACING_SOUTH', # YA
+	'isFacingEast' : 'IS_FACING_EAST', # YA
+	'isFacingWest' : 'IS_FACING_WEST', # YA
+	'goal' : 'GOAL', # YA
+	'start' : 'START', # YA
+	'outOfBounds' : 'OUT_OF_BOUNDS', #YA
+	'print' : 'PRINT', # YA
 	'canMoveForward' : 'CAN_MOVE_FORWARD',
 	'isBlocked' : 'IS_BLOCKED',
 	'isCollectible' : 'IS_COLLECTIBLE',
-	'pickUp' : 'PICK_UP',
 	'position' : 'POSITION',
-	'spawnObject' : 'SPAWN_OBJECT',
-	'envSize' : 'ENV_SIZE',
+	'spawnObject' : 'SPAWN_OBJECT', # YA
 	'setMovementSpeed' : 'SET_MOV_SPEED',
-	'length' : 'LENGTH'
 }
 
 tokens = [

@@ -1,4 +1,9 @@
 import Memory as Mem
+import SymbolTables as st
+import GameManager
+from utils import raiseError
+from vpython import *
+import time
 
 GOTO = "GOTO"
 GOTOF = "GOTO_FALSE"
@@ -32,11 +37,13 @@ class VMachine:
         self.memory = Mem.Memory()
         self.memoryStack = [self.memory]
         self.subMem = []
+        self.gm = None
 
     def runVM(self):
-
+        self.gm = GameManager.GameManager()
         while self.currentCuad[-1] < len(self.cuadruplos):
             self.processCuad(self.cuadruplos[self.currentCuad[-1]])
+        print("Finished!")
 
     def processReservedFunction(self, function, parameters):
             if function == "down":
@@ -57,28 +64,78 @@ class VMachine:
             elif function == "spawnObject":
                 obj = parameters[0]
                 if obj == "sphere":
-                    sphere(pos = vector(parameters[1], parameters[2], parameters[3]))
+                    sphere(pos = vector(parameters[1], parameters[2], parameters[3]), size = vector(0.5, 0.5, 0.5))
+                    self.gm.collectibles.append((parameters[1], parameters[2], parameters[3]))
                 elif obj == "cube":
                     box(pos = vector(parameters[1], parameters[2], parameters[3]))
+                    self.gm.obstacles.append((parameters[1], parameters[2], parameters[3]))
             elif function == "isFacingNorth":
                 res = self.gm.player.axis.x == 1.0
-                st[st.FUNC][function][st.RESULT].append(res)
+                self.memoryStack[-1].SEND_PARAMS.append(res)
             elif function == "isFacingSouth":
                 res = self.gm.player.axis.x == -1.0
-                st[st.FUNC][function][st.RESULT].append(res)
+                self.memoryStack[-1].SEND_PARAMS.append(res)
             elif function == "isFacingEast":
                 res = self.gm.player.axis.z == 1.0
-                st[st.FUNC][function][st.RESULT].append(res)
+                self.memoryStack[-1].SEND_PARAMS.append(res)
             elif function == "isFacingWest":
                 res = self.gm.player.axis.z == -1.0
-                st[st.FUNC][function][st.RESULT].append(res)
+                self.memoryStack[-1].SEND_PARAMS.append(res)
             elif function == "start":
-                self.gm.startPosition = (parameters[0], parameters[1], parameters[2])
+                x = parameters[0]
+                y = parameters[1]
+                z = parameters[2]
+                if x > 20 or x < 0 or y > 20 or y < 0 or z > 20 or z < 0:
+                    raiseError('Given coordinates are out of the allowed bounds.')
+                self.gm.startPosition = (x, y, z)
             elif function == "goal":
-                self.gm.goalPosition = (parameters[0], parameters[1], parameters[2])
+                x = parameters[0]
+                y = parameters[1]
+                z = parameters[2]
+                if x > 20 or x < 0 or y > 20 or y < 0 or z > 20 or z < 0:
+                    raiseError('Given coordinates are out of the allowed bounds.')
+                self.gm.goalPosition = (x, y, z)
+            elif function == "print":
+                print(parameters[0])
+            elif function == "startMovement":
+                self.gm.player = box(pos = vector(self.gm.startPosition[0], self.gm.startPosition[1], self.gm.startPosition[2]), color = color.red)
+                attach_trail(self.gm.player)
+            elif function == "outOfBounds":
+                x = parameters[0]
+                y = parameters[1]
+                z = parameters[2]
+                res = x > 20 or x < 0 or y > 20 or y < 0 or z > 20 or z < 0
+                self.memoryStack[-1].SEND_PARAMS.append(res)
+            elif function == "isCollectible":
+                x = parameters[0]
+                y = parameters[1]
+                z = parameters[2]
+                for collectible in self.gm.collectibles:
+                    if self.gm.distance((x, y, z), collectible) <= 1:
+                        res = True
+                        self.memoryStack[-1].SEND_PARAMS.append(res)
+                        return
+
+                res = False
+                self.memoryStack[-1].SEND_PARAMS.append(res)
+
+            elif function == "isBlocked":
+                x = parameters[0]
+                y = parameters[1]
+                z = parameters[2]
+                coord = (x, y, z)
+                print(self.gm.obstacles)
+                print(coord)
+                for obstacle in self.gm.obstacles:
+                    if self.gm.distance((x, y, z), obstacle) <= 1:
+                        res = True
+                        self.memoryStack[-1].SEND_PARAMS.append(res)
+                        return
+
+                res = False
+                self.memoryStack[-1].SEND_PARAMS.append(res)
 
     def processCuad(self, cuadruplo):
-        print("PC\tCuad= ",str(cuadruplo))
 
         if cuadruplo.operator == GOTO:
             self.currentCuad[-1] = cuadruplo.result
@@ -105,6 +162,7 @@ class VMachine:
 
             result = oper1 + oper2
 
+            #print('oper1 (', result, ') + (', oper2, ') = ', result)
             if self.memoryStack[-1].saveResult(result,cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
@@ -145,15 +203,14 @@ class VMachine:
 
         elif cuadruplo.operator == ASSIGN:
             if len(self.subMem)!=0 and self.subMem[-1] == cuadruplo.operand1:
-                if self.memoryStack[-1].saveResult(self.memoryStack[-1].RECEIVE_PARAMS[-1], cuadruplo.result):
+                if self.memoryStack[-1].saveResult(self.memoryStack[-1].RECEIVE_PARAMS[-1], int(self.memoryStack[-1].getAddress(cuadruplo.result))):
                     self.memoryStack[-1].RECEIVE_PARAMS.pop()
                     self.currentCuad[-1] += 1
                 else:
                     print("case1.1.2")
             else:
                 oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
-
-                if self.memoryStack[-1].saveResult(oper1, cuadruplo.result):
+                if self.memoryStack[-1].saveResult(oper1, int(self.memoryStack[-1].getAddress(cuadruplo.result))):
                     self.currentCuad[-1] += 1
                 else:
                     raiseError("Error in save result EQUAL")
@@ -294,18 +351,24 @@ class VMachine:
                 raiseError("Error in save result NEG")
 
         elif cuadruplo.operator == ERA:
-            # self.memoryStack.append(Mem.Memory())
             self.currentCuad[-1] += 1
 
         elif cuadruplo.operator == PARAM:
-            oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
+            oper1 = cuadruplo.operand1
+            if cuadruplo.operand1 != 'cube' and cuadruplo.operand1 != 'sphere':
+                oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
             self.memoryStack[-1].SEND_PARAMS.append(oper1)
             self.currentCuad[-1] += 1
 
         elif cuadruplo.operator == GO_SUB:
             if cuadruplo.result == None:
-                self.processReservedFunction(cuadruplo.operand1, None)
-                self.currentCuad += 1
+                self.memoryStack.append(Mem.Memory())
+                self.processReservedFunction(cuadruplo.operand1, self.memoryStack[-2].SEND_PARAMS)
+                self.subMem.append(cuadruplo.operand1)
+                # self.memoryStack[-1].RECEIVE_PARAMS = self.memoryStack[-2].SEND_PARAMS
+                self.memoryStack[-2].SEND_PARAMS = []
+                self.memoryStack.pop()
+                self.currentCuad[-1] += 1
             else:
                 self.currentCuad.append(cuadruplo.result)
                 self.memoryStack.append(Mem.Memory())
@@ -325,7 +388,13 @@ class VMachine:
             self.currentCuad.pop()
             self.currentCuad[-1] += 1
 
-        print("")
+        elif cuadruplo.operator == VER:
+            index = self.memoryStack[-1].getValue(cuadruplo.operand1);
+            lowerBound = int(cuadruplo.operand2)
+            upperBound = int(cuadruplo.result)
+            if index >= lowerBound and index < upperBound:
+                self.currentCuad[-1] += 1
+            else:
+                raiseError("Error: Array index out of bounds.")
 
-
-
+        #print("")

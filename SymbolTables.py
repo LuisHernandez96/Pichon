@@ -2,6 +2,7 @@ import pprint
 import sys
 import constants
 import NeededSize as n
+from utils import raiseError
 import re
 from GlobalVars import globals
 
@@ -59,7 +60,6 @@ def getArgumentSize(argument, currentScope):
         return 0
 
     for var in scope[VARS]:
-        pprint.pprint(scope[VARS][var])
         if ADDRESS in scope[VARS][var] and scope[VARS][var][ADDRESS] == argument:
             return scope[VARS][var][SIZE]
 
@@ -131,28 +131,28 @@ def ADD_PREDEFINED_FUNCTIONS():
         },
         "isFacingNorth" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingEast" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingWest" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingSouth" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
@@ -179,42 +179,42 @@ def ADD_PREDEFINED_FUNCTIONS():
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "goal" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
         },
         "start" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
         },
         "outOfBounds" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isBlocked" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isCollectible" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "pickUp" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
@@ -228,11 +228,18 @@ def ADD_PREDEFINED_FUNCTIONS():
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "spawnObject" : {
-            PARAMS : [re.compile('cube|sphere'), 'float', 'float', 'float'],
-            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            PARAMS : [re.compile('cube|sphere'), re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
+        },
+        "print" : {
+            PARAMS : [re.compile('float|int|boolean')],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : NONE_TYPE
         },
     }
 
@@ -322,7 +329,7 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
         scope[VARS][id] = dict()
         scope[VARS][id][DATA_TYPE] = data_type
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
-        scope[VARS][id][SIZE] = size
+        scope[VARS][id][SIZE] = size #if data_type in [4, 5, 6, 7] else 0
         scope[VARS][id][DIMS] = dims
 
 def GET_PARAMS(id):

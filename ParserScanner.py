@@ -18,7 +18,7 @@ precedence = (
 
 def p_start(p):
     '''start : push_goto func_sec env_sec mov_sec'''
-    print("Finished!")
+    # print("Finished!")
 
 
 def p_func_sec(p):
@@ -31,7 +31,7 @@ def p_func_sec1(p):
 
 
 def p_functions(p):
-    '''functions : FUNCTION tipo function_header_id create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
+    '''functions : FUNCTION tipo_funcion function_header_id create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
     st.ADD_SCOPE_MEMORY(globals.currentScope)
     globals.functionReturns = False
     createEndProc()
@@ -53,12 +53,9 @@ def p_function_header_id(p):
 				| CAN_MOVE_FORWARD
 				| IS_BLOCKED
 				| IS_COLLECTIBLE
-				| PICK_UP
 				| POSITION
 				| SPAWN_OBJECT
-				| ENV_SIZE
 				| SET_MOV_SPEED
-				| LENGTH
 				| ID
 				'''
     if p[1] in reserved:
@@ -97,7 +94,7 @@ def p_functions1(p):
 				   | empty '''
 
 
-def p_fucntions2(p):
+def p_functions2(p):
     '''functions2 : return
 				   | empty'''
     if not globals.functionReturns and st.getReturnType(st.getScope(globals.currentScope)) != constants.DATA_TYPES[
@@ -108,11 +105,26 @@ def p_fucntions2(p):
 def p_env_sec(p):
     '''env_sec : ENVIRONMENT create_function_vars_table cond_replace_none_2 L_BRACE set_start_cuad vars bloque R_BRACE'''
     st.ADD_SCOPE_MEMORY(globals.currentScope)
-
+    cuad = Cuadruplo('GOSUB', 'startMovement', result = None, counter = globals.cuadCounter)
+    globals.cuadCounter = globals.cuadCounter + 1
+    globals.cuadruplos.append(cuad)
 
 def p_mov_sec(p):
     '''mov_sec : MOVEMENT create_function_vars_table L_BRACE set_start_cuad vars bloque R_BRACE'''
     st.ADD_SCOPE_MEMORY(globals.currentScope)
+
+
+def p_tipo_funcion(p):
+    '''tipo_funcion : INT tipo1_funcion
+            | BOOLEAN tipo1_funcion
+            | COORD tipo1_funcion
+            | FLOAT tipo1_funcion
+            | VOID'''
+    setDataType(p)
+    globals.currentDataTypeString = p[1] + globals.currentDataTypeString
+
+    # Avoid pushing in the stack function return types
+    p[0] = globals.currentDataType
 
 
 def p_tipo(p):
@@ -147,6 +159,15 @@ def p_tipo1(p):
         p[0] = None
 
 
+def p_tipo1_funcion(p):
+    '''tipo1_funcion : L_BRACKET CTE_I return_int_funcion R_BRACKET tipo1 return_list
+              | empty'''
+    if len(p) == 7:
+        p[0] = {'isList': p[6], 'listSize': p[2]}
+    else:
+        p[0] = None
+
+
 def p_return_list(p):
     '''return_list : '''
     p[0] = True
@@ -159,6 +180,14 @@ def p_return_int(p):
     globals.isArr = True
     globals.dimensiones.append({'inf': 0, 'sup': int(p[-1]), 'm': None})
     globals.R = (globals.dimensiones[-1]['sup'] - globals.dimensiones[-1]['inf']) * globals.R
+    p[0] = p[-1]
+
+
+def p_return_int_funcion(p):
+    'return_int_funcion : '
+    globals.currentDataTypeString += ('[' + str(p[-1]) + ']')
+    globals.currentSize *= p[-1]
+    globals.isArr = True
     p[0] = p[-1]
 
 
@@ -440,6 +469,8 @@ def p_push_fondo_falso(p):
     '''push_fondo_falso :'''
     address = globals.operandos.pop()
     type = globals.tipos.pop()
+    #pprint.pprint(st.SYMBOL_TABLE)
+    #print(address)
     if not st.checkIfArray(globals.currentScope, address):
         id = st.getIDFromAddress(globals.currentScope, address)
         raiseError('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
@@ -453,6 +484,8 @@ def p_push_fondo_falso_asignacion(p):
     '''push_fondo_falso_asignacion :'''
     type = getIdDataType(globals.assigningID, globals.currentScope)
     address = getIdAddress(globals.assigningID, type, globals.currentScope)
+    #pprint.pprint(st.SYMBOL_TABLE)
+    #print(address)
     if not st.checkIfArray(globals.currentScope, address):
         raiseError('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, globals.assigningID))
 
@@ -651,12 +684,14 @@ def p_func_call(p):
     retType = st.getReturnType(st.getScope(globals.functionCalled[-1]))
     retSize = st.getReturnSize(st.getScope(globals.functionCalled[-1]))
     virtualAddress = memory.ADD_NEW_VAR(retType, retSize)
+    #print('retType ', retType)
+    #print('virtual address ', virtualAddress)
     globals.operadores.pop()
     globals.operandos.append(virtualAddress)
     globals.tipos.append(retType)
 
     if retType != constants.DATA_TYPES[constants.VOID]:
-        # 	create cuad = func _ temp1
+        #print('NOT VOID VA ', virtualAddress)
         cuad = Cuadruplo('=', operand1=globals.functionCalled[-1], result=virtualAddress, counter=globals.cuadCounter)
         st.ADD_MEMORY(globals.currentScope, retType, 1, True)
         globals.cuadruplos.append(cuad)
@@ -702,12 +737,10 @@ def p_func_id(p):
 				| CAN_MOVE_FORWARD
 				| IS_BLOCKED
 				| IS_COLLECTIBLE
-				| PICK_UP
 				| POSITION
 				| SPAWN_OBJECT
-				| ENV_SIZE
 				| SET_MOV_SPEED
-				| LENGTH
+                | PRINT
 				| ID
 				'''
     st.CHECK_FUNCTION_DEFINED(p[1])
@@ -1005,7 +1038,7 @@ def p_empty(p):
     pass
 
 
-def main(program):
+def main():
 
     st.SYMBOL_INIT(False)
 
@@ -1013,19 +1046,19 @@ def main(program):
     lex.lex()
     parser = yacc.yacc(start='start')
 
-    '''
+    
     with open('test.txt') as f:
-        read_data = f.read()
+                    read_data = f.read()
+            
+                    parser.parse(read_data)
+    
 
-        parser.parse(read_data)
-    '''
+    # parser.parse(program)
 
-    parser.parse(program)
-
-    '''for cuadruplo in globals.cuadruplos:
-                    print(cuadruplo)'''
-
-    # pprint.pprint(st.SYMBOL_TABLE)
+    for cuadruplo in globals.cuadruplos:
+                    print(cuadruplo)
+                    
+    pprint.pprint(st.SYMBOL_TABLE)
 
     # print(globals.operadores)
     # print(globals.operandos)
@@ -1041,7 +1074,7 @@ def main(program):
     virtualMachine.runVM()
 
 if __name__ == '__main__':
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument('program')
-    args = argparser.parse_args()
-    main(args.program)
+    '''argparser = argparse.ArgumentParser()
+                argparser.add_argument('program')
+                args = argparser.parse_args()'''
+    main()
