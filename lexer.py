@@ -34,11 +34,11 @@ reserved = {
 	'outOfBounds' : 'OUT_OF_BOUNDS', #YA
 	'print' : 'PRINT', # YA
 	'canMoveForward' : 'CAN_MOVE_FORWARD',
-	'isBlocked' : 'IS_BLOCKED',
-	'isCollectible' : 'IS_COLLECTIBLE',
+	'isBlocked' : 'IS_BLOCKED', #YA
+	'isCollectible' : 'IS_COLLECTIBLE', #YA
 	'position' : 'POSITION',
 	'spawnObject' : 'SPAWN_OBJECT', # YA
-	'setMovementSpeed' : 'SET_MOV_SPEED',
+	'setMovementSpeed' : 'SET_MOV_SPEED', #YA
 }
 
 tokens = [

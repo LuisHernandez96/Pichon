@@ -1055,10 +1055,10 @@ def main():
 
     # parser.parse(program)
 
-    for cuadruplo in globals.cuadruplos:
-                    print(cuadruplo)
-                    
-    pprint.pprint(st.SYMBOL_TABLE)
+    #for cuadruplo in globals.cuadruplos:
+    #                print(cuadruplo)
+
+    #pprint.pprint(st.SYMBOL_TABLE)
 
     # print(globals.operadores)
     # print(globals.operandos)

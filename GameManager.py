@@ -7,6 +7,12 @@ class GameManager:
 		self.goalPosition = (5, 0, 0)
 		self.obstacles = []
 		self.collectibles = []
+		self.speed = 1.0
+		self.score = None
+		self.collectibleObjects = []
+		self.obstacleObjects = []
+		self.totalCollectibles = 0
+		self.collected = 0
 
 	def distance(self, coord1, coord2):
 		x1 = coord1[0]
@@ -17,3 +23,21 @@ class GameManager:
 		z2 = coord2[2]
 		dist = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 		return dist
+
+	def checkCollectibles(self):
+		playerPos = (self.player.pos.x, self.player.pos.y, self.player.pos.z)
+		toRemove = []
+		for i in range(0, len(self.collectibles)):
+			collectible = self.collectibles[i]
+			if self.distance(playerPos, collectible) < 0.5:
+				self.collectibleObjects[i].visible = False
+				self.collected += 1
+				toRemove.append(i)
+
+		removed = 0
+		for index in toRemove:
+			self.collectibles.pop(index - removed)
+			self.collectibleObjects.pop(index - removed)
+			removed += 1
+
+		self.score.text = 'Collectibles: {}/{}'.format(self.collected, self.totalCollectibles)

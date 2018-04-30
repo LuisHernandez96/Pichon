@@ -1,39 +1,21 @@
 FUNCTIONS{
-    function int caca(int a){
-        int[5] b = {1, 2, 3, 4, 5};
-        return b[3] * a + b[4];
-    }
+
 }
 
 ENVIRONMENT{
+    spawnObject(sphere, 3, 0, 0);
+    spawnObject(sphere, ~1, 0, 0);
+    spawnObject(sphere, 3, 5, 0);
+    spawnObject(sphere, 3, 3, 0);
 }
 
 MOVEMENT{
-    int[2][2][2] a = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
-    print(a[0][0][0]);
-    print(a[0][0][1]);
-    print(a[0][1][0]);
-    print(a[0][1][1]);
-    print(a[1][0][0]);
-    print(a[1][0][1]);
-    print(a[1][1][0]);
-    print(a[1][1][1]);
-    a[0][0][0] = a[1][1][1];
-    a[0][0][1] = 12;
-    a[0][1][0] = 13;
-    a[0][1][1] = 14;
-    a[1][0][0] = 15;
-    a[1][0][1] = 16;
-    a[1][1][0] = 17;
-    a[1][1][1] = 18;
-    print(a[0][0][0]);
-    print(a[0][0][1]);
-    print(a[0][1][0]);
-    print(a[0][1][1]);
-    print(a[1][0][0]);
-    print(a[1][0][1]);
-    print(a[1][1][0]);
-    print(a[1][1][1]);
-    print(a[0][0][0] + a[0][0][1] + a[0][1][0] + a[0][1][1] + a[1][0][0] + a[1][0][1] + a[1][1][0] + a[1][1][1]);
-    print(caca(a[0][0][0] + 100) + 100);
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
 }

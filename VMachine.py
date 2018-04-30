@@ -48,27 +48,33 @@ class VMachine:
     def processReservedFunction(self, function, parameters):
             if function == "down":
                 self.gm.player.pos = self.gm.player.pos - self.gm.player.up
-                time.sleep(1)
+                self.gm.checkCollectibles()
+                time.sleep(1/self.gm.speed)
             elif function == "up":
                 self.gm.player.pos = self.gm.player.pos + self.gm.player.up
-                time.sleep(1)
+                self.gm.checkCollectibles()
+                time.sleep(1/self.gm.speed)
             elif function == "forward":
                 self.gm.player.pos = self.gm.player.pos + self.gm.player.axis
-                time.sleep(1)
+                self.gm.checkCollectibles()
+                time.sleep(1/self.gm.speed)
             elif function == "turnLeft":
                 self.gm.player.rotate(radians(90), vec(0, 1, 0))
-                time.sleep(1)
+                time.sleep(1/self.gm.speed)
             elif function == "turnRight":
                 self.gm.player.rotate(radians(-90), vec(0, 1, 0))
-                time.sleep(1)
+                time.sleep(1/self.gm.speed)
             elif function == "spawnObject":
                 obj = parameters[0]
                 if obj == "sphere":
-                    sphere(pos = vector(parameters[1], parameters[2], parameters[3]), size = vector(0.5, 0.5, 0.5))
+                    collectible = sphere(pos = vector(parameters[1], parameters[2], parameters[3]), size = vector(0.5, 0.5, 0.5))
+                    self.gm.totalCollectibles += 1
                     self.gm.collectibles.append((parameters[1], parameters[2], parameters[3]))
+                    self.gm.collectibleObjects.append(collectible)
                 elif obj == "cube":
-                    box(pos = vector(parameters[1], parameters[2], parameters[3]))
+                    obstacle = box(pos = vector(parameters[1], parameters[2], parameters[3]))
                     self.gm.obstacles.append((parameters[1], parameters[2], parameters[3]))
+                    self.gm.obstacleObjects.append(obstacle)
             elif function == "isFacingNorth":
                 res = self.gm.player.axis.x == 1.0
                 self.memoryStack[-1].SEND_PARAMS.append(res)
@@ -98,6 +104,7 @@ class VMachine:
             elif function == "print":
                 print(parameters[0])
             elif function == "startMovement":
+                self.gm.score = label(pos = vector(self.gm.goalPosition[0], self.gm.goalPosition[1], self.gm.goalPosition[2]), text='Collectibles: 0/{}'.format(len(self.gm.collectibles)))
                 self.gm.player = box(pos = vector(self.gm.startPosition[0], self.gm.startPosition[1], self.gm.startPosition[2]), color = color.red)
                 attach_trail(self.gm.player)
             elif function == "outOfBounds":
@@ -124,8 +131,6 @@ class VMachine:
                 y = parameters[1]
                 z = parameters[2]
                 coord = (x, y, z)
-                print(self.gm.obstacles)
-                print(coord)
                 for obstacle in self.gm.obstacles:
                     if self.gm.distance((x, y, z), obstacle) <= 1:
                         res = True
@@ -134,6 +139,9 @@ class VMachine:
 
                 res = False
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+
+            elif function == "setMovementSpeed":
+                self.gm.speed = parameters[0]
 
     def processCuad(self, cuadruplo):
 
@@ -364,8 +372,9 @@ class VMachine:
             if cuadruplo.result == None:
                 self.memoryStack.append(Mem.Memory())
                 self.processReservedFunction(cuadruplo.operand1, self.memoryStack[-2].SEND_PARAMS)
-                self.subMem.append(cuadruplo.operand1)
-                # self.memoryStack[-1].RECEIVE_PARAMS = self.memoryStack[-2].SEND_PARAMS
+                if len(self.memoryStack[-1].SEND_PARAMS) > 0:
+                    self.subMem.append(cuadruplo.operand1)
+                self.memoryStack[-2].RECEIVE_PARAMS = self.memoryStack[-1].SEND_PARAMS
                 self.memoryStack[-2].SEND_PARAMS = []
                 self.memoryStack.pop()
                 self.currentCuad[-1] += 1
