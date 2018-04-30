@@ -117,7 +117,6 @@ def p_mov_sec(p):
 def p_tipo_funcion(p):
     '''tipo_funcion : INT tipo1_funcion
             | BOOLEAN tipo1_funcion
-            | COORD tipo1_funcion
             | FLOAT tipo1_funcion
             | VOID'''
     setDataType(p)
@@ -130,7 +129,6 @@ def p_tipo_funcion(p):
 def p_tipo(p):
     '''tipo : INT tipo1
 			| BOOLEAN tipo1
-			| COORD tipo1
 			| FLOAT tipo1
 			| VOID'''
     setDataType(p)
@@ -415,7 +413,6 @@ def p_cuads_true_false(p):
 def p_var_cte(p):
     '''var_cte : ID push_operand_stack var_cte1
 		| func_call var_cte1
-		| coord var_cte1
 		| CTE_I push_constant_operand_stack
 		| CTE_F push_constant_operand_stack
 		| TRUE push_constant_operand_stack
@@ -664,14 +661,6 @@ def p_push_operator_stack(p):
 def p_pop_operator_stack(p):
     '''pop_operator_stack :'''
     globals.operadores.pop()
-
-
-def p_coord(p):
-    '''coord : L_PAREN xyz R_PAREN'''
-
-
-def p_xyz(p):
-    '''xyz : expresion COMMA expresion COMMA expresion'''
 
 
 def p_func_call(p):

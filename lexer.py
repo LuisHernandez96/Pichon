@@ -8,7 +8,6 @@ reserved = {
 	'int' : 'INT',
 	'float' : 'FLOAT',
 	'boolean' : 'BOOLEAN',
-	'coord' : 'COORD',
 	'void' : 'VOID',
 	'return' : 'RETURN',
 	'if' : 'IF',
