@@ -159,7 +159,7 @@ def ADD_PREDEFINED_FUNCTIONS():
         },
         "canMoveForward" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE

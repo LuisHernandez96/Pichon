@@ -7,15 +7,20 @@ ENVIRONMENT{
     spawnObject(sphere, ~1, 0, 0);
     spawnObject(sphere, 3, 5, 0);
     spawnObject(sphere, 3, 3, 0);
+    spawnObject(cube, 13, 5, 10);
+    spawnObject(cube, 3, 5, 10);
+    start(8, 5, 10);
+    goal(0, 0, 0);
 }
 
 MOVEMENT{
-    forward();
-    forward();
-    forward();
-    forward();
-    forward();
-    forward();
-    forward();
-    forward();
+    
+    while(true){
+        while(canMoveForward()){
+            forward();
+        };
+
+        turnLeft();
+        turnLeft();
+    };
 }

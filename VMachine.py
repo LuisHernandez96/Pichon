@@ -47,16 +47,37 @@ class VMachine:
 
     def processReservedFunction(self, function, parameters):
             if function == "down":
-                self.gm.player.pos = self.gm.player.pos - self.gm.player.up
-                self.gm.checkCollectibles()
+                nextPos = self.gm.player.pos - self.gm.player.up
+                nextPosCoord = (nextPos.x, nextPos.y, nextPos.z)
+                if not self.gm.outOfBounds(nextPosCoord) and not self.gm.isBlocked(nextPosCoord):
+                    self.gm.warning.visible = False
+                    self.gm.player.pos = self.gm.player.pos - self.gm.player.up
+                    self.gm.checkCollectibles()
+                else:
+                    self.gm.warning.pos = self.gm.player.pos + 0.8 * self.gm.player.up
+                    self.gm.warning.visible = True
                 time.sleep(1/self.gm.speed)
             elif function == "up":
-                self.gm.player.pos = self.gm.player.pos + self.gm.player.up
-                self.gm.checkCollectibles()
+                nextPos = self.gm.player.pos + self.gm.player.up
+                nextPosCoord = (nextPos.x, nextPos.y, nextPos.z)
+                if not self.gm.outOfBounds(nextPosCoord) and not self.gm.isBlocked(nextPosCoord):
+                    self.gm.warning.visible = False
+                    self.gm.player.pos = self.gm.player.pos + self.gm.player.up
+                    self.gm.checkCollectibles()
+                else:
+                    self.gm.warning.pos = self.gm.player.pos + 0.8 * self.gm.player.up
+                    self.gm.warning.visible = True
                 time.sleep(1/self.gm.speed)
             elif function == "forward":
-                self.gm.player.pos = self.gm.player.pos + self.gm.player.axis
-                self.gm.checkCollectibles()
+                nextPos = self.gm.player.pos + self.gm.player.axis
+                nextPosCoord = (nextPos.x, nextPos.y, nextPos.z)
+                if not self.gm.outOfBounds(nextPosCoord) and not self.gm.isBlocked(nextPosCoord):
+                    self.gm.warning.visible = False
+                    self.gm.player.pos = self.gm.player.pos + self.gm.player.axis
+                    self.gm.checkCollectibles()
+                else:
+                    self.gm.warning.pos = self.gm.player.pos + 0.8 * self.gm.player.up
+                    self.gm.warning.visible = True
                 time.sleep(1/self.gm.speed)
             elif function == "turnLeft":
                 self.gm.player.rotate(radians(90), vec(0, 1, 0))
@@ -91,27 +112,29 @@ class VMachine:
                 x = parameters[0]
                 y = parameters[1]
                 z = parameters[2]
-                if x > 20 or x < 0 or y > 20 or y < 0 or z > 20 or z < 0:
-                    raiseError('Given coordinates are out of the allowed bounds.')
+                if x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim:
+                    raiseError('Start coordinates are out of the allowed bounds.')
                 self.gm.startPosition = (x, y, z)
             elif function == "goal":
                 x = parameters[0]
                 y = parameters[1]
                 z = parameters[2]
-                if x > 20 or x < 0 or y > 20 or y < 0 or z > 20 or z < 0:
-                    raiseError('Given coordinates are out of the allowed bounds.')
+                if x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim:
+                    raiseError('Goal coordinates are out of the allowed bounds.')
                 self.gm.goalPosition = (x, y, z)
             elif function == "print":
                 print(parameters[0])
             elif function == "startMovement":
+                scene.title = 'Pichon - Starting position: {} - Goal position: {} - Collectibles: {}'.format(self.gm.startPosition, self.gm.goalPosition, len(self.gm.collectibles))
                 self.gm.score = label(pos = vector(self.gm.goalPosition[0], self.gm.goalPosition[1], self.gm.goalPosition[2]), text='Collectibles: 0/{}'.format(len(self.gm.collectibles)))
+                self.gm.warning = label(pos = vector(self.gm.startPosition[0], self.gm.startPosition[1] + 0.2, self.gm.startPosition[2]), text='Cannot perform action!', visible = False)
                 self.gm.player = box(pos = vector(self.gm.startPosition[0], self.gm.startPosition[1], self.gm.startPosition[2]), color = color.red)
                 attach_trail(self.gm.player)
             elif function == "outOfBounds":
                 x = parameters[0]
                 y = parameters[1]
                 z = parameters[2]
-                res = x > 20 or x < 0 or y > 20 or y < 0 or z > 20 or z < 0
+                res = x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim
                 self.memoryStack[-1].SEND_PARAMS.append(res)
             elif function == "isCollectible":
                 x = parameters[0]
@@ -142,6 +165,10 @@ class VMachine:
 
             elif function == "setMovementSpeed":
                 self.gm.speed = parameters[0]
+
+            elif function == "canMoveForward":
+                res = self.gm.canMoveForward()
+                self.memoryStack[-1].SEND_PARAMS.append(res)
 
     def processCuad(self, cuadruplo):
 

@@ -3,16 +3,19 @@ import math
 class GameManager:
 	def __init__(self):
 		self.player = None
-		self.startPosition = (0, 0, 0)
-		self.goalPosition = (5, 0, 0)
+		self.startPosition = (10, 10, 10)
+		self.goalPosition = (15, 15, 15)
 		self.obstacles = []
 		self.collectibles = []
 		self.speed = 1.0
 		self.score = None
+		self.warning = None
 		self.collectibleObjects = []
 		self.obstacleObjects = []
 		self.totalCollectibles = 0
 		self.collected = 0
+		self.minDim = 0
+		self.maxDim = 20
 
 	def distance(self, coord1, coord2):
 		x1 = coord1[0]
@@ -41,3 +44,24 @@ class GameManager:
 			removed += 1
 
 		self.score.text = 'Collectibles: {}/{}'.format(self.collected, self.totalCollectibles)
+
+	def isBlocked(self, coord):
+		for obstacle in self.obstacles:
+		    if self.distance(coord, obstacle) < 1:
+		        return True
+
+		return False
+
+	def outOfBounds(self, coord1):
+		x = coord1[0]
+		y = coord1[1]
+		z = coord1[2]
+		return x > self.maxDim or x < self.minDim or y > self.maxDim or y < self.minDim or z > self.maxDim or z < self.minDim
+
+	def canMoveForward(self):
+		forwardPos = self.player.pos + self.player.axis
+		forwardCoord = (forwardPos.x, forwardPos.y, forwardPos.z)
+		if self.outOfBounds(forwardCoord) or self.isBlocked(forwardCoord):
+			return False
+		else:
+			return True
