@@ -1118,7 +1118,7 @@ def main(program):
     parser.parse(program)
 
     #for cuadruplo in globals.cuadruplos:
-    #                print(cuadruplo)
+    #    print(cuadruplo)
 
     #pprint.pprint(st.SYMBOL_TABLE[st.MOV])
 

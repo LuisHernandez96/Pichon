@@ -103,9 +103,10 @@ class Bolt(tk.Frame):
 
     def _saveAs(self):
         self.master.filename =  filedialog.asksaveasfilename(initialdir = "/", title = "Save as...", filetypes = [("Pichon","*.pichon")])
-        file = open(self.master.filename, 'w')
-        file.write(self.text_area.get(1.0, tk.END))
-        file.close()
+        if self.master.filename != '':
+            file = open(self.master.filename, 'w')
+            file.write(self.text_area.get(1.0, tk.END))
+            file.close()
 
     def _changeHelpText(self, helpTxt):
         self.help_label.config(state = tk.NORMAL)
