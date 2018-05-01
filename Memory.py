@@ -83,8 +83,12 @@ class Memory:
 		# pprint.pprint(st.GET_PARAMS_ADDRESS(subName))
 		self.currentFunc = subName
 		for param, pType, pAddress in zip(self.RECEIVE_PARAMS,st.GET_PARAMS(subName), st.GET_PARAMS_ADDRESS(subName)):
-			# print(param,pType,pAddress)
-			self.saveResult(param,pAddress)
+			# print(param,pType,pAddress)
+			if isinstance(param, list):
+				for i in range(0, len(param)):
+					self.saveResult(param[i], pAddress + i)
+			else:
+				self.saveResult(param, pAddress)
 
 	def getValue(self, operand):
 		try:

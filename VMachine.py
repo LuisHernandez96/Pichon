@@ -396,9 +396,25 @@ class VMachine:
 
         elif cuadruplo.operator == PARAM:
             oper1 = cuadruplo.operand1
-            if cuadruplo.operand1 != 'cube' and cuadruplo.operand1 != 'sphere':
-                oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
-            self.memoryStack[-1].SEND_PARAMS.append(oper1)
+            paramArray = -1
+
+            if isinstance(cuadruplo.result, str) and cuadruplo.result[-1] == ')':
+                openParen = cuadruplo.result.find('(')
+                paramArray = int(cuadruplo.result[openParen + 1 : -1])
+
+            if paramArray != -1:
+                params = []
+                for i in range(0, paramArray):
+                    if cuadruplo.operand1 != 'cube' and cuadruplo.operand1 != 'sphere':
+                        address = self.memoryStack[-1].getAddress(cuadruplo.operand1)
+                        address = str(int(address) + i)
+                        oper1 = self.memoryStack[-1].getValue(address)
+                    params.append(oper1)
+                self.memoryStack[-1].SEND_PARAMS.append(params)
+            else:
+                if cuadruplo.operand1 != 'cube' and cuadruplo.operand1 != 'sphere':
+                    oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
+                self.memoryStack[-1].SEND_PARAMS.append(oper1)
             self.currentCuad[-1] += 1
 
         elif cuadruplo.operator == GO_SUB:
