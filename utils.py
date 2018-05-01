@@ -7,6 +7,7 @@ from Memory import memory
 from GlobalVars import globals
 from SemanticCube import SEMANTIC_CUBE
 from cuadruplo import Cuadruplo
+import tkinter as tk
 
 REGEX_BOOLEAN = r'true|false'
 regex_boolean = re.compile(REGEX_BOOLEAN)
@@ -27,8 +28,6 @@ def setDataType(p):
 			globals.currentDataType = constants.DATA_TYPES[constants.INT]
 		elif p[1] == 'boolean':
 			globals.currentDataType = constants.DATA_TYPES[constants.BOOLEAN]
-		elif p[1] == 'coord':
-			globals.currentDataType = constants.DATA_TYPES[constants.COORD]
 		elif p[1] == 'float':
 			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT]
 		else:
@@ -38,8 +37,6 @@ def setDataType(p):
 			globals.currentDataType = constants.DATA_TYPES[constants.INT_LIST]
 		elif p[1] == 'boolean':
 			globals.currentDataType = constants.DATA_TYPES[constants.BOOLEAN_LIST]
-		elif p[1] == 'coord':
-			globals.currentDataType = constants.DATA_TYPES[constants.COORD_LIST]
 		elif p[1] == 'float':
 			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT_LIST]
 
@@ -47,7 +44,7 @@ def setDataType(p):
 def isValidResult(operador, tipo_izq, tipo_der = None):
 	returnDataType = SEMANTIC_CUBE[tipo_izq][tipo_der if tipo_der != None else constants.DATA_TYPES[constants.VOID]][constants.OPERATORS[operador]]
 	if returnDataType == constants.SEMANTIC_ERROR:
-		sys.exit('Error at line {}: Type mismatch. Can not do {} with {} and {}'.format(globals.lineNumber + 1, operador, tipo_izq, tipo_der))
+		raiseError('Error at line {}: Type mismatch. Can not do {} with {} and {}'.format(globals.lineNumber + 1, operador, tipo_izq, tipo_der))
 	return returnDataType
 
 # Get the data type of an ID in a given scope
@@ -57,12 +54,12 @@ def getIdDataType(id, scope):
 		if id in st.SYMBOL_TABLE[st.FUNC][scope][st.VARS]:
 			resultType = st.SYMBOL_TABLE[st.FUNC][scope][st.VARS][id][st.DATA_TYPE]
 		else:
-			sys.exit('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
+			raiseError('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
 	else:
 		if id in st.SYMBOL_TABLE[scope][st.VARS]:
 			resultType = st.SYMBOL_TABLE[scope][st.VARS][id][st.DATA_TYPE]
 		else:
-			sys.exit('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
+			raiseError('Error at line {}: Variable {} not defined in the following scope: {}.'.format(globals.lineNumber + 1, id, scope))
 	return resultType
 
 # Get the address of an ID in a given scope. If it hasn't been assigned yet, it is assigned and returned.
@@ -148,17 +145,17 @@ def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
 	if len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]) > 0 and parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		if isinstance(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], type(regex_object)):
 			if not st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].match(argumentDataType):
-				sys.exit("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].pattern, argumentDataType))
+				raiseError("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].pattern, argumentDataType))
 		else:
 			if argumentDataType != st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter]:
-				sys.exit("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))
+				raiseError("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))
 	elif parameterCounter >= len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
-		sys.exit("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
+		raiseError("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
 # Check if a function is called with less arguments than the amount needed
 def checkIncompleteParameters(functionID, parameterCounter):
 	if parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
-		sys.exit("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
+		raiseError("Error at line {}: {} expects {} argument(s). ({})".format(globals.lineNumber + 1, functionID, len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]), st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]))
 
 # Create an END PROCEDURE quadruple
 def createEndProc():
@@ -174,7 +171,7 @@ def createERA(functionCalled):
 
 # Create a PARAMETER quadruple
 def createParam(paramCounter, operand, size):
-	cuad = Cuadruplo('PARAMETER', operand, result = 'PARAM{}{}'.format(paramCounter, '' if size == 0 else '(' + str(size) + ')'), counter = globals.cuadCounter)
+	cuad = Cuadruplo('PARAMETER', operand, result = '{}{}'.format(paramCounter, '' if size == 0 else '(' + str(size) + ')'), counter = globals.cuadCounter)
 	globals.cuadCounter = globals.cuadCounter + 1
 	globals.cuadruplos.append(cuad)
 
@@ -204,18 +201,18 @@ def checkUpdateFunctionType(currentScope, functionCalled):
 	functionCalledType = getFunctionType(functionCalled)
 	if currentScope == "ENVIRONMENT":
 		if functionCalledType == st.MOVEMENT_TYPE:
-			sys.exit('Error at line {}: Only environment type functions can be called inside ENVIRONMENT.'.format(globals.lineNumber + 1))
+			raiseError('Error at line {}: Only environment type functions can be called inside ENVIRONMENT.'.format(globals.lineNumber + 1))
 	elif currentScope == "MOVEMENT":
 		if functionCalledType == st.ENV_TYPE:
-			sys.exit('Error at line {}: Only movement type functions can be called inside MOVEMENT.'.format(globals.lineNumber + 1))
+			raiseError('Error at line {}: Only movement type functions can be called inside MOVEMENT.'.format(globals.lineNumber + 1))
 	else:
 		currentFunctionType = getFunctionType(currentScope)
 		if currentFunctionType == st.NONE_TYPE:
 			setFunctionType(currentScope, functionCalledType)
 		elif currentFunctionType == st.MOVEMENT_TYPE and functionCalledType == st.ENV_TYPE:
-			sys.exit('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
+			raiseError('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
 		elif currentFunctionType == st.ENV_TYPE and functionCalledType == st.MOVEMENT_TYPE:
-			sys.exit('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
+			raiseError('Error at line {}: A function ({}) can only contain environment type functions or movement type functions, but not both.'.format(globals.lineNumber + 1, currentScope))
 
 # Reset some global helper variables
 def resetGlobalVars():
@@ -242,3 +239,7 @@ def checkArrayDimensions(arr, dimensions, index):
 				return False
 
 		return ret
+
+def raiseError(message):
+	print(message)
+	sys.exit()

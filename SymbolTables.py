@@ -2,6 +2,7 @@ import pprint
 import sys
 import constants
 import NeededSize as n
+from utils import raiseError
 import re
 from GlobalVars import globals
 
@@ -24,6 +25,7 @@ PROC_START = "proc_start"
 ADDRESS = "address"
 RESERVED = "reserved"
 FUNCTION_TYPE = "function_type"
+RETURNS = "returns"
 MOVEMENT_TYPE = 0
 ENV_TYPE = 1
 NONE_TYPE = 2
@@ -58,7 +60,6 @@ def getArgumentSize(argument, currentScope):
         return 0
 
     for var in scope[VARS]:
-        pprint.pprint(scope[VARS][var])
         if ADDRESS in scope[VARS][var] and scope[VARS][var][ADDRESS] == argument:
             return scope[VARS][var][SIZE]
 
@@ -72,9 +73,8 @@ def getScope(scope):
 
 def getDims(currentScope, id):
     scope = getScope(currentScope)
-
     if id not in scope[VARS]:
-        sys.exit('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
     else:
         return scope[VARS][id][DIMS]
 
@@ -84,7 +84,8 @@ def getIDFromAddress(currentScope, address):
         if scope[VARS][var][ADDRESS] == address:
             return var
 
-    sys.exit('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
+    return False
+    # raiseError('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
 
 def checkIfArray(currentScope, address):
     id = getIDFromAddress(currentScope, address)
@@ -130,35 +131,35 @@ def ADD_PREDEFINED_FUNCTIONS():
         },
         "isFacingNorth" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingEast" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingWest" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingSouth" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "canMoveForward" : {
             PARAMS : [],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
@@ -178,60 +179,67 @@ def ADD_PREDEFINED_FUNCTIONS():
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "goal" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
-            FUNCTION_TYPE : MOVEMENT_TYPE
+            FUNCTION_TYPE : ENV_TYPE
         },
         "start" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
-            FUNCTION_TYPE : MOVEMENT_TYPE
+            FUNCTION_TYPE : ENV_TYPE
         },
         "outOfBounds" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isBlocked" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isCollectible" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "pickUp" : {
-            PARAMS : ['float', 'float', 'float'],
+            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "position" : {
-            PARAMS : [''],
+            PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.FLOAT_LIST],
             RETURN_SIZE : 3,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "spawnObject" : {
-            PARAMS : [re.compile('cube|sphere'), 'float', 'float', 'float'],
-            RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
+            PARAMS : [re.compile('cube|sphere'), re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
+        },
+        "print" : {
+            PARAMS : [re.compile('float|int|boolean')],
+            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
+            RETURN_SIZE : 0,
+            RESERVED : True,
+            FUNCTION_TYPE : NONE_TYPE
         },
     }
 
@@ -255,13 +263,14 @@ def ADD_FUNC(id, returnType, debug = False):
         SYMBOL_TABLE[FUNC][id][VARS] = dict()
         SYMBOL_TABLE[FUNC][id][PARAMS] = []
         SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS] = []
+        SYMBOL_TABLE[FUNC][id][RETURNS] = []
         SYMBOL_TABLE[FUNC][id][NEEDS] = n.NeededSize()
         SYMBOL_TABLE[FUNC][id][FUNCTION_TYPE] = NONE_TYPE
         SYMBOL_TABLE[FUNC][id][RESERVED] = False
         if(debug):
             pprint.pprint(SYMBOL_TABLE)
     else:
-        sys.exit('Error at line {}: Function {} already defined!'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: Function {} already defined!'.format(globals.lineNumber + 1, id))
 
 def ADD_MEMORY(currentScope, dataType, amount, temp):
 
@@ -270,8 +279,8 @@ def ADD_MEMORY(currentScope, dataType, amount, temp):
     # Integers
     if dataType in [0, 4]:
         scope[NEEDS].addInts(amount, temp)
-    # Floats (and coordinates)
-    elif dataType in [1, 5, 2, 7]:
+    # Floats
+    elif dataType in [1, 5]:
         scope[NEEDS].addFloats(amount, temp)
     # Booleans
     elif dataType in [3, 6]:
@@ -304,7 +313,7 @@ def ADD_RETURN_SIZE(functionID, size):
 
 def CHECK_FUNCTION_DEFINED(functionID):
     if functionID not in SYMBOL_TABLE[FUNC]:
-        sys.exit("Error at line {}: Function {} not defined.".format(globals.lineNumber + 1, functionID))
+        raiseError("Error at line {}: Function {} not defined.".format(globals.lineNumber + 1, functionID))
 
 def VARS_INIT():
     VARS_TABLE = dict()
@@ -315,10 +324,19 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
     scope = getScope(currentScope)
 
     if id in scope[VARS]:
-        sys.exit('Error at line {}: Variable {} already defined!'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: Variable {} already defined!'.format(globals.lineNumber + 1, id))
     else:
         scope[VARS][id] = dict()
         scope[VARS][id][DATA_TYPE] = data_type
         scope[VARS][id][DATA_TYPE_STRING] = data_type_string
-        scope[VARS][id][SIZE] = size
+        scope[VARS][id][SIZE] = size #if data_type in [4, 5, 6, 7] else 0
         scope[VARS][id][DIMS] = dims
+
+def GET_PARAMS(id):
+    return (SYMBOL_TABLE[FUNC][id][PARAMS])
+
+def GET_PARAMS_ADDRESS(id):
+    return (SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS])
+
+def ADD_RETURN_VALUES(id,value):
+    SYMBOL_TABLE[FUNC][id][RETURNS].append(value)

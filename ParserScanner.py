@@ -7,6 +7,7 @@ from GlobalVars import globals
 from lexer import *
 from utils import *
 import VMachine as vm
+import argparse
 
 # Precedence rules for the arithmetic operators
 precedence = (
@@ -17,7 +18,7 @@ precedence = (
 
 def p_start(p):
     '''start : push_goto func_sec env_sec mov_sec'''
-    print("Finished!")
+    # print("Finished!")
 
 
 def p_func_sec(p):
@@ -30,7 +31,7 @@ def p_func_sec1(p):
 
 
 def p_functions(p):
-    '''functions : FUNCTION tipo function_header_id create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
+    '''functions : FUNCTION tipo_funcion function_header_id create_function_vars_table L_PAREN functions1 R_PAREN L_BRACE set_start_cuad vars bloque functions2 R_BRACE'''
     st.ADD_SCOPE_MEMORY(globals.currentScope)
     globals.functionReturns = False
     createEndProc()
@@ -52,16 +53,13 @@ def p_function_header_id(p):
 				| CAN_MOVE_FORWARD
 				| IS_BLOCKED
 				| IS_COLLECTIBLE
-				| PICK_UP
 				| POSITION
 				| SPAWN_OBJECT
-				| ENV_SIZE
 				| SET_MOV_SPEED
-				| LENGTH
 				| ID
 				'''
     if p[1] in reserved:
-        sys.exit(
+        raiseError(
             'Error at line {}: {} is a reserved function and cannot be redefined.'.format(globals.lineNumber + 1, p[1]))
     p[0] = p[1]
 
@@ -96,28 +94,41 @@ def p_functions1(p):
 				   | empty '''
 
 
-def p_fucntions2(p):
+def p_functions2(p):
     '''functions2 : return
 				   | empty'''
     if not globals.functionReturns and st.getReturnType(st.getScope(globals.currentScope)) != constants.DATA_TYPES[
         constants.VOID]:
-        sys.exit('Error at line {}: Missing return statement.'.format(globals.lineNumber + 1))
+        raiseError('Error at line {}: Missing return statement.'.format(globals.lineNumber + 1))
 
 
 def p_env_sec(p):
     '''env_sec : ENVIRONMENT create_function_vars_table cond_replace_none_2 L_BRACE set_start_cuad vars bloque R_BRACE'''
     st.ADD_SCOPE_MEMORY(globals.currentScope)
-
+    cuad = Cuadruplo('GOSUB', 'startMovement', result = None, counter = globals.cuadCounter)
+    globals.cuadCounter = globals.cuadCounter + 1
+    globals.cuadruplos.append(cuad)
 
 def p_mov_sec(p):
     '''mov_sec : MOVEMENT create_function_vars_table L_BRACE set_start_cuad vars bloque R_BRACE'''
     st.ADD_SCOPE_MEMORY(globals.currentScope)
 
 
+def p_tipo_funcion(p):
+    '''tipo_funcion : INT tipo1_funcion
+            | BOOLEAN tipo1_funcion
+            | FLOAT tipo1_funcion
+            | VOID'''
+    setDataType(p)
+    globals.currentDataTypeString = p[1] + globals.currentDataTypeString
+
+    # Avoid pushing in the stack function return types
+    p[0] = globals.currentDataType
+
+
 def p_tipo(p):
     '''tipo : INT tipo1
 			| BOOLEAN tipo1
-			| COORD tipo1
 			| FLOAT tipo1
 			| VOID'''
     setDataType(p)
@@ -146,6 +157,15 @@ def p_tipo1(p):
         p[0] = None
 
 
+def p_tipo1_funcion(p):
+    '''tipo1_funcion : L_BRACKET CTE_I return_int_funcion R_BRACKET tipo1_funcion return_list
+              | empty'''
+    if len(p) == 7:
+        p[0] = {'isList': p[6], 'listSize': p[2]}
+    else:
+        p[0] = None
+
+
 def p_return_list(p):
     '''return_list : '''
     p[0] = True
@@ -158,6 +178,14 @@ def p_return_int(p):
     globals.isArr = True
     globals.dimensiones.append({'inf': 0, 'sup': int(p[-1]), 'm': None})
     globals.R = (globals.dimensiones[-1]['sup'] - globals.dimensiones[-1]['inf']) * globals.R
+    p[0] = p[-1]
+
+
+def p_return_int_funcion(p):
+    'return_int_funcion : '
+    globals.currentDataTypeString += ('[' + str(p[-1]) + ']')
+    globals.currentSize *= p[-1]
+    globals.isArr = True
     p[0] = p[-1]
 
 
@@ -255,7 +283,7 @@ def p_push_return(p):
     retType = st.getReturnType(st.getScope(globals.currentScope))
 
     if (retType != typ):
-        sys.exit(
+        raiseError(
             "Error at line {}: return {} does not match declared function type {}".format(globals.lineNumber + 1, typ,
                                                                                           retType))
     else:
@@ -288,7 +316,7 @@ def p_cond_remove_lid(p):
 def p_cond_check_bool(p):
     '''cond_check_bool : '''
     if globals.tipos.pop() != constants.DATA_TYPES[constants.BOOLEAN]:
-        sys.exit('Error at line {}: Type mismatch. Expression has to be boolean'.format(globals.lineNumber + 1))
+        raiseError('Error at line {}: Type mismatch. Expression has to be boolean'.format(globals.lineNumber + 1))
 
 
 def p_cond_replace_none_1(p):
@@ -385,7 +413,6 @@ def p_cuads_true_false(p):
 def p_var_cte(p):
     '''var_cte : ID push_operand_stack var_cte1
 		| func_call var_cte1
-		| coord var_cte1
 		| CTE_I push_constant_operand_stack
 		| CTE_F push_constant_operand_stack
 		| TRUE push_constant_operand_stack
@@ -404,7 +431,7 @@ def p_var_cte1(p):
         dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
 
         if globals.currentDim != len(dimensions) - 1:
-            sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+            raiseError('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
 
         aux1 = globals.operandos.pop()
         res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
@@ -439,9 +466,11 @@ def p_push_fondo_falso(p):
     '''push_fondo_falso :'''
     address = globals.operandos.pop()
     type = globals.tipos.pop()
+    #pprint.pprint(st.SYMBOL_TABLE)
+    #print(address)
     if not st.checkIfArray(globals.currentScope, address):
         id = st.getIDFromAddress(globals.currentScope, address)
-        sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
+        raiseError('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, id))
 
     globals.currentDim = 0
     globals.saved_dims.append((address, globals.currentDim))
@@ -452,8 +481,10 @@ def p_push_fondo_falso_asignacion(p):
     '''push_fondo_falso_asignacion :'''
     type = getIdDataType(globals.assigningID, globals.currentScope)
     address = getIdAddress(globals.assigningID, type, globals.currentScope)
+    #pprint.pprint(st.SYMBOL_TABLE)
+    #print(address)
     if not st.checkIfArray(globals.currentScope, address):
-        sys.exit('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, globals.assigningID))
+        raiseError('Error at line {}: {} is not an array.'.format(globals.lineNumber + 1, globals.assigningID))
 
     globals.currentDim = 0
     globals.saved_dims.append((address, globals.currentDim))
@@ -463,14 +494,14 @@ def p_check_dims(p):
     '''check_dims :'''
     
     if globals.tipos[-1] != constants.DATA_TYPES[constants.INT]:
-        sys.exit('Error at line {}: Array indexes must be integers.'.format(globals.lineNumber + 1))
+        raiseError('Error at line {}: Array indexes must be integers.'.format(globals.lineNumber + 1))
 
     address = globals.operandos[-1]
     (arr_address, arr_dim) = globals.saved_dims[-1]
     dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
 
     if globals.currentDim >= len(dimensions):
-        sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+        raiseError('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
 
     inferior = dimensions[arr_dim]['inf']
     superior = dimensions[arr_dim]['sup']
@@ -632,14 +663,6 @@ def p_pop_operator_stack(p):
     globals.operadores.pop()
 
 
-def p_coord(p):
-    '''coord : L_PAREN xyz R_PAREN'''
-
-
-def p_xyz(p):
-    '''xyz : expresion COMMA expresion COMMA expresion'''
-
-
 def p_func_call(p):
     '''func_call : func_id L_PAREN func_call1 R_PAREN'''
     checkIncompleteParameters(globals.functionCalled[-1], globals.parameterCounter)
@@ -650,16 +673,40 @@ def p_func_call(p):
     retType = st.getReturnType(st.getScope(globals.functionCalled[-1]))
     retSize = st.getReturnSize(st.getScope(globals.functionCalled[-1]))
     virtualAddress = memory.ADD_NEW_VAR(retType, retSize)
+    #print('retType ', retType)
+    #print('virtual address ', virtualAddress)
     globals.operadores.pop()
     globals.operandos.append(virtualAddress)
     globals.tipos.append(retType)
 
     if retType != constants.DATA_TYPES[constants.VOID]:
-        # 	create cuad = func _ temp1
-        cuad = Cuadruplo('=', operand1=globals.functionCalled[-1], result=virtualAddress, counter=globals.cuadCounter)
-        st.ADD_MEMORY(globals.currentScope, retType, 1, True)
-        globals.cuadruplos.append(cuad)
-        globals.cuadCounter += 1
+        #print('NOT VOID VA ', virtualAddress)
+        offset = 0
+        while retSize > 0:
+            cuad = Cuadruplo('=', operand1=globals.functionCalled[-1], result=virtualAddress + offset, counter=globals.cuadCounter)
+            st.ADD_MEMORY(globals.currentScope, retType, 1, True)
+            appendType = retType
+            if retType == 4:
+                appendType = 0
+                globals.operandos.append(virtualAddress + offset)
+                globals.tipos.append(appendType)
+            elif retType == 5:
+                appendType = 1
+                globals.operandos.append(virtualAddress + offset)
+                globals.tipos.append(appendType)
+            elif retType == 6:
+                appendType = 3
+                globals.operandos.append(virtualAddress + offset)
+                globals.tipos.append(appendType)
+
+            globals.cuadruplos.append(cuad)
+            globals.cuadCounter += 1
+            offset += 1
+            retSize -= 1
+
+        if retType in [4, 5, 6]:
+            globals.tipos.append(retType)
+            globals.operandos.append(virtualAddress)
 
     globals.functionCalled.pop()
     globals.parameterCounter = 0
@@ -701,12 +748,10 @@ def p_func_id(p):
 				| CAN_MOVE_FORWARD
 				| IS_BLOCKED
 				| IS_COLLECTIBLE
-				| PICK_UP
 				| POSITION
 				| SPAWN_OBJECT
-				| ENV_SIZE
 				| SET_MOV_SPEED
-				| LENGTH
+                | PRINT
 				| ID
 				'''
     st.CHECK_FUNCTION_DEFINED(p[1])
@@ -731,14 +776,14 @@ def p_inicializacion(p):
     if p[8] == True:
 
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit(
+            raiseError(
                 'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
-            sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
+            raiseError('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -786,27 +831,51 @@ def p_inicializacion(p):
     if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[8]:
         asigningVirtualAddress = globals.operandos[-1]
         asigningDataType = globals.tipos[-1]
-        asigningScope = st.getScopeID(st.getIDFromAddress(globals.currentScope, asigningVirtualAddress), globals.currentScope)
-        asigneeScope = st.getScopeID(p[2], globals.currentScope)
-        asigningDataTypeString = st.getDataTypeString(asigningScope)
-        asigneeDataTypeString = st.getDataTypeString(asigneeScope)
-        
-        if asigningDataTypeString != asigneeDataTypeString:
-            sys.exit('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+        asigningID = st.getIDFromAddress(globals.currentScope, asigningVirtualAddress)
+
+        # ID not found, it's a function call I assume
+        if asigningID != False:
+            asigningScope = st.getScopeID(asigningID, globals.currentScope)
+            asigneeScope = st.getScopeID(p[2], globals.currentScope)
+            asigningDataTypeString = st.getDataTypeString(asigningScope)
+            asigneeDataTypeString = st.getDataTypeString(asigneeScope)
+            
+            if asigningDataTypeString != asigneeDataTypeString:
+                raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+            else:
+                asigningSize = st.getSize(asigningScope)
+                asigneeSize = st.getSize(asigneeScope)
+
+                assert asigningSize == asigneeSize
+
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
+                for k in range(0, asigningSize):
+                    cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
         else:
-            asigningSize = st.getSize(asigningScope)
-            asigneeSize = st.getSize(asigneeScope)
+            if asigningDataType in [4, 5, 6]:
+                globals.tipos.pop()
+                globals.operandos.pop()
+                k = 0
+                rightSideArray = []
+                leftSideArray = []
+                while globals.tipos[-1] not in [4, 5, 6]:
+                    rightSideArray.insert(0, globals.operandos.pop())
+                    leftSideArray.append(virtualAddress + k)
+                    globals.tipos.pop()
+                    k += 1
 
-            assert asigningSize == asigneeSize
+                for (leftAddress, rightAddress) in zip(leftSideArray, rightSideArray):
+                    cuad = Cuadruplo('=', operand1 = rightAddress, result = leftAddress, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
 
-            globals.operandos.pop()
-            globals.tipos.pop()
-            globals.operadores.pop()
-            for k in range(0, asigningSize):
-                cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
-                globals.cuadCounter += 1
-                globals.cuadruplos.append(cuad)
-
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
     else:
         globals.operandos.append(virtualAddress)
         globals.tipos.append(dataType)
@@ -822,14 +891,17 @@ def p_asignacion(p):
     '''asignacion : ID save_assigning_id asignacion1 ASSIGN push_operator_stack expression_list'''
     if p[6] == True:
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
-            sys.exit(
+            raiseError(
                 'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
 
+        #print(assignedArray)
+        #print(dimensions)
+
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
-            sys.exit('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
+            raiseError('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
 
         globals.tipos.append(globals.lastDataType)
 
@@ -892,27 +964,51 @@ def p_asignacion(p):
     if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[6]:
         asigningVirtualAddress = globals.operandos[-1]
         asigningDataType = globals.tipos[-1]
-        asigningScope = st.getScopeID(st.getIDFromAddress(globals.currentScope, asigningVirtualAddress), globals.currentScope)
-        asigneeScope = st.getScopeID(p[1], globals.currentScope)
-        asigningDataTypeString = st.getDataTypeString(asigningScope)
-        asigneeDataTypeString = st.getDataTypeString(asigneeScope)
-        
-        if asigningDataTypeString != asigneeDataTypeString:
-            sys.exit('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+        asigningID = st.getIDFromAddress(globals.currentScope, asigningVirtualAddress)
+
+        # ID not found, it's a function call I assume
+        if asigningID != False:
+            asigningScope = st.getScopeID(asigningID, globals.currentScope)
+            asigneeScope = st.getScopeID(p[1], globals.currentScope)
+            asigningDataTypeString = st.getDataTypeString(asigningScope)
+            asigneeDataTypeString = st.getDataTypeString(asigneeScope)
+            
+            if asigningDataTypeString != asigneeDataTypeString:
+                raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+            else:
+                asigningSize = st.getSize(asigningScope)
+                asigneeSize = st.getSize(asigneeScope)
+
+                assert asigningSize == asigneeSize
+
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
+                for k in range(0, asigningSize):
+                    cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
         else:
-            asigningSize = st.getSize(asigningScope)
-            asigneeSize = st.getSize(asigneeScope)
+            if asigningDataType in [4, 5, 6]:
+                globals.tipos.pop()
+                globals.operandos.pop()
+                k = 0
+                rightSideArray = []
+                leftSideArray = []
+                while globals.tipos[-1] not in [4, 5, 6]:
+                    rightSideArray.insert(0, globals.operandos.pop())
+                    leftSideArray.append(virtualAddress + k)
+                    globals.tipos.pop()
+                    k += 1
 
-            assert asigningSize == asigneeSize
+                for (leftAddress, rightAddress) in zip(leftSideArray, rightSideArray):
+                    cuad = Cuadruplo('=', operand1 = rightAddress, result = leftAddress, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
 
-            globals.operandos.pop()
-            globals.tipos.pop()
-            globals.operadores.pop()
-            for k in range(0, asigningSize):
-                cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
-                globals.cuadCounter += 1
-                globals.cuadruplos.append(cuad)
-
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
     else:
         if p[3] == True:
             # When assigning to an array index, operand and data type are already in the stack for some reason
@@ -952,7 +1048,7 @@ def p_asignacion1(p):
         dimensions = st.getDims(globals.currentScope, st.getIDFromAddress(globals.currentScope, arr_address))
 
         if globals.currentDim != len(dimensions) - 1:
-            sys.exit('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
+            raiseError('Error at line {}: Array must be accessed using {} dimensions.'.format(globals.lineNumber + 1, len(dimensions)))
 
         aux1 = globals.operandos.pop()
         res = memory.ADD_NEW_VAR(constants.DATA_TYPES[constants.INT])
@@ -996,8 +1092,7 @@ def p_top_kek(p):
 
 def p_error(p):
     if p is not None:
-        print("Syntax error at '%s'" % p)
-        sys.exit(1)
+        raiseError("Syntax error at '%s'" % p)
 
 
 def p_empty(p):
@@ -1005,28 +1100,33 @@ def p_empty(p):
     pass
 
 
-def main():
+def main(program):
+
     st.SYMBOL_INIT(False)
 
     # Build the lexer
     lex.lex()
     parser = yacc.yacc(start='start')
 
-    with open('test.txt') as f:
-        read_data = f.read()
+    
+    '''with open('test.txt') as f:
+                                read_data = f.read()
+                        
+                                parser.parse(read_data)'''
+    
 
-        parser.parse(read_data)
+    parser.parse(program)
 
-    for cuadruplo in globals.cuadruplos:
-        print(cuadruplo)
+    #for cuadruplo in globals.cuadruplos:
+    #                print(cuadruplo)
 
-    pprint.pprint(st.SYMBOL_TABLE)
+    #pprint.pprint(st.SYMBOL_TABLE[st.MOV])
 
-    print(globals.operadores)
-    print(globals.operandos)
-    print(globals.tipos)
-    print(globals.saved_dims)
-    print(globals.saltos)
+    #print(globals.operadores)
+    #print(globals.operandos)
+    #print(globals.tipos)
+    #print(globals.saved_dims)
+    #print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0
     assert len(globals.tipos) == 0
@@ -1036,4 +1136,7 @@ def main():
     virtualMachine.runVM()
 
 if __name__ == '__main__':
-    main()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('program')
+    args = argparser.parse_args()
+    main(args.program)

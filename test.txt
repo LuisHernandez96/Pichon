@@ -3,34 +3,28 @@ FUNCTIONS{
 }
 
 ENVIRONMENT{
-	int kek;
-	boolean tr;
-	boolean fl;
-	boolean kok;
-    kek = 1 + 1;
-    kek = kek + 2;
-    kek = kek -3;
-    kek = kek * 5;
-    kek = kek / 2;
-    tr = true;
-    fl = false;
-    kok = tr && tr;
-    kok = tr || fl;
-    kok = tr && fl;
-    kok = 2 > 1;
-    kok = 2 < 1;
-    kok = 2 <= 2;
-    kok = 2 <= 1;
-    kok = 2 >= 5;
-    kok = 5 == 3;
-    kok = 5 == 5;
-    kok = 5 != 5;
-    kok = 5 != 3;
-    kok = !kok;
-    kek = 15;
-    kek = ~kek;
+    start(10, 10, 10);
+    goal(20, 10, 10);
+    spawnObject(sphere, 11, 10, 10);
+    spawnObject(sphere, 12, 10, 10);
+    spawnObject(sphere, 13, 10, 10);
+    spawnObject(sphere, 14, 10, 10);
+    spawnObject(sphere, 15, 10, 10);
+    spawnObject(sphere, 16, 10, 10);
+    spawnObject(sphere, 17, 10, 10);
+    spawnObject(sphere, 18, 10, 10);
+    spawnObject(sphere, 19, 10, 10);
 }
 
 MOVEMENT{
-
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
 }
