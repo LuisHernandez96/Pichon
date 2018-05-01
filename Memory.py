@@ -123,14 +123,15 @@ class Memory:
 		except:
 			return address
 
+	def getCurrentFuncReturnSize(self):
+		return st.SYMBOL_TABLE[st.FUNC][self.currentFunc][st.RETURN_SIZE]
+
 	def saveResult(self, value, memDirection):
-		#print("SR\tVal= ", value, "\tMemDir=", memDirection)
 		if memDirection < 40000:
 			return False
 		else:
 			try:
 				if memDirection < 50000:
-					#print('SAVING ', memDirection, ' = ', value)
 					self.INT_MEME[memDirection % 40000] = value
 				elif memDirection > 59999:
 					self.BOOL_MEME[memDirection % 60000] = value
@@ -159,7 +160,7 @@ class Memory:
 				return self.FLOAT_MEME[memDirection % 50000]
 
 	def setReturn(self,value):
-		st.ADD_RETURN_VALUES(self.currentFunc,value)
-		self.SEND_PARAMS.append(value)
+		st.ADD_RETURN_VALUES(self.currentFunc, value)
+		self.SEND_PARAMS.insert(0, value)
 
 memory = Memory()

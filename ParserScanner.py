@@ -158,7 +158,7 @@ def p_tipo1(p):
 
 
 def p_tipo1_funcion(p):
-    '''tipo1_funcion : L_BRACKET CTE_I return_int_funcion R_BRACKET tipo1 return_list
+    '''tipo1_funcion : L_BRACKET CTE_I return_int_funcion R_BRACKET tipo1_funcion return_list
               | empty'''
     if len(p) == 7:
         p[0] = {'isList': p[6], 'listSize': p[2]}
@@ -681,10 +681,32 @@ def p_func_call(p):
 
     if retType != constants.DATA_TYPES[constants.VOID]:
         #print('NOT VOID VA ', virtualAddress)
-        cuad = Cuadruplo('=', operand1=globals.functionCalled[-1], result=virtualAddress, counter=globals.cuadCounter)
-        st.ADD_MEMORY(globals.currentScope, retType, 1, True)
-        globals.cuadruplos.append(cuad)
-        globals.cuadCounter += 1
+        offset = 0
+        while retSize > 0:
+            cuad = Cuadruplo('=', operand1=globals.functionCalled[-1], result=virtualAddress + offset, counter=globals.cuadCounter)
+            st.ADD_MEMORY(globals.currentScope, retType, 1, True)
+            appendType = retType
+            if retType == 4:
+                appendType = 0
+                globals.operandos.append(virtualAddress + offset)
+                globals.tipos.append(appendType)
+            elif retType == 5:
+                appendType = 1
+                globals.operandos.append(virtualAddress + offset)
+                globals.tipos.append(appendType)
+            elif retType == 6:
+                appendType = 3
+                globals.operandos.append(virtualAddress + offset)
+                globals.tipos.append(appendType)
+
+            globals.cuadruplos.append(cuad)
+            globals.cuadCounter += 1
+            offset += 1
+            retSize -= 1
+
+        if retType in [4, 5, 6]:
+            globals.tipos.append(retType)
+            globals.operandos.append(virtualAddress)
 
     globals.functionCalled.pop()
     globals.parameterCounter = 0
@@ -809,27 +831,51 @@ def p_inicializacion(p):
     if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[8]:
         asigningVirtualAddress = globals.operandos[-1]
         asigningDataType = globals.tipos[-1]
-        asigningScope = st.getScopeID(st.getIDFromAddress(globals.currentScope, asigningVirtualAddress), globals.currentScope)
-        asigneeScope = st.getScopeID(p[2], globals.currentScope)
-        asigningDataTypeString = st.getDataTypeString(asigningScope)
-        asigneeDataTypeString = st.getDataTypeString(asigneeScope)
-        
-        if asigningDataTypeString != asigneeDataTypeString:
-            raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+        asigningID = st.getIDFromAddress(globals.currentScope, asigningVirtualAddress)
+
+        # ID not found, it's a function call I assume
+        if asigningID != False:
+            asigningScope = st.getScopeID(asigningID, globals.currentScope)
+            asigneeScope = st.getScopeID(p[2], globals.currentScope)
+            asigningDataTypeString = st.getDataTypeString(asigningScope)
+            asigneeDataTypeString = st.getDataTypeString(asigneeScope)
+            
+            if asigningDataTypeString != asigneeDataTypeString:
+                raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+            else:
+                asigningSize = st.getSize(asigningScope)
+                asigneeSize = st.getSize(asigneeScope)
+
+                assert asigningSize == asigneeSize
+
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
+                for k in range(0, asigningSize):
+                    cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
         else:
-            asigningSize = st.getSize(asigningScope)
-            asigneeSize = st.getSize(asigneeScope)
+            if asigningDataType in [4, 5, 6]:
+                globals.tipos.pop()
+                globals.operandos.pop()
+                k = 0
+                rightSideArray = []
+                leftSideArray = []
+                while globals.tipos[-1] not in [4, 5, 6]:
+                    rightSideArray.insert(0, globals.operandos.pop())
+                    leftSideArray.append(virtualAddress + k)
+                    globals.tipos.pop()
+                    k += 1
 
-            assert asigningSize == asigneeSize
+                for (leftAddress, rightAddress) in zip(leftSideArray, rightSideArray):
+                    cuad = Cuadruplo('=', operand1 = rightAddress, result = leftAddress, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
 
-            globals.operandos.pop()
-            globals.tipos.pop()
-            globals.operadores.pop()
-            for k in range(0, asigningSize):
-                cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
-                globals.cuadCounter += 1
-                globals.cuadruplos.append(cuad)
-
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
     else:
         globals.operandos.append(virtualAddress)
         globals.tipos.append(dataType)
@@ -850,6 +896,9 @@ def p_asignacion(p):
 
         assignedArray = globals.dummyArray.pop()
         dimensions = st.getDimensionsID(st.getScopeID(globals.assigningID, globals.currentScope))
+
+        #print(assignedArray)
+        #print(dimensions)
 
         if not checkArrayDimensions(assignedArray, dimensions, index=0):
             raiseError('Error at line {}: Array dimensions do not match.'.format(globals.lineNumber + 1))
@@ -915,27 +964,51 @@ def p_asignacion(p):
     if dataType == globals.tipos[-1] and dataType in [4, 5, 6] and not p[6]:
         asigningVirtualAddress = globals.operandos[-1]
         asigningDataType = globals.tipos[-1]
-        asigningScope = st.getScopeID(st.getIDFromAddress(globals.currentScope, asigningVirtualAddress), globals.currentScope)
-        asigneeScope = st.getScopeID(p[1], globals.currentScope)
-        asigningDataTypeString = st.getDataTypeString(asigningScope)
-        asigneeDataTypeString = st.getDataTypeString(asigneeScope)
-        
-        if asigningDataTypeString != asigneeDataTypeString:
-            raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+        asigningID = st.getIDFromAddress(globals.currentScope, asigningVirtualAddress)
+
+        # ID not found, it's a function call I assume
+        if asigningID != False:
+            asigningScope = st.getScopeID(asigningID, globals.currentScope)
+            asigneeScope = st.getScopeID(p[1], globals.currentScope)
+            asigningDataTypeString = st.getDataTypeString(asigningScope)
+            asigneeDataTypeString = st.getDataTypeString(asigneeScope)
+            
+            if asigningDataTypeString != asigneeDataTypeString:
+                raiseError('Error at line {}: Cannot asign a {} to a {}.'.format(globals.lineNumber + 1, asigningDataTypeString, asigneeDataTypeString))
+            else:
+                asigningSize = st.getSize(asigningScope)
+                asigneeSize = st.getSize(asigneeScope)
+
+                assert asigningSize == asigneeSize
+
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
+                for k in range(0, asigningSize):
+                    cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
         else:
-            asigningSize = st.getSize(asigningScope)
-            asigneeSize = st.getSize(asigneeScope)
+            if asigningDataType in [4, 5, 6]:
+                globals.tipos.pop()
+                globals.operandos.pop()
+                k = 0
+                rightSideArray = []
+                leftSideArray = []
+                while globals.tipos[-1] not in [4, 5, 6]:
+                    rightSideArray.insert(0, globals.operandos.pop())
+                    leftSideArray.append(virtualAddress + k)
+                    globals.tipos.pop()
+                    k += 1
 
-            assert asigningSize == asigneeSize
+                for (leftAddress, rightAddress) in zip(leftSideArray, rightSideArray):
+                    cuad = Cuadruplo('=', operand1 = rightAddress, result = leftAddress, counter = globals.cuadCounter)
+                    globals.cuadCounter += 1
+                    globals.cuadruplos.append(cuad)
 
-            globals.operandos.pop()
-            globals.tipos.pop()
-            globals.operadores.pop()
-            for k in range(0, asigningSize):
-                cuad = Cuadruplo('=', operand1 = asigningVirtualAddress + k, result = virtualAddress + k, counter = globals.cuadCounter)
-                globals.cuadCounter += 1
-                globals.cuadruplos.append(cuad)
-
+                globals.operandos.pop()
+                globals.tipos.pop()
+                globals.operadores.pop()
     else:
         if p[3] == True:
             # When assigning to an array index, operand and data type are already in the stack for some reason
@@ -1027,7 +1100,7 @@ def p_empty(p):
     pass
 
 
-def main():
+def main(program):
 
     st.SYMBOL_INIT(False)
 
@@ -1036,24 +1109,24 @@ def main():
     parser = yacc.yacc(start='start')
 
     
-    with open('test.txt') as f:
-                    read_data = f.read()
-            
-                    parser.parse(read_data)
+    '''with open('test.txt') as f:
+                                read_data = f.read()
+                        
+                                parser.parse(read_data)'''
     
 
-    # parser.parse(program)
+    parser.parse(program)
 
     #for cuadruplo in globals.cuadruplos:
     #                print(cuadruplo)
 
-    #pprint.pprint(st.SYMBOL_TABLE)
+    #pprint.pprint(st.SYMBOL_TABLE[st.MOV])
 
-    # print(globals.operadores)
-    # print(globals.operandos)
-    # print(globals.tipos)
-    # print(globals.saved_dims)
-    # print(globals.saltos)
+    #print(globals.operadores)
+    #print(globals.operandos)
+    #print(globals.tipos)
+    #print(globals.saved_dims)
+    #print(globals.saltos)
     assert len(globals.operadores) == 0
     assert len(globals.operandos) == 0
     assert len(globals.tipos) == 0
@@ -1063,7 +1136,7 @@ def main():
     virtualMachine.runVM()
 
 if __name__ == '__main__':
-    '''argparser = argparse.ArgumentParser()
-                argparser.add_argument('program')
-                args = argparser.parse_args()'''
-    main()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('program')
+    args = argparser.parse_args()
+    main(args.program)

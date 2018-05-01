@@ -73,7 +73,6 @@ def getScope(scope):
 
 def getDims(currentScope, id):
     scope = getScope(currentScope)
-
     if id not in scope[VARS]:
         raiseError('Error at line {}: Variable {} not found in current scope'.format(globals.lineNumber + 1, id))
     else:
@@ -85,7 +84,8 @@ def getIDFromAddress(currentScope, address):
         if scope[VARS][var][ADDRESS] == address:
             return var
 
-    raiseError('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
+    return False
+    # raiseError('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
 
 def checkIfArray(currentScope, address):
     id = getIDFromAddress(currentScope, address)
@@ -221,7 +221,7 @@ def ADD_PREDEFINED_FUNCTIONS():
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "position" : {
-            PARAMS : [''],
+            PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.FLOAT_LIST],
             RETURN_SIZE : 3,
             RESERVED : True,
@@ -279,8 +279,8 @@ def ADD_MEMORY(currentScope, dataType, amount, temp):
     # Integers
     if dataType in [0, 4]:
         scope[NEEDS].addInts(amount, temp)
-    # Floats (and coordinates)
-    elif dataType in [1, 5, 2, 7]:
+    # Floats
+    elif dataType in [1, 5]:
         scope[NEEDS].addFloats(amount, temp)
     # Booleans
     elif dataType in [3, 6]:

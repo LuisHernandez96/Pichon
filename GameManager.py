@@ -52,6 +52,13 @@ class GameManager:
 
 		return False
 
+	def checkWin(self):
+		playerCoord = (self.player.pos.x, self.player.pos.y, self.player.pos.z)
+		if self.distance(playerCoord, self.goalPosition) <= 0.5 and self.collected == self.totalCollectibles:
+			return True
+		else:
+			return False
+
 	def outOfBounds(self, coord1):
 		x = coord1[0]
 		y = coord1[1]

@@ -28,8 +28,6 @@ def setDataType(p):
 			globals.currentDataType = constants.DATA_TYPES[constants.INT]
 		elif p[1] == 'boolean':
 			globals.currentDataType = constants.DATA_TYPES[constants.BOOLEAN]
-		elif p[1] == 'coord':
-			globals.currentDataType = constants.DATA_TYPES[constants.COORD]
 		elif p[1] == 'float':
 			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT]
 		else:
@@ -39,8 +37,6 @@ def setDataType(p):
 			globals.currentDataType = constants.DATA_TYPES[constants.INT_LIST]
 		elif p[1] == 'boolean':
 			globals.currentDataType = constants.DATA_TYPES[constants.BOOLEAN_LIST]
-		elif p[1] == 'coord':
-			globals.currentDataType = constants.DATA_TYPES[constants.COORD_LIST]
 		elif p[1] == 'float':
 			globals.currentDataType = constants.DATA_TYPES[constants.FLOAT_LIST]
 

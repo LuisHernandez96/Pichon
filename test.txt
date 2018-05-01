@@ -3,24 +3,28 @@ FUNCTIONS{
 }
 
 ENVIRONMENT{
-    spawnObject(sphere, 3, 0, 0);
-    spawnObject(sphere, ~1, 0, 0);
-    spawnObject(sphere, 3, 5, 0);
-    spawnObject(sphere, 3, 3, 0);
-    spawnObject(cube, 13, 5, 10);
-    spawnObject(cube, 3, 5, 10);
-    start(8, 5, 10);
-    goal(0, 0, 0);
+    start(10, 10, 10);
+    goal(20, 10, 10);
+    spawnObject(sphere, 11, 10, 10);
+    spawnObject(sphere, 12, 10, 10);
+    spawnObject(sphere, 13, 10, 10);
+    spawnObject(sphere, 14, 10, 10);
+    spawnObject(sphere, 15, 10, 10);
+    spawnObject(sphere, 16, 10, 10);
+    spawnObject(sphere, 17, 10, 10);
+    spawnObject(sphere, 18, 10, 10);
+    spawnObject(sphere, 19, 10, 10);
 }
 
 MOVEMENT{
-    
-    while(true){
-        while(canMoveForward()){
-            forward();
-        };
-
-        turnLeft();
-        turnLeft();
-    };
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
+    forward();
 }

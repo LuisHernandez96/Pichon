@@ -43,6 +43,10 @@ class VMachine:
         self.gm = GameManager.GameManager()
         while self.currentCuad[-1] < len(self.cuadruplos):
             self.processCuad(self.cuadruplos[self.currentCuad[-1]])
+        if(self.gm.checkWin()):
+            self.gm.warning = label(pos = vector(self.gm.player.pos.x, self.gm.player.pos.y + 0.8, self.gm.player.pos.z), text='You won!')
+        else:
+            self.gm.warning = label(pos = vector(self.gm.player.pos.x, self.gm.player.pos.y + 0.8, self.gm.player.pos.z), text='Try again!')
         print("Finished!")
 
     def processReservedFunction(self, function, parameters):
@@ -126,9 +130,10 @@ class VMachine:
                 print(parameters[0])
             elif function == "startMovement":
                 scene.title = 'Pichon - Starting position: {} - Goal position: {} - Collectibles: {}'.format(self.gm.startPosition, self.gm.goalPosition, len(self.gm.collectibles))
-                self.gm.score = label(pos = vector(self.gm.goalPosition[0], self.gm.goalPosition[1], self.gm.goalPosition[2]), text='Collectibles: 0/{}'.format(len(self.gm.collectibles)))
+                self.gm.score = label(pos = vector(self.gm.goalPosition[0], self.gm.goalPosition[1] + 1, self.gm.goalPosition[2]), text='Collectibles: 0/{}'.format(len(self.gm.collectibles)))
                 self.gm.warning = label(pos = vector(self.gm.startPosition[0], self.gm.startPosition[1] + 0.2, self.gm.startPosition[2]), text='Cannot perform action!', visible = False)
                 self.gm.player = box(pos = vector(self.gm.startPosition[0], self.gm.startPosition[1], self.gm.startPosition[2]), color = color.red)
+                ring(pos = vector(self.gm.goalPosition[0], self.gm.goalPosition[1], self.gm.goalPosition[2]), radius = 0.5, thickness = 0.1, axis = vector(0, 1, 0))
                 attach_trail(self.gm.player)
             elif function == "outOfBounds":
                 x = parameters[0]
@@ -148,7 +153,6 @@ class VMachine:
 
                 res = False
                 self.memoryStack[-1].SEND_PARAMS.append(res)
-
             elif function == "isBlocked":
                 x = parameters[0]
                 y = parameters[1]
@@ -162,13 +166,15 @@ class VMachine:
 
                 res = False
                 self.memoryStack[-1].SEND_PARAMS.append(res)
-
             elif function == "setMovementSpeed":
                 self.gm.speed = parameters[0]
-
             elif function == "canMoveForward":
                 res = self.gm.canMoveForward()
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            elif function == "position":
+                self.memoryStack[-1].SEND_PARAMS.insert(0, self.gm.player.pos.x)
+                self.memoryStack[-1].SEND_PARAMS.insert(0, self.gm.player.pos.y)
+                self.memoryStack[-1].SEND_PARAMS.insert(0, self.gm.player.pos.z)
 
     def processCuad(self, cuadruplo):
 
@@ -414,8 +420,10 @@ class VMachine:
                 self.memoryStack[-1].PROCESS_PARAMS(str(cuadruplo.operand1))
 
         elif cuadruplo.operator == RETURN:
-            oper1 = self.memoryStack[-1].getValue(cuadruplo.result)
-            self.memoryStack[-1].setReturn(oper1)
+            returnSize = self.memoryStack[-1].getCurrentFuncReturnSize()
+            for i in range(0, returnSize):
+                oper1 = self.memoryStack[-1].getValue(cuadruplo.result + i)
+                self.memoryStack[-1].setReturn(oper1)
             self.currentCuad[-1] += 1
 
         elif cuadruplo.operator == END_PROC:
