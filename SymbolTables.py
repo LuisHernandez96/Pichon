@@ -132,35 +132,35 @@ def ADD_PREDEFINED_FUNCTIONS():
         "isFacingNorth" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingEast" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingWest" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isFacingSouth" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "canMoveForward" : {
             PARAMS : [],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
@@ -195,21 +195,21 @@ def ADD_PREDEFINED_FUNCTIONS():
         "outOfBounds" : {
             PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isBlocked" : {
             PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isCollectible" : {
             PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
-            RETURN_SIZE : 0,
+            RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
