@@ -3,10 +3,10 @@ Pichón is a programming language created with the purpose of helping people und
 
 ## Requirements
 The following languages and libraries need to be installed in order to run Pichón
-Python 3 or above (https://www.python.org/download/releases/3.0/)
-Vpython (http://vpython.org)
-Tkinter (https://docs.python.org/3/library/tkinter.html)
-PLY (http://www.dabeaz.com/ply/)
+* Python 3 or above (https://www.python.org/download/releases/3.0/)
+* Vpython (http://vpython.org)
+* Tkinter (https://docs.python.org/3/library/tkinter.html)
+* PLY (http://www.dabeaz.com/ply/)
 
 
 ## Getting Pichón
