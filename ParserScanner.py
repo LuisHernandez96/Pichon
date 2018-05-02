@@ -129,8 +129,7 @@ def p_tipo_funcion(p):
 def p_tipo(p):
     '''tipo : INT tipo1
 			| BOOLEAN tipo1
-			| FLOAT tipo1
-			| VOID'''
+			| FLOAT tipo1'''
     setDataType(p)
     globals.currentDataTypeString = p[1] + globals.currentDataTypeString
 
@@ -726,7 +725,7 @@ def p_check_parameter(p):
     '''check_parameter :'''
     argument = globals.operandos.pop()
     argumentDataType = globals.tipos.pop()
-    argumentSize = st.getArgumentSize(argument, globals.currentScope)
+    argumentSize = st.getArgumentSize(argument, globals.currentScope) if argumentDataType in [4, 5, 6] else 0
     checkFunctionParameter(globals.functionCalled[-1], dataTypeToString(argumentDataType, argument), globals.parameterCounter)
     createParam(globals.parameterCounter, argument, argumentSize)
     globals.parameterCounter += 1
