@@ -1,0 +1,23 @@
+FUNCTIONS{
+    function int fiboRecursivo(int a){
+        int add;
+
+        if(a==0){
+            add = 0;
+        } elif (a==1) {
+            add = 1;
+        } else{
+            add = fiboRecursivo(a-1) + fiboRecursivo(a-2);
+        };
+
+        return add;
+    }
+}
+
+ENVIRONMENT{
+    print(fiboRecursivo(7));
+}
+
+MOVEMENT{
+
+}

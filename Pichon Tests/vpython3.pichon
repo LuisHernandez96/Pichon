@@ -1,0 +1,46 @@
+FUNCTIONS{
+  function void moveCircleRight(int n){
+    int i;
+    int j;
+    for(i = 0; i < 4; i = i + 1){
+      for(j = 0; j < n; j = j + 1){
+        forward();
+      };
+      turnRight();
+    };
+  }
+}
+
+ENVIRONMENT{
+  float[8] x = {12.0, 14.0, 12.0, 10.0, 12.0, 14.0, 12.0, 10.0};
+  float[8] y = {10.0, 10.0, 10.0, 10.0, 12.0, 12.0, 12.0, 12.0};
+  float[8] z = {10.0, 12.0, 14.0, 12.0, 10.0,12.0,14.0,12.0};
+  int i;
+  start(10, 10, 10);
+  goal(10, 12, 10);
+  for(i = 0; i < 8; i=i+1){
+    spawnObject(sphere, x[i], y[i], z[i]);
+  };
+
+  spawnObject(cube, 11,10,11);
+  spawnObject(cube, 12,10,11);
+  spawnObject(cube, 13,10,11);
+  spawnObject(cube, 11,10,12);
+  spawnObject(cube, 12,10,12);
+  spawnObject(cube, 13,10,12);
+  spawnObject(cube, 11,10,13);
+  spawnObject(cube, 12,10,13);
+  spawnObject(cube, 13,10,13);
+}
+
+MOVEMENT{
+  int i;
+  setMovementSpeed(2.0);
+  for(i = 0; i<2; i=i+1){
+      moveCircleRight(4);
+      up();
+      up();
+  };
+  down();
+  down();
+}

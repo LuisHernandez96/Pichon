@@ -1,0 +1,29 @@
+FUNCTIONS{
+
+}
+
+ENVIRONMENT{
+
+}
+
+MOVEMENT{
+    int[10] arr = {5, 1, 7, 2, 4, 3, 9, 10, 8, 6};
+    int i;
+    int j;
+    int temp;
+
+    for(i = 0; i < 9; i = i + 1){
+        for(j = 0; j < 9 - i; j = j + 1){
+            if(arr[j] > arr[j+1]){
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            };
+        };
+    };
+
+    for(i = 0; i < 10; i = i + 1){
+        print(arr[i]);
+    };
+}
+

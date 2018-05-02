@@ -1,0 +1,25 @@
+FUNCTIONS{
+    function int factorialRecursivo(int a){
+        int add;
+
+        if(a==0){
+            add = 1;
+        } else {
+            add = a * factorialRecursivo(a-1);
+        };
+
+        return add;
+    }
+}
+
+ENVIRONMENT{
+    int a;
+
+    for(a = 1; a <= 5; a = a + 1){
+        print(factorialRecursivo(a));
+    };
+}
+
+MOVEMENT{
+
+}

@@ -1,0 +1,25 @@
+FUNCTIONS{
+  function void moveCircleRight(int n){
+    int i;
+    int j;
+    for(i = 0; i < 4; i = i + 1){
+      for(j = 0; j < n; j = j + 1){
+        forward();
+      };
+      turnRight();
+    };
+  }
+}
+
+ENVIRONMENT{
+  start(2, 2, 2);
+  goal(2, 2, 2);
+  spawnObject(sphere, 6, 2, 2);
+  spawnObject(sphere, 6, 2, 6);
+  spawnObject(sphere, 2, 2, 6);
+  spawnObject(sphere, 4, 2, 2);
+}
+
+MOVEMENT{
+  moveCircleRight(4);
+}

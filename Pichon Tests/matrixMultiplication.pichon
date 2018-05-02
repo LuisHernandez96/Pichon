@@ -1,0 +1,29 @@
+FUNCTIONS{
+
+}
+
+ENVIRONMENT{
+
+}
+
+MOVEMENT{
+    int[2][3] a = {{1, 2, 3}, {4, 5, 6}};
+    int[3][2] b = {{7, 8}, {9, 10}, {11, 12}};
+    int[2][2] res = {{0, 0}, {0, 0}};
+    int i;
+    int j;
+    int k;
+    for(i = 0; i < 2; i = i + 1){
+        for(j = 0; j < 2; j = j + 1){
+            for(k = 0; k < 3; k = k + 1){
+                res[i][j] = res[i][j] + a[i][k] * b[k][j];
+            };
+        };
+    };
+
+    for(i = 0; i < 2; i = i + 1){
+        for(j = 0; j < 2; j = j + 1){
+            print(res[i][j]);
+        };
+    };
+}

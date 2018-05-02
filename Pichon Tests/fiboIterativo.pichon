@@ -1,0 +1,24 @@
+FUNCTIONS{
+    function int fiboIterativo(int a){
+        int i = 1;
+        int result = 1;
+        int prevRes = 1;
+        int tmp;
+        while(i < a-1){
+            tmp = result;
+            result = result + prevRes;
+            prevRes = tmp;
+            i = i + 1;
+        };
+
+        return result;
+    }
+}
+
+ENVIRONMENT{
+    print(fiboIterativo(7));
+}
+
+MOVEMENT{
+
+}
