@@ -145,7 +145,12 @@ def checkFunctionParameter(functionID, argumentDataType, parameterCounter):
 	if len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]) > 0 and parameterCounter < len(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS]):
 		if isinstance(st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], type(regex_object)):
 			if not st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].match(argumentDataType):
-				raiseError("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].pattern, argumentDataType))
+				rePattern = st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter].pattern
+				rePattern = rePattern.replace('(', '')
+				rePattern = rePattern.replace(')', '')
+				rePattern = rePattern.replace('^', '')
+				rePattern = rePattern.replace('+$', '')
+				raiseError("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, rePattern, argumentDataType))
 		else:
 			if argumentDataType != st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter]:
 				raiseError("Error at line {}: {} Expected: {} Received: {}.".format(globals.lineNumber + 1, functionID, st.SYMBOL_TABLE[st.FUNC][functionID][st.PARAMS][parameterCounter], argumentDataType))

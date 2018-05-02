@@ -164,13 +164,6 @@ def ADD_PREDEFINED_FUNCTIONS():
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
-        "envSize" : {
-            PARAMS : ['int', 'int', 'int'],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RETURN_SIZE : 0,
-            RESERVED : True,
-            FUNCTION_TYPE : ENV_TYPE
-        },
         "setMovementSpeed" : {
             PARAMS : ['float'],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
@@ -179,44 +172,37 @@ def ADD_PREDEFINED_FUNCTIONS():
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "goal" : {
-            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            PARAMS : [re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
         },
         "start" : {
-            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            PARAMS : [re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
         },
         "outOfBounds" : {
-            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            PARAMS : [re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isBlocked" : {
-            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            PARAMS : [re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 1,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "isCollectible" : {
-            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            PARAMS : [re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)')],
             RETURN_TYPE: constants.DATA_TYPES[constants.BOOLEAN],
             RETURN_SIZE : 1,
-            RESERVED : True,
-            FUNCTION_TYPE : MOVEMENT_TYPE
-        },
-        "pickUp" : {
-            PARAMS : [re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
-            RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
-            RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
@@ -228,14 +214,14 @@ def ADD_PREDEFINED_FUNCTIONS():
             FUNCTION_TYPE : MOVEMENT_TYPE
         },
         "spawnObject" : {
-            PARAMS : [re.compile('cube|sphere'), re.compile('int|float'), re.compile('int|float'), re.compile('int|float')],
+            PARAMS : [re.compile('cube|sphere'), re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)'), re.compile('(^float+$)|(^int+$)')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,
             FUNCTION_TYPE : ENV_TYPE
         },
         "print" : {
-            PARAMS : [re.compile('float|int|boolean')],
+            PARAMS : [re.compile('(^float+$)|(^int+$)|(^boolean+$)')],
             RETURN_TYPE: constants.DATA_TYPES[constants.VOID],
             RETURN_SIZE : 0,
             RESERVED : True,

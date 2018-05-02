@@ -91,15 +91,19 @@ class VMachine:
                 time.sleep(1/self.gm.speed)
             elif function == "spawnObject":
                 obj = parameters[0]
-                if obj == "sphere":
-                    collectible = sphere(pos = vector(parameters[1], parameters[2], parameters[3]), size = vector(0.5, 0.5, 0.5))
-                    self.gm.totalCollectibles += 1
-                    self.gm.collectibles.append((parameters[1], parameters[2], parameters[3]))
-                    self.gm.collectibleObjects.append(collectible)
-                elif obj == "cube":
-                    obstacle = box(pos = vector(parameters[1], parameters[2], parameters[3]))
-                    self.gm.obstacles.append((parameters[1], parameters[2], parameters[3]))
-                    self.gm.obstacleObjects.append(obstacle)
+                coord = (parameters[1], parameters[2], parameters[3])
+                if self.gm.outOfBounds(coord):
+                    raiseError('Error: Cannot spawn an object at an out of bounds position.')
+                else:
+                    if obj == "sphere":
+                        collectible = sphere(pos = vector(parameters[1], parameters[2], parameters[3]), size = vector(0.5, 0.5, 0.5))
+                        self.gm.totalCollectibles += 1
+                        self.gm.collectibles.append((parameters[1], parameters[2], parameters[3]))
+                        self.gm.collectibleObjects.append(collectible)
+                    elif obj == "cube":
+                        obstacle = box(pos = vector(parameters[1], parameters[2], parameters[3]))
+                        self.gm.obstacles.append((parameters[1], parameters[2], parameters[3]))
+                        self.gm.obstacleObjects.append(obstacle)
             elif function == "isFacingNorth":
                 res = self.gm.player.axis.x == 1.0
                 self.memoryStack[-1].SEND_PARAMS.append(res)
@@ -117,14 +121,14 @@ class VMachine:
                 y = parameters[1]
                 z = parameters[2]
                 if x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim:
-                    raiseError('Start coordinates are out of the allowed bounds.')
+                    raiseError('Error: Start coordinates are out of the allowed bounds.')
                 self.gm.startPosition = (x, y, z)
             elif function == "goal":
                 x = parameters[0]
                 y = parameters[1]
                 z = parameters[2]
                 if x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim:
-                    raiseError('Goal coordinates are out of the allowed bounds.')
+                    raiseError('Error: Goal coordinates are out of the allowed bounds.')
                 self.gm.goalPosition = (x, y, z)
             elif function == "print":
                 print(parameters[0])
@@ -146,7 +150,7 @@ class VMachine:
                 y = parameters[1]
                 z = parameters[2]
                 for collectible in self.gm.collectibles:
-                    if self.gm.distance((x, y, z), collectible) <= 1:
+                    if self.gm.distance((x, y, z), collectible) < 1:
                         res = True
                         self.memoryStack[-1].SEND_PARAMS.append(res)
                         return
@@ -159,7 +163,7 @@ class VMachine:
                 z = parameters[2]
                 coord = (x, y, z)
                 for obstacle in self.gm.obstacles:
-                    if self.gm.distance((x, y, z), obstacle) <= 1:
+                    if self.gm.distance((x, y, z), obstacle) < 1:
                         res = True
                         self.memoryStack[-1].SEND_PARAMS.append(res)
                         return

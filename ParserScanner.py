@@ -1072,8 +1072,7 @@ def p_asignacion3(p):
 
 
 def p_asignacion2(p):
-    '''asignacion2 : L_BRACKET CTE_I R_BRACKET
-					| empty'''
+    '''asignacion2 : '''
 
 
 def p_estatutos(p):
