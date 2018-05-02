@@ -440,9 +440,14 @@ class VMachine:
                 self.memoryStack[-1].PROCESS_PARAMS(str(cuadruplo.operand1))
 
         elif cuadruplo.operator == RETURN:
+            # print(cuadruplo)
             returnSize = self.memoryStack[-1].getCurrentFuncReturnSize()
             for i in range(0, returnSize):
-                oper1 = self.memoryStack[-1].getValue(cuadruplo.result + i)
+                if(isinstance(cuadruplo.result, str) and cuadruplo.result[0] == '%'):
+                    oper1 = cuadruplo.result.replace('%', '')
+                else:
+                    address = self.memoryStack[-1].getAddress(cuadruplo.result)
+                    oper1 = self.memoryStack[-1].getValue(str(int(address) + i))
                 self.memoryStack[-1].setReturn(oper1)
             self.currentCuad[-1] += 1
 

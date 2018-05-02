@@ -412,7 +412,7 @@ def p_cuads_true_false(p):
 
 def p_var_cte(p):
     '''var_cte : ID push_operand_stack var_cte1
-		| func_call var_cte1
+		| func_call
 		| CTE_I push_constant_operand_stack
 		| CTE_F push_constant_operand_stack
 		| TRUE push_constant_operand_stack
@@ -772,9 +772,10 @@ def p_declaracion(p):
 
 def p_inicializacion(p):
     '''inicializacion : tipo ID asignacion2 is_initializing add_var ASSIGN push_operator_stack expression_list'''
-
+    dataType = p[1]
     if p[8] == True:
-
+        if dataType not in [4, 5, 6]:
+            raiseError('Error at line {}: Cannot assign an array to a non-array variable.'.format(globals.lineNumber + 1))
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             raiseError(
                 'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
@@ -821,7 +822,6 @@ def p_inicializacion(p):
 
         globals.dummyArray = []
 
-    dataType = p[1]
     virtualAddress = getIdAddress(p[2], dataType, globals.currentScope)
 
     # Assigning an array variable to another array variable
@@ -889,7 +889,10 @@ def p_is_initializing(p):
 
 def p_asignacion(p):
     '''asignacion : ID save_assigning_id asignacion1 ASSIGN push_operator_stack expression_list'''
+    dataType = getIdDataType(p[1], globals.currentScope)
     if p[6] == True:
+        if dataType not in [4, 5, 6]:
+            raiseError('Error at line {}: Cannot assign an array to a non-array variable.'.format(globals.lineNumber + 1))
         if not all(dataType == globals.arrayPendingTypes[0] for dataType in globals.arrayPendingTypes):
             raiseError(
                 'Error at line {}: All elements of an array must be of the same type.'.format(globals.lineNumber + 1))
@@ -943,7 +946,6 @@ def p_asignacion(p):
 
         globals.dummyArray = []
 
-    dataType = getIdDataType(p[1], globals.currentScope)
     virtualAddress = getIdAddress(p[1], dataType, globals.currentScope)
 
     # Assigning to an index of the variable
