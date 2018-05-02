@@ -444,7 +444,7 @@ class VMachine:
             returnSize = self.memoryStack[-1].getCurrentFuncReturnSize()
             for i in range(0, returnSize):
                 if(isinstance(cuadruplo.result, str) and cuadruplo.result[0] == '%'):
-                    oper1 = cuadruplo.result.replace('%', '')
+                    oper1 = self.memoryStack[-1].getValue(cuadruplo.result)
                 else:
                     address = self.memoryStack[-1].getAddress(cuadruplo.result)
                     oper1 = self.memoryStack[-1].getValue(str(int(address) + i))
