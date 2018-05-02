@@ -2,6 +2,7 @@ import constants
 import SymbolTables as st
 import pprint
 
+# Memory representation used during compilation and execution
 class Memory:
 
 	LOCAL_MEMORY = {
@@ -16,6 +17,7 @@ class Memory:
 		}
 	}
 
+	# Constructor
 	def __init__(self):
 
 		self.INT_MEME = [None] * 10000
@@ -35,6 +37,7 @@ class Memory:
 
 		self.currentFunc = None
 
+	# Increase the address counter of the given data type
 	def ADD_NEW_VAR(self, data_type, size = 1):
 		if data_type == constants.DATA_TYPES[constants.INT] or data_type == constants.DATA_TYPES[constants.INT_LIST]:
 			assignedMemory = self.CURRENT_TEMP_INT
@@ -53,6 +56,7 @@ class Memory:
 
 		return assignedMemory
 
+	# Get the previously assigned address of the given data type
 	def PREVIOUS_ADDRESS(self, data_type):
 		if data_type == constants.DATA_TYPES[constants.INT]:
 			return self.CURRENT_TEMP_INT - 1
@@ -61,6 +65,7 @@ class Memory:
 		elif data_type == constants.DATA_TYPES[constants.BOOLEAN]:
 			return self.CURRENT_TEMP_BOOLEAN - 1
 
+	# Get the next address to be assigned given a certain data type
 	def CURRENT_ADDRESS(self, data_type):
 		if data_type == constants.DATA_TYPES[constants.INT]:
 			return self.CURRENT_TEMP_INT
@@ -69,6 +74,7 @@ class Memory:
 		elif data_type == constants.DATA_TYPES[constants.BOOLEAN]:
 			return self.CURRENT_TEMP_BOOLEAN
 
+	# Reset counters
 	def CLEAR_MEMORY(self):
 		self.CURRENT_TEMP_INT = self.LOCAL_TEMP_INT_START
 		self.CURRENT_TEMP_FLOAT = self.LOCAL_TEMP_FLOAT_START
@@ -77,19 +83,17 @@ class Memory:
 		for key in self.LOCAL_MEMORY:
 				self.LOCAL_MEMORY[key].clear()
 
+	# Assign each parameter from the calling scope to the called scope
 	def PROCESS_PARAMS(self, subName):
-		# pprint.pprint(self.PARAMS)
-		# pprint.pprint(st.GET_PARAMS(subName))
-		# pprint.pprint(st.GET_PARAMS_ADDRESS(subName))
 		self.currentFunc = subName
 		for param, pType, pAddress in zip(self.RECEIVE_PARAMS,st.GET_PARAMS(subName), st.GET_PARAMS_ADDRESS(subName)):
-			# print(param,pType,pAddress)
 			if isinstance(param, list):
 				for i in range(0, len(param)):
 					self.saveResult(param[i], pAddress + i)
 			else:
 				self.saveResult(param, pAddress)
 
+	# Get value at a certain memory address
 	def getValue(self, operand):
 		try:
 			if operand[0] == "%":
@@ -115,6 +119,8 @@ class Memory:
 		except:
 			return self.retrieveFromMemory(int(operand))
 
+	# Get the address pointed from a given address if it's a pointer to an address
+	# If it's not an address pointer, simply returns the address
 	def getAddress(self, address):
 		try:
 			if address[0] == '(':
@@ -127,9 +133,11 @@ class Memory:
 		except:
 			return address
 
+	# Get the size of the return variable of the function being called
 	def getCurrentFuncReturnSize(self):
 		return st.SYMBOL_TABLE[st.FUNC][self.currentFunc][st.RETURN_SIZE]
 
+	# Store a value in at a memory address
 	def saveResult(self, value, memDirection):
 		if memDirection < 40000:
 			return False
@@ -146,6 +154,7 @@ class Memory:
 			except:
 				return False
 
+	# Get the value stored at a memory address
 	def retrieveFromMemory(self, memDirection):
 		if memDirection < 50000:
 			if self.INT_MEME[memDirection % 40000] == None:
@@ -163,8 +172,10 @@ class Memory:
 			else:
 				return self.FLOAT_MEME[memDirection % 50000]
 
+	# Add a given value to the Returns of the function being called
 	def setReturn(self,value):
 		st.ADD_RETURN_VALUES(self.currentFunc, value)
 		self.SEND_PARAMS.insert(0, value)
 
+# Create a memory instance for compilation
 memory = Memory()

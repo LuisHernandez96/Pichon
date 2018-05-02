@@ -5,6 +5,7 @@ from tkinter import ttk
 from GlobalVars import globals
 from tkinter import filedialog
 
+# Builds the UI
 class Bolt(tk.Frame):
 
     _boltDescription = "Pichon is a programming environment with the purpose of helping people not very familiar with programming concepts to understand them by creating new and fun experiences.\n\nWith Pichon the user is able to create a 3D environment in which he will be able to move around, collect objects and complete a goal, all this while using a friendly high-level programming language. To know more about Bolt functionality, click on the buttons to the left."
@@ -19,12 +20,14 @@ class Bolt(tk.Frame):
         tk.Frame.__init__(self, *args, **kwargs)
         self.master = master
 
+        # Add menu bar
         self.menuBar = tk.Menu(self)
         self.fileMenu = tk.Menu(self.menuBar, tearoff = 0)
         self.fileMenu.add_command(label = 'Open', command = self._openFile)
         self.fileMenu.add_command(label = 'Save as...', command = self._saveAs)
         self.menuBar.add_cascade(label = 'File', menu = self.fileMenu)
 
+        # Define UI elements
         self.bolt = tk.Button(self, text="What is Pichon?")
         self.functions = tk.Button(self, text="FUNCTIONS")
         self.environment = tk.Button(self, text="ENVIRONMENT")
@@ -57,6 +60,7 @@ class Bolt(tk.Frame):
             )
         )
 
+        # Place elements in a grid
         self.master.config(menu = self.menuBar)
         self.bolt.grid(row = 0, column = 0, padx = 5)
         self.predefined_functions.grid(row = 0, column = 1, padx = 5)
@@ -73,6 +77,7 @@ class Bolt(tk.Frame):
         self.console_label.grid(row = 6, columnspan = 7)
         self.console.grid(row = 7, column = 0, columnspan = 7, sticky = "we", padx = 10)
 
+        # Button bindings
         self.bolt.bind("<Button-1>", self._on_bolt_enter)
         self.functions.bind("<Button-1>", self._on_functions_enter)
         self.environment.bind("<Button-1>", self._on_environment_enter)
@@ -81,6 +86,7 @@ class Bolt(tk.Frame):
         self.for_loop.bind("<Button-1>", self._on_for_enter)
         self.conditions.bind("<Button-1>", self._on_conditions_enter)
 
+    # Compile and execute the program and print its output to console
     def _runProgram(self):
         program = self.text_area.get(1.0, tk.END)
         self.run.config(state = tk.DISABLED)
@@ -93,6 +99,7 @@ class Bolt(tk.Frame):
         self.console.insert(tk.END, message)
         self.console.config(state = tk.DISABLED)
 
+    # Promts a user to open a file
     def _openFile(self):
         self.master.filename =  filedialog.askopenfilename(initialdir = "/", title = "Select a file", filetypes = [("Pichon","*.pichon")])
         if(self.master.filename != ''):
@@ -101,6 +108,7 @@ class Bolt(tk.Frame):
             self.text_area.insert(tk.END, file.read())
             file.close()
 
+    # Prompts the user to save a file
     def _saveAs(self):
         self.master.filename =  filedialog.asksaveasfilename(initialdir = "/", title = "Save as...", filetypes = [("Pichon","*.pichon")])
         if self.master.filename != '':
@@ -108,36 +116,42 @@ class Bolt(tk.Frame):
             file.write(self.text_area.get(1.0, tk.END))
             file.close()
 
+    # Update Help section text
     def _changeHelpText(self, helpTxt):
         self.help_label.config(state = tk.NORMAL)
         self.help_label.delete(1.0, tk.END)
         self.help_label.insert(tk.END, helpTxt)
         self.help_label.config(state = tk.DISABLED)
 
+    # Print Pichon general help
     def _on_bolt_enter(self, event):
         self._changeHelpText(self._boltDescription)
 
+    # Print FUNCTIONS general help
     def _on_functions_enter(self, event):
         self._changeHelpText(self._functionsDescription)
 
+    # Print ENVIRONMENT general help
     def _on_environment_enter(self, event):
         self._changeHelpText(self._environmentDescription)
 
+    # Print MOVEMENT general help
     def _on_movement_enter(self, event):
         self._changeHelpText(self._movementDescription)
 
+    # Print predefined functions general help
     def _on_predefined_functions_enter(self, event):
         self._changeHelpText(self._predefinedFunctions)
 
+    # Loops description
     def _on_for_enter(self, event):
         self._changeHelpText(self._loopsDescription)
 
+    # Conditions description
     def _on_conditions_enter(self, event):
         self._changeHelpText(self._conditionsDescription)
 
 if __name__ == "__main__":
     root = tk.Tk()
-    #w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-    #root.geometry("%dx%d+0+0" % (w, h))
     Bolt(root).grid()
     root.mainloop()

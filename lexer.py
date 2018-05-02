@@ -17,27 +17,27 @@ reserved = {
 	'for' : 'FOR',
 	'true' : 'TRUE',
 	'false' : 'FALSE',
-	'cube' : 'CUBE', # YA
-	'sphere' : 'SPHERE', # YA
-	'down' : 'DOWN', # YAqwe
-	'up' : 'UP', # YAqwe
-	'forward' : 'FORWARD', # YAqwe
-	'turnLeft' : 'TURN_LEFT', # YAqwe
-	'turnRight' : 'TURN_RIGHT', # YAqwe
-	'isFacingNorth' : 'IS_FACING_NORTH', # YAqwe
-	'isFacingSouth' : 'IS_FACING_SOUTH', # YAqwe
-	'isFacingEast' : 'IS_FACING_EAST', # YAqwe
-	'isFacingWest' : 'IS_FACING_WEST', # YAwqe
-	'goal' : 'GOAL', # YAqwe
-	'start' : 'START', # YAqwe
-	'outOfBounds' : 'OUT_OF_BOUNDS', #YAqwe
-	'print' : 'PRINT', # YAqwe
-	'canMoveForward' : 'CAN_MOVE_FORWARD', #YAqwe
-	'isBlocked' : 'IS_BLOCKED', #YAqwe
-	'isCollectible' : 'IS_COLLECTIBLE', #YAqwe
+	'cube' : 'CUBE',
+	'sphere' : 'SPHERE',
+	'down' : 'DOWN',
+	'up' : 'UP',
+	'forward' : 'FORWARD',
+	'turnLeft' : 'TURN_LEFT',
+	'turnRight' : 'TURN_RIGHT',
+	'isFacingNorth' : 'IS_FACING_NORTH',
+	'isFacingSouth' : 'IS_FACING_SOUTH',
+	'isFacingEast' : 'IS_FACING_EAST',
+	'isFacingWest' : 'IS_FACING_WEST',
+	'goal' : 'GOAL',
+	'start' : 'START',
+	'outOfBounds' : 'OUT_OF_BOUNDS',
+	'print' : 'PRINT',
+	'canMoveForward' : 'CAN_MOVE_FORWARD',
+	'isBlocked' : 'IS_BLOCKED',
+	'isCollectible' : 'IS_COLLECTIBLE',
 	'position' : 'POSITION',
-	'spawnObject' : 'SPAWN_OBJECT', # YAqew
-	'setMovementSpeed' : 'SET_MOV_SPEED', #YAqwe
+	'spawnObject' : 'SPAWN_OBJECT',
+	'setMovementSpeed' : 'SET_MOV_SPEED',
 }
 
 tokens = [

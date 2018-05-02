@@ -32,26 +32,33 @@ NONE_TYPE = 2
 
 SYMBOL_TABLE = dict()
 
+# Get return type of a given scope
 def getReturnType(scope):
     return scope[RETURN_TYPE]
 
+# Get return size of a given scope
 def getReturnSize(scope):
     return scope[RETURN_SIZE]
 
+# Get dimensions of a given scope
 def getDimensionsID(scope):
     return scope[DIMS]
 
+# Get data type as string of a given scope
 def getDataTypeString(scope):
     return scope[DATA_TYPE_STRING]
 
+# Get size of a given scope
 def getSize(scope):
     return scope[SIZE]
 
+# Get the variable object of a given scope
 def getScopeID(id, currentScope):
     scope = getScope(currentScope)
     scope = scope[VARS][id]
     return scope
 
+# Get the size of a given argument in the given scope
 def getArgumentSize(argument, currentScope):
     scope = getScope(currentScope)
 
@@ -65,12 +72,14 @@ def getArgumentSize(argument, currentScope):
 
     return 0
 
+# Get the scope (object) of the given scope
 def getScope(scope):
     if scope in SYMBOL_TABLE[FUNC].keys():
         return SYMBOL_TABLE[FUNC][scope]
 
     return SYMBOL_TABLE[scope]
 
+# Get dimensions of a variable in the current scope
 def getDims(currentScope, id):
     scope = getScope(currentScope)
     if id not in scope[VARS]:
@@ -78,6 +87,7 @@ def getDims(currentScope, id):
     else:
         return scope[VARS][id][DIMS]
 
+# Get the ID from an address in the current scope
 def getIDFromAddress(currentScope, address):
     scope = getScope(currentScope)
     for var in scope[VARS]:
@@ -87,11 +97,13 @@ def getIDFromAddress(currentScope, address):
     return False
     # raiseError('Error at line {}: Address {} not found in current scope'.format(globals.lineNumber + 1, address))
 
+# Check if the given address is an array
 def checkIfArray(currentScope, address):
     id = getIDFromAddress(currentScope, address)
     dims = getDims(currentScope, id)
     return len(dims) > 0
 
+# Add constant predefined functions to the symbol table
 def ADD_PREDEFINED_FUNCTIONS():
     predefined_functions = {
         "down" : {
@@ -231,6 +243,7 @@ def ADD_PREDEFINED_FUNCTIONS():
 
     SYMBOL_TABLE[FUNC].update(predefined_functions)
 
+# Create static scopes in the symbol table
 def SYMBOL_INIT(debug):
     SYMBOL_TABLE[FUNC] = dict()
     SYMBOL_TABLE[ENV] = dict()
@@ -241,6 +254,7 @@ def SYMBOL_INIT(debug):
     if(debug):
         pprint.pprint(SYMBOL_TABLE)
 
+# Add a function to the Function Directory
 def ADD_FUNC(id, returnType, debug = False):
     assert FUNC in SYMBOL_TABLE
     if id not in SYMBOL_TABLE[FUNC]:
@@ -258,6 +272,7 @@ def ADD_FUNC(id, returnType, debug = False):
     else:
         raiseError('Error at line {}: Function {} already defined!'.format(globals.lineNumber + 1, id))
 
+# Add an amount of memory in the current scope for a given data type
 def ADD_MEMORY(currentScope, dataType, amount, temp):
 
     scope = getScope(currentScope)
@@ -272,6 +287,7 @@ def ADD_MEMORY(currentScope, dataType, amount, temp):
     elif dataType in [3, 6]:
         scope[NEEDS].addBooleans(amount, temp)
 
+# Add memory for all the variables needed in current scope
 def ADD_SCOPE_MEMORY(currentScope):
     scope = getScope(currentScope)
     for var_name in scope[VARS]:
@@ -280,31 +296,39 @@ def ADD_SCOPE_MEMORY(currentScope):
         size = var[SIZE]
         ADD_MEMORY(currentScope, data_type, size, False)
 
+# Add a parameter data type to a function
 def ADD_PARAM_FUNCTION(functionID, dataType):
     SYMBOL_TABLE[FUNC][functionID][PARAMS].append(dataType)
 
+# Add the virtual address of a parameter to a function
 def ADD_PARAM_VIRTUAL_ADDRESS(functionID, virtualAddress):
     SYMBOL_TABLE[FUNC][functionID][PARAMS_ADDRESS].append(virtualAddress)
 
+# Create a new variables table for the current scope
 def ADD_SCOPE_VARS_TABLE(currentScope):
     SYMBOL_TABLE[currentScope][VARS] = dict()
     SYMBOL_TABLE[currentScope][NEEDS] = n.NeededSize()
 
+# Set the quadruple where a procedure starts
 def SET_START_CUAD(currentScope, start):
     scope = getScope(currentScope)
     scope[PROC_START] = start
 
+# Set the return size of a given function
 def ADD_RETURN_SIZE(functionID, size):
     SYMBOL_TABLE[FUNC][functionID][RETURN_SIZE] = size
 
+# Validate that a function has already been defined
 def CHECK_FUNCTION_DEFINED(functionID):
     if functionID not in SYMBOL_TABLE[FUNC]:
         raiseError("Error at line {}: Function {} not defined.".format(globals.lineNumber + 1, functionID))
 
+# Create a new variables table
 def VARS_INIT():
     VARS_TABLE = dict()
     return VARS_TABLE
 
+# Registe a variable in the variable table of the current scope
 def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = []):
 
     scope = getScope(currentScope)
@@ -318,11 +342,14 @@ def ADD_VAR(currentScope, id, data_type, data_type_string, size = None, dims = [
         scope[VARS][id][SIZE] = size #if data_type in [4, 5, 6, 7] else 0
         scope[VARS][id][DIMS] = dims
 
+# Get the list of a parameters of a given ID
 def GET_PARAMS(id):
     return (SYMBOL_TABLE[FUNC][id][PARAMS])
 
+# Get the list of parameter addresses of a given ID
 def GET_PARAMS_ADDRESS(id):
     return (SYMBOL_TABLE[FUNC][id][PARAMS_ADDRESS])
 
+# Add return values to a function
 def ADD_RETURN_VALUES(id,value):
     SYMBOL_TABLE[FUNC][id][RETURNS].append(value)

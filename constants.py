@@ -1,5 +1,6 @@
 import re
 
+# Used to access the DATA_TYPES dictionary
 INT = "INT"
 FLOAT = "FLOAT"
 BOOLEAN = "BOOLEAN"
@@ -10,6 +11,7 @@ VOID = "VOID"
 OBJECT = "OBJECT"
 SEMANTIC_ERROR = 99
 
+# Regular expressiones to match data types
 REGEX_BOOLEAN = r'true|false'
 regex_boolean = re.compile(REGEX_BOOLEAN)
 
@@ -22,6 +24,7 @@ regex_float = re.compile(REGEX_FLOAT)
 REGEX_OBJECT = r'cube|sphere'
 regex_object = re.compile(REGEX_OBJECT)
 
+# Data types as integers used during compilation
 DATA_TYPES = {
     INT : 0,
     FLOAT : 1,
@@ -33,6 +36,7 @@ DATA_TYPES = {
     OBJECT : 9
 }
 
+# Operators as integers used during compilation
 OPERATORS = {
     # Arithmetic
     "+" : 0,

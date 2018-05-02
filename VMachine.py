@@ -30,15 +30,19 @@ PARAM = "PARAMETER"
 GO_SUB = "GOSUB"
 RETURN = "RETURN"
 
+# Virtual machine that executes a sequence of quadruples
 class VMachine:
-    def __init__(self, cuadruplos = None):
-        self.cuadruplos = cuadruplos
-        self.currentCuad = [0]
-        self.memory = Mem.Memory()
-        self.memoryStack = [self.memory]
-        self.subMem = []
-        self.gm = None
 
+    # Constructor
+    def __init__(self, cuadruplos = None):
+        self.cuadruplos = cuadruplos        # Sequence of quacruples
+        self.currentCuad = [0]              # Instruction pointer of the current scope
+        self.memory = Mem.Memory()          # Memory of the current scope
+        self.memoryStack = [self.memory]    # Memory stack
+        self.subMem = []                    # Sequence of functions called
+        self.gm = None                      # Game manager
+
+    # Execute sequence of quadruples
     def runVM(self):
         self.gm = GameManager.GameManager()
         while self.currentCuad[-1] < len(self.cuadruplos):
@@ -49,7 +53,9 @@ class VMachine:
             self.gm.warning = label(pos = vector(self.gm.player.pos.x, self.gm.player.pos.y + 0.8, self.gm.player.pos.z), text='Try again!')
         print("Finished!")
 
+    # Execute reserved functions
     def processReservedFunction(self, function, parameters):
+            # Move the player 1 unit down
             if function == "down":
                 nextPos = self.gm.player.pos - self.gm.player.up
                 nextPosCoord = (nextPos.x, nextPos.y, nextPos.z)
@@ -61,6 +67,7 @@ class VMachine:
                     self.gm.warning.pos = self.gm.player.pos + 0.8 * self.gm.player.up
                     self.gm.warning.visible = True
                 time.sleep(1/self.gm.speed)
+            # Move the player 1 unit up
             elif function == "up":
                 nextPos = self.gm.player.pos + self.gm.player.up
                 nextPosCoord = (nextPos.x, nextPos.y, nextPos.z)
@@ -72,6 +79,7 @@ class VMachine:
                     self.gm.warning.pos = self.gm.player.pos + 0.8 * self.gm.player.up
                     self.gm.warning.visible = True
                 time.sleep(1/self.gm.speed)
+            # Move the player 1 unit forward
             elif function == "forward":
                 nextPos = self.gm.player.pos + self.gm.player.axis
                 nextPosCoord = (nextPos.x, nextPos.y, nextPos.z)
@@ -83,12 +91,15 @@ class VMachine:
                     self.gm.warning.pos = self.gm.player.pos + 0.8 * self.gm.player.up
                     self.gm.warning.visible = True
                 time.sleep(1/self.gm.speed)
+            # Rotate the player 90º to the left
             elif function == "turnLeft":
                 self.gm.player.rotate(radians(90), vec(0, 1, 0))
                 time.sleep(1/self.gm.speed)
+            # Rotate the player 90º to the right
             elif function == "turnRight":
                 self.gm.player.rotate(radians(-90), vec(0, 1, 0))
                 time.sleep(1/self.gm.speed)
+            # Spawn an object at the given coordinates
             elif function == "spawnObject":
                 obj = parameters[0]
                 coord = (parameters[1], parameters[2], parameters[3])
@@ -104,18 +115,23 @@ class VMachine:
                         obstacle = box(pos = vector(parameters[1], parameters[2], parameters[3]))
                         self.gm.obstacles.append((parameters[1], parameters[2], parameters[3]))
                         self.gm.obstacleObjects.append(obstacle)
+            # Return true if the player is facing towards +x, false otherwise
             elif function == "isFacingNorth":
                 res = self.gm.player.axis.x == 1.0
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Return true if the player is facing towards -x, false otherwise
             elif function == "isFacingSouth":
                 res = self.gm.player.axis.x == -1.0
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Return true if the player is facing towards +z, false otherwise
             elif function == "isFacingEast":
                 res = self.gm.player.axis.z == 1.0
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Return true if the player is facing towards -z, false otherwise
             elif function == "isFacingWest":
                 res = self.gm.player.axis.z == -1.0
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Set the starting position of the player
             elif function == "start":
                 x = parameters[0]
                 y = parameters[1]
@@ -123,6 +139,7 @@ class VMachine:
                 if x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim:
                     raiseError('Error: Start coordinates are out of the allowed bounds.')
                 self.gm.startPosition = (x, y, z)
+            # Set the goal position of the player
             elif function == "goal":
                 x = parameters[0]
                 y = parameters[1]
@@ -130,8 +147,10 @@ class VMachine:
                 if x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim:
                     raiseError('Error: Goal coordinates are out of the allowed bounds.')
                 self.gm.goalPosition = (x, y, z)
+            # Print a value
             elif function == "print":
                 print(parameters[0])
+            # Special instruction to start Vpython's studd
             elif function == "startMovement":
                 scene.title = 'Pichon - Starting position: {} - Goal position: {} - Collectibles: {}'.format(self.gm.startPosition, self.gm.goalPosition, len(self.gm.collectibles))
                 self.gm.score = label(pos = vector(self.gm.goalPosition[0], self.gm.goalPosition[1] + 1, self.gm.goalPosition[2]), text='Collectibles: 0/{}'.format(len(self.gm.collectibles)))
@@ -139,12 +158,15 @@ class VMachine:
                 self.gm.player = box(pos = vector(self.gm.startPosition[0], self.gm.startPosition[1], self.gm.startPosition[2]), color = color.red)
                 ring(pos = vector(self.gm.goalPosition[0], self.gm.goalPosition[1], self.gm.goalPosition[2]), radius = 0.5, thickness = 0.1, axis = vector(0, 1, 0))
                 attach_trail(self.gm.player)
+            # Return true if the given coordinate is out of the allowed bounds, false otherwise
             elif function == "outOfBounds":
                 x = parameters[0]
                 y = parameters[1]
                 z = parameters[2]
                 res = x > self.gm.maxDim or x < self.gm.minDim or y > self.gm.maxDim or y < self.gm.minDim or z > self.gm.maxDim or z < self.gm.minDim
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Return true if there's a collectible at most 1 unit from the given coordinate,
+            # false otherwise
             elif function == "isCollectible":
                 x = parameters[0]
                 y = parameters[1]
@@ -154,9 +176,10 @@ class VMachine:
                         res = True
                         self.memoryStack[-1].SEND_PARAMS.append(res)
                         return
-
                 res = False
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Return true if there's an obstacle at most 1 unit from the given coordinate,
+            # false otherwise
             elif function == "isBlocked":
                 x = parameters[0]
                 y = parameters[1]
@@ -167,14 +190,17 @@ class VMachine:
                         res = True
                         self.memoryStack[-1].SEND_PARAMS.append(res)
                         return
-
                 res = False
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Define the speed at which the player moves around
             elif function == "setMovementSpeed":
                 self.gm.speed = parameters[0]
+            # Return true if the position where the player would be if he had gone forward is blocked or out of bounds,
+            # false otherwise
             elif function == "canMoveForward":
                 res = self.gm.canMoveForward()
                 self.memoryStack[-1].SEND_PARAMS.append(res)
+            # Return the current position of the player
             elif function == "position":
                 self.memoryStack[-1].SEND_PARAMS.insert(0, self.gm.player.pos.x)
                 self.memoryStack[-1].SEND_PARAMS.insert(0, self.gm.player.pos.y)
@@ -191,7 +217,7 @@ class VMachine:
             if not oper1:
                 self.currentCuad[-1] = cuadruplo.result
             else:
-                self.currentCuad[-1] = self.currentCuad[-1]+1
+                self.currentCuad[-1] = self.currentCuad[-1] + 1
 
         if cuadruplo.operator == GOTOT:
             oper1 = self.memoryStack[-1].getValue(cuadruplo.operand1)
@@ -207,7 +233,6 @@ class VMachine:
 
             result = oper1 + oper2
 
-            #print('oper1 (', result, ') + (', oper2, ') = ', result)
             if self.memoryStack[-1].saveResult(result,cuadruplo.result):
                 self.currentCuad[-1] += 1
             else:
@@ -440,7 +465,6 @@ class VMachine:
                 self.memoryStack[-1].PROCESS_PARAMS(str(cuadruplo.operand1))
 
         elif cuadruplo.operator == RETURN:
-            # print(cuadruplo)
             returnSize = self.memoryStack[-1].getCurrentFuncReturnSize()
             for i in range(0, returnSize):
                 if(isinstance(cuadruplo.result, str) and cuadruplo.result[0] == '%'):
@@ -465,5 +489,3 @@ class VMachine:
                 self.currentCuad[-1] += 1
             else:
                 raiseError("Error: Array index out of bounds.")
-
-        #print("")

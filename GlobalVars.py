@@ -1,3 +1,4 @@
+# Helper class to store general variables needed during compilation
 class GlobalVars:
 
     def __init__(self):
